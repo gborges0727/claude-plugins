@@ -1,0 +1,18 @@
+{
+  "name": "gborges-standard",
+  "displayName": "Gabe's standard set",
+  "description": "Standard Claude Code setup used across all of Gabe Borges' repos. Injects working conventions at session start and bundles the writing-voice and read-aloud-prep skills, the add-to-git command, and the frontend-design, mattpocock-skills, and context7 plugins.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Gabe Borges",
+    "email": "gbborges@proton.me"
+  },
+  "homepage": "https://github.com/gborges0727/claude-plugins",
+  "repository": "https://github.com/gborges0727/claude-plugins",
+  "license": "MIT",
+  "dependencies": [
+    { "name": "frontend-design", "marketplace": "claude-plugins-official" },
+    { "name": "mattpocock-skills", "marketplace": "claude-plugins-official" },
+    { "name": "context7", "marketplace": "claude-plugins-official" }
+  ]
+}

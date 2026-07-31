@@ -1,0 +1,17 @@
+{
+  "name": "gborges",
+  "description": "Gabe Borges' personal Claude Code marketplace. One bundle plugin carrying working conventions, skills, and the third-party plugins used across every repo.",
+  "owner": {
+    "name": "Gabe Borges",
+    "email": "gbborges@proton.me"
+  },
+  "allowCrossMarketplaceDependenciesOn": ["claude-plugins-official"],
+  "plugins": [
+    {
+      "name": "gborges-standard",
+      "source": "./plugins/gborges-standard",
+      "category": "workflow",
+      "tags": ["conventions", "writing", "bundle"]
+    }
+  ]
+}
