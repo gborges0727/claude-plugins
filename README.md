@@ -34,11 +34,24 @@ For cloud sessions, prefer the [setup script](#cloud-sessions) over this file.
 
 Declaring the marketplace in a repo's `.claude/settings.json` is the portable option, and it is the wrong one for cloud sessions. Install from that file happens as the session starts, and it lags a boot. The first launch in a fresh VM registers the marketplace and installs nothing. The second launch installs the plugin. A cloud session only ever gets one launch, so the first turn has no plugin components loaded, and opening with a slash command does not resolve it. Sending a throwaway message to wait the install out is the workaround that costs tokens.
 
-A setup script avoids the whole problem. Setup scripts run as root before Claude Code launches, so everything is registered by the time the first turn is read, and they run outside the model loop, so they cost nothing. Paste `scripts/cloud-bootstrap.sh` into the **Setup script** field of a cloud environment at [claude.ai/code](https://claude.ai/code), reached through the cloud icon above the message box.
+A setup script avoids the whole problem. Setup scripts run as root before Claude Code launches, so everything is registered by the time the first turn is read, and they run outside the model loop, so they cost nothing. The field is at [claude.ai/code](https://claude.ai/code) under the cloud icon above the message box, **Setup script** in the environment dialog.
+
+Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the logic stays in git and the environment field never has to be edited again:
+
+```bash
+#!/bin/bash
+# rev: 1
+curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
+exit 0
+```
+
+`raw.githubusercontent.com` is on the default Trusted allowlist, so this needs no network configuration. A failed fetch leaves the session without the bundle and still starts it, which is the right failure, since a non-zero exit from a setup script kills the session outright.
 
 The script installs at user scope inside the VM, which is a real user scope that Claude Code reads, unlike the one on a local machine that never travels. A repo needs no `.claude/settings.json` at all to pick the bundle up, in any repo the environment opens.
 
-Anthropic snapshots the VM filesystem after the setup script completes and reuses the snapshot for later sessions, which skip the script entirely. The install is idempotent and takes about ten seconds from cold, so either path is fine. What the cache does cost is freshness, since a snapshot can serve a plugin version up to roughly a week old. Changing the script text rebuilds the cache, so bump the `rev` comment at the top of `cloud-bootstrap.sh` after publishing a change that sessions need right away.
+Anthropic snapshots the VM filesystem after the setup script completes and reuses the snapshot for later sessions, which skip the script entirely. The install is idempotent and takes under ten seconds from cold, so either path is fine.
+
+What the cache does cost is freshness. A snapshot can serve a plugin version up to roughly a week old, and a `SessionStart` hook cannot patch that, because plugins load while Claude Code launches and hooks run after. The cache rebuilds when the setup script text changes, when the allowed hosts change, or when it expires. So the loader's `rev` comment is the lever for a change that cannot wait out the expiry. Bumping it is the only reason to open the environment dialog again.
 
 ## What the bundle contains
 
