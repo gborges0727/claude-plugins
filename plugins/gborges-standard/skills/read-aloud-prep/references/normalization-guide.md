@@ -1,6 +1,6 @@
 # Normalization Guide
 
-The full catalog of how to turn written elements into spoken English for an AI narrator. The main `SKILL.md` covers the workflow and the common cases; come here for the complete set and for the trickier judgment calls.
+The full catalog of how to turn written elements into spoken English for an AI narrator. `SKILL.md` carries the workflow and the locked conventions. This file is where every transformation lives, along with the trickier judgment calls.
 
 ## Contents
 
@@ -22,7 +22,7 @@ The full catalog of how to turn written elements into spoken English for an AI n
 16. Roman numerals and ordinals
 17. Abbreviations and acronyms
 18. Structure: headings, lists, tables, code, quotes, citations, links, figures
-19. Rewriting negation-contrast phrasing for the voice
+19. Antithesis: rewriting negation-contrast for the voice
 20. Cleaning up PDF extraction artifacts
 21. Worked examples
 
@@ -243,23 +243,11 @@ When a single set of letters could expand two ways, the document's subject decid
 
 **Figures, charts, images.** Describe from the caption and the surrounding discussion. "Figure three shows revenue climbing steadily from twenty nineteen to twenty twenty four, with the sharpest jump in the final year." If a PDF figure is the only place a number lives, rasterize the page, read it, and put the value into words.
 
-## 19. Rewriting negation-contrast phrasing for the voice
+## 19. Antithesis: rewriting negation-contrast for the voice
 
-A specific sentence shape degrades AI narration: a claim built as a negation that sets up a contrasting positive. On the page it reads fine. Out loud, the synthesis voice tends to treat the comma or period after the negated part as a full stop and lands a falling, finished inflection there, so the two halves sound disconnected and the real point arrives flat. Because smooth narration is the whole purpose here, rewrite these into a direct positive claim.
+One sentence shape degrades AI narration above all others. A claim built as a negation that sets up a contrasting positive reads fine on the page. Out loud, the synthesis voice treats the comma or period after the negated part as a full stop and lands a falling, finished inflection there, so the two halves sound disconnected and the real point arrives flat.
 
-Catch every form, including ones split across a sentence boundary:
-
-- "That's not X, it's Y."
-- "It wasn't X. It was Y." (split across a period)
-- "This isn't about X, it's about Y."
-- "not just X but Y" and "not only X but also Y"
-- "less X, more Y"
-- "X didn't matter; what mattered was Y."
-- "by X, not by Y" and the bare "X, not Y"
-- "You wouldn't just X. You'd Y."
-- Any escalation that diminishes one consequence to build toward a bigger one.
-
-The common thread: the sentence works only because of the contrast between a negated idea and the idea that follows it. That contrast is the thing that mis-cues the voice.
+The full catalog of forms, including the concessive variants and the carve-out for negation that does real informational work, is rule 9 of the `writing-voice` skill. Everything it flags is antithesis, and here it gets rewritten for an extra reason: the voice mis-inflects it.
 
 Three ways to fix it:
 
@@ -269,9 +257,7 @@ Three ways to fix it:
 
 Inside quotations: when a quoted speaker uses the pattern, render the line as introduced or reported speech and lead with the positive, keeping the speaker's meaning. A book executive's "we're not looking at results, it's the way they're wagering" becomes "the book reacts to how customers bet, treating wagering style as the signal." This keeps the narration smooth and avoids the voice mishandling a first-person negation in the middle of a passage.
 
-A note on plain negatives: a simple factual negative is fine and needs no rewriting. "No U S regulator backs your funds," "the policy does not limit winning players," and "if you are not beating the closing line, your process has no edge yet" each state a fact, and none of them uses a negated half as the launchpad for a contrasting positive across the break. The target is the contrast structure, not every sentence containing the word "not."
-
-The concessive versions hide the same move behind a polite turn. "Sure, X. But Y," "While X is true, the real point is Y," and "It's tempting to think X, but Y" all set up a throwaway first half so the second half can land. Rewrite them to lead with the real claim by itself. Where both halves are true and both matter, state them as a pair, in the form "X and Y both," so neither one is demoted to set up the other. Keep a negation when it does real work, such as correcting a genuine misconception or stating a real limitation ("the study is a working paper and has not been peer-reviewed"). Cut a negation only when it is there for emphasis alone.
+A plain factual negative is fine and needs no rewriting. "No U S regulator backs your funds," "the policy does not limit winning players," and "if you are not beating the closing line, your process has no edge yet" each state a fact, and none of them uses a negated half as the launchpad for a contrasting positive across the break. The target is the contrast structure, not every sentence containing the word "not."
 
 Before and after, drawn from real prose:
 
