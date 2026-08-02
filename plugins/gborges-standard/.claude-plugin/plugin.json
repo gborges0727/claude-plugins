@@ -1,8 +1,8 @@
 {
   "name": "gborges-standard",
   "displayName": "Gabe's standard set",
-  "description": "Standard Claude Code setup used across all of Gabe Borges' repos. Injects working conventions at session start and bundles the writing-voice and read-aloud-prep skills, the add-to-git command, and the frontend-design, mattpocock-skills, and context7 plugins.",
-  "version": "1.0.0",
+  "description": "Standard Claude Code setup used across all of Gabe Borges' repos. Injects working conventions at session start and bundles the writing-voice, read-aloud-prep, and bear-notes skills, the add-to-git command, and the frontend-design, mattpocock-skills, and context7 plugins.",
+  "version": "1.1.0",
   "author": {
     "name": "Gabe Borges",
     "email": "gbborges@proton.me"
