@@ -17,14 +17,17 @@ Make live markup **inert** before every write.
 python3 scripts/inert.py < doc.md | bearcli create "Title" --tags parent/child
 ```
 
-Two forms are structural.
+Three forms are structural.
 
 | Live form | Effect | Inert form |
 |---|---|---|
 | `#144`, `#95-flip`, `#123/#126` | Adds a global tag | Backticks |
+| `#@firstname@#`, `#two words#` | Adds a global tag under a name the bare form rejects | Backticks |
 | `[[anything]]` | Creates a wikilink and backlink | Backticks |
 
-A `#` opening a word is live anywhere on the line, including after a slash, and Bear absorbs trailing punctuation into the tag name. Two of them on one line produce a single multi-word tag out of everything between, which is how one line of prose mints a tag like `99 per-row fields); live remainder = the`. Markdown headings, fenced blocks, and inline-code spans are safe already.
+A `#` opening a word is live anywhere on the line, including after a slash, and Bear absorbs trailing punctuation into the tag name. Two of them on one line produce a single multi-word tag out of everything between, which is how one line of prose mints a tag like `99 per-row fields); live remainder = the`. A template placeholder that carries its own trailing `#` is the wrapped form arriving by accident.
+
+A `#` that follows a word character is inert, so URL fragments like `.../pages/405372996#Android-Mobile-7.0.26` pass through as written. Markdown headings, fenced blocks, and inline-code spans are safe already. An escaped `` \` `` is a literal backtick rather than a span delimiter, so a doc that escapes its backticks leaves the refs between them live.
 
 The rest of Bear's syntax (`==highlight==`, `~underline~`, `$math$`) changes display only, and the stored bytes round-trip either way. Bear drops setext headings, indented code blocks, and lazy continuation, so a doc built on 4-space code blocks arrives as plain paragraphs.
 
@@ -35,6 +38,12 @@ The rest of Bear's syntax (`==highlight==`, `~underline~`, `$math$`) changes dis
 ## Deepest subtag alone
 
 Bear rolls parents up. A note tagged `FairLine/architecture` already answers a `#FairLine` search, so passing both hangs a redundant tag on the note.
+
+## Tag names echo back
+
+A tag name ends at the first `[`, so `Audit-[SADA]` is stored as `Audit-`. Bear reports no error, and the note lands under a tag nobody asked for. Turning brackets into parens keeps the name whole. Spaces, parens, `&`, `+`, and `'` all survive, and Bear returns any name holding a space or paren wrapped as `#name#`.
+
+The write echoes the tags it stored. Comparing that echo against the tag passed in catches a mangled name on the first note, before the rest of the set lands under it.
 
 ## Explicit titles
 
