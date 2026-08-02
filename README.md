@@ -60,6 +60,7 @@ What the cache does cost is freshness. A snapshot can serve a plugin version up 
 | `CONVENTIONS.md` | `SessionStart` hook | Injected into context every session. Prose rules, git rules, plan-document rules |
 | `writing-voice` | Skill | Drafting anything longer than a paragraph |
 | `read-aloud-prep` | Skill | Rewriting documents so a TTS voice reads them cleanly |
+| `bear-notes` | Skill | Writing into Bear without minting junk tags and wikilinks |
 | `add-to-git` | Command | Explicit invocation only, never model-triggered |
 | `frontend-design` | Dependency | From `claude-plugins-official` |
 | `mattpocock-skills` | Dependency | From `claude-plugins-official` |
