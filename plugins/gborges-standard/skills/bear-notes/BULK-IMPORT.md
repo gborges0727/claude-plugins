@@ -8,7 +8,11 @@ Build `path <TAB> tag <TAB> title` for the whole set before writing anything. A 
 
 Derive titles from paths with a category prefix, so `docs/architecture/odds_integration.md` becomes `Architecture: Odds Integration`. The prefix keeps titles unique across directories that share filenames, and Bear has no folders, so the prefix is the only grouping a title carries. Keep date prefixes on dated files so chronology survives sorting. Uppercase the acronyms the path lowercased.
 
+Where a path encodes spaces as hyphens, restore them, and leave a hyphen sitting between two digits alone so `10-28-25` and `NBA-25-26` survive the conversion. Prefix only the names that collide, widening one ancestor at a time until the set is unique, which keeps the common title short.
+
 Check the manifest for duplicate titles before writing. Two notes with one title makes `--title` lookups ambiguous forever after.
+
+Run the tag column through the [tag-name rules](SKILL.md#tag-names-echo-back) while building it. A path segment is a directory name, not a tag name, and the two disagree on brackets.
 
 ## Source pointer
 
@@ -18,7 +22,7 @@ Open each body with the repo path and the commit it came from:
 > Source: `docs/architecture/auth.md` @ commit a80e8e8
 ```
 
-That line is what makes a note diffable against its source later, and what tells a re-import which notes are stale.
+That line is what makes a note diffable against its source later, and what tells a re-import which notes are stale. Where the source is not versioned, the path alone carries the pointer.
 
 ## Idempotency
 
@@ -28,12 +32,14 @@ Correcting an import that already landed calls for `bearcli overwrite <id>`, whi
 
 ## Readback
 
+Log what each write returns against the source path it came from. Verification is then a join between that log and the manifest, rather than a search of Bear by title.
+
 Read every note back and compare it to its processed source. Comparing all of them costs one `cat` per note and catches truncation, encoding damage, and notes that silently failed to write. Strip the title line, the source pointer, and the trailing tag line before comparing.
 
 Confirm heading counts match the source too. A malformed inert pass shows up as headings that stopped being headings.
 
-Finish on the [tag-list diff](SKILL.md#tag-list-diff), which catches what the readback cannot.
+Finish on the [tag-list diff](SKILL.md#tag-list-diff), which catches what the readback cannot. Read the new tags rather than counting them. The intended tags arriving in full says nothing about what else the bodies minted alongside them.
 
 ## Scale
 
-Roughly 180 notes import in under a minute, so batching or backgrounding buys nothing. Pilot two notes, read one back, then run the rest.
+Around 570 notes import in half a minute, so batching or backgrounding buys nothing. Pilot two notes, check the tags the write echoed, read one body back, then run the rest.
