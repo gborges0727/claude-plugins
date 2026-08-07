@@ -37,6 +37,16 @@ Keep the copula when the predicate is the fact: "CLV is the difference between y
 
 Quiet ones break the rule the same way: "a known recipe", "the gold standard", "its best shot".
 
+Tech-culture jargon as seasoning:
+
+| Seasoning | Plain |
+|---|---|
+| "Keeping them is a bit of a footgun." | "Keeping them makes the tic easy to reproduce by accident." |
+| "These patterns are somewhat orthogonal to intent." | "These patterns show up whatever the intent." |
+| "There's one gotcha." | "The scan misses hits inside code blocks." |
+
+Literal technical uses stay: "the happy path returns 200 and the error path retries".
+
 ## Rule 5, headers
 
 | Framing | Label |
@@ -85,3 +95,22 @@ Three ways out, all leading with the positive claim:
 | "This isn't about coverage, it's about correctness." | "The tests need to catch the mutation, whatever the coverage number says." |
 
 Negation that does real work stays: "This isn't a memory leak. The handles aren't being closed."
+
+## Rule 10, size and padding
+
+| Padded | Once |
+|---|---|
+| "It's a hard problem. A genuinely hard problem, actually." | "The problem is hard because suppressing one tic surfaces the next." |
+| "Let's break down what makes this work: 1. The insight, that the problem is structural. 2. The framing, which treats it as structural. 3. The implication, that lexical fixes won't hold." | "The problem is structural, so lexical fixes won't hold." |
+| "So, to recap: the fix is invalidating on write." (after a ten-line answer) | (delete, the answer is still on screen) |
+| "What you've identified here is that the patterns are structural." | (delete, the reader wrote it) |
+
+## Rule 11, openers and closers
+
+| Opener or closer | Direct |
+|---|---|
+| "You're absolutely right to call this out. The patterns are structural." | "The patterns are structural." |
+| "Great question. The cache invalidates on write." | "The cache invalidates on write." |
+| "Would you like me to elaborate on any of these points? Happy to adjust the tone or iterate. 🚀" | (delete) |
+
+A real decision stays, asked plainly: "Should this rule live in the hook or the skill? The hook pays its cost every session."
