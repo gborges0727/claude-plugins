@@ -62,6 +62,7 @@ What the cache does cost is freshness. A snapshot can serve a plugin version up 
 | `read-aloud-prep` | Skill | Rewriting documents so a TTS voice reads them cleanly |
 | `bear-notes` | Skill | Writing into Bear without minting junk tags and wikilinks |
 | `add-to-git` | Command | Explicit invocation only, never model-triggered |
+| `plain-english` | Command | Re-explains the previous answer without jargon. Explicit invocation only |
 | `frontend-design` | Dependency | From `claude-plugins-official` |
 | `mattpocock-skills` | Dependency | From `claude-plugins-official` |
 | `context7` | Dependency | From `claude-plugins-official` |
