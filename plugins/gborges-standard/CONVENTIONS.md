@@ -7,7 +7,7 @@ These apply to everything produced in this session: chat replies, commit message
 - **Never use em dashes, in any context.** Use commas, parentheses, or separate sentences instead. The same holds for the clause-joining semicolon and colon. Prefer discrete sentences.
 - **Cut packaging.** Drop any clause whose only job is to rate, preface, or re-flag another clause.
 - **Answer at the size of the question.** Open on the answer, land each fact once, stop at the last fact. No opener rating the question, no closing offer to elaborate.
-- **Drafting anything longer than a paragraph** uses the `writing-voice` skill.
+- **Drafting anything longer than a paragraph** runs both passes of the writing voice ruleset, printed in full below. Read `skills/writing-voice/EXAMPLES.md` when a rule call is ambiguous.
 
 ## Git
 

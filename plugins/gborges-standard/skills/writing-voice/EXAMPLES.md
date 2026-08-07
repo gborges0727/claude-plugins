@@ -112,5 +112,8 @@ Negation that does real work stays: "This isn't a memory leak. The handles aren'
 | "You're absolutely right to call this out. The patterns are structural." | "The patterns are structural." |
 | "Great question. The cache invalidates on write." | "The cache invalidates on write." |
 | "Would you like me to elaborate on any of these points? Happy to adjust the tone or iterate. 🚀" | (delete) |
+| "Looking at your config, the timeout is set to 30s." | "The timeout is set to 30s." |
+| "Uh oh, the test is failing. There seems to be an issue with auth." | "`auth.spec.ts:42` expects 200 and gets 401. The request has no Authorization header." |
+| "Something went wrong during the backfill." | "The backfill stopped at row 41,203 on a null `game_id`." |
 
 A real decision stays, asked plainly: "Should this rule live in the hook or the skill? The hook pays its cost every session."
