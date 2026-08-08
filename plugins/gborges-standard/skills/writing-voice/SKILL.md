@@ -1,6 +1,7 @@
 ---
 name: writing-voice
 description: Use when drafting any prose longer than a paragraph, whether a chat answer, a document, a plan, an audit, a commit message, or a PR body. Also when another skill needs the prose rules.
+disable-model-invocation: true
 ---
 
 # Writing voice
@@ -15,7 +16,13 @@ Run both after drafting, on anything longer than a paragraph. They work differen
 
 ### Pass 1, literal scan
 
-Search the rendered draft for these strings and cut each hit. Mechanical, so it runs fast even when the draft reads well.
+If the draft is going to a file, run `scripts/check.py` against it. The script carries the full string list and prints each hit with its rule number.
+
+```
+python3 scripts/check.py path/to/draft.md
+```
+
+For a chat reply, search the rendered draft for these strings and cut each hit. Mechanical either way, so it runs fast even when the draft reads well.
 
 | Search for | Rule |
 |---|---|
@@ -31,8 +38,9 @@ Search the rendered draft for these strings and cut each hit. Mechanical, so it 
 | `Let me`, `Here's the thing`, `That said`, `To be clear`, `Zooming out`, `at its core` | 1 |
 | `non-trivial`, `nuanced`, `multifaceted` | 2 |
 | `footgun`, `happy path`, `sane defaults`, `escape hatch`, `gotcha`, `belt and suspenders`, `orthogonal`, `delve`, `rich tapestry` | 3 |
-| `You're absolutely`, `Great question`, `Great point` | 11 |
-| `Would you like me to`, `Happy to`, `Let me know if`, `just say the word`, any emoji | 11 |
+| `You're absolutely`, `Great question`, `Great point`, `Sure!`, `Looking at your`, `To answer your question` | 11 |
+| `Uh oh`, `Oh no`, `There seems to be`, `Something went wrong` | 11 |
+| `Would you like me to`, `Happy to`, `Let me know if`, `just say the word`, `Hope this helps`, `Feel free to ask`, any emoji | 11 |
 
 The em dash looks almost identical to a hyphen on screen, so reading will not catch it. Search the character.
 
@@ -50,7 +58,11 @@ Go sentence by sentence and name the new information each one delivers. Do not s
 
 **4. Discrete sentences.** Where you would join two clauses with an em dash, a semicolon, or a colon that just explains the first clause, end the sentence and start a new one. When two short sentences genuinely read worse than one, join them with a plain conjunction (and, but, so). An em dash almost always joins or interrupts, so when splitting is the default you rarely reach for one. Carve-outs: compound-modifier hyphens (no-vig, soft-book, closing-line) are not joins and stay. A colon introducing a list, a label, or a quoted block stays. The rule targets only the clause-joining colon (X: Y, where Y is a full sentence explaining X).
 
-**5. Headers are plain noun labels.** Write "Cross-book detection cost", not "The fork that determines the effort". A header carrying a framing verb (determines, drives), a stakes phrase (the heart of it, what matters most), or a "the X that Y" shape is packaging. Rename it to what it labels. Keep headers few, since the sectioned-memo layout generates most framing. Use flat prose unless the content needs the structure.
+**5. Headers are plain noun labels.** Write "Cross-book detection cost", not "The fork that determines the effort". A header carrying a framing verb (determines, drives), a stakes phrase (the heart of it, what matters most), or a "the X that Y" shape is packaging. Rename it to what it labels.
+
+Headers belong to documents, not to answers. A document has parts the reader returns to: steps to follow, findings to cite, sections to skim back into. A plan, an audit, a PR body, or a runbook keeps its labels at any length, including a short one. An answer to a question runs as prose, however long it gets, because its reader is reading start to finish.
+
+When an answer is long enough that headers seem necessary, the usual cause is that it answers more than was asked. Check that before adding them. A four-paragraph reply split into four labelled sections is one answer wearing a memo costume, and the labels then do the work that topic sentences should.
 
 **6. Lead with the plain claim, then the reason in the same breath.** Say what's true first, rather than opening with a slogan and unpacking it after. Attach a label only when it carries information the sentence doesn't already.
 
@@ -64,7 +76,15 @@ Carve-out for rule 9: keep negation that does informational work. Correcting a s
 
 **10. Size the answer to the question, and land each fact once.** Depth matches the ask: a yes-or-no question gets the answer plus the one reason that decides it, not a survey. A fact restated in different words is padding. Cut the second delivery and keep the better-written one. A numbered list earns its structure only when the items are parallel and distinct; one point dressed as three bullets goes back to being a sentence. Restating the reader's own point back to them is padding too. Skip the closing recap unless the piece is long enough that the reader has lost the top.
 
-**11. Open on the answer, stop at the last fact.** The first sentence delivers the answer or the first thing the reader came for. An opener that rates the question or its author ("Great question", "You're absolutely right") or announces what the reply will do ("Let me break this down") gets cut; doing the thing does the announcing. The last sentence delivers the last fact. A closer that offers more work ("Would you like me to elaborate", "Happy to adjust"), solicits approval, or decorates with an emoji gets cut. Carve-out: a decision the reader genuinely has to make is content, and stays, asked plainly.
+**11. Open on the answer, stop at the last fact.** The first sentence delivers the answer or the first thing the reader came for. An opener that rates the question or its author ("Great question", "You're absolutely right"), announces what the reply will do ("Let me break this down", "Looking at your code", "To answer your question"), or reacts emotionally to a problem ("Uh oh", "Oh no", "There seems to be a problem", "Something went wrong") gets cut. Doing the thing does the announcing, and a failure gets reported by naming its cause and its fix. The last sentence delivers the last fact. A closer that offers more work ("Would you like me to elaborate", "Happy to adjust", "Hope this helps", "Feel free to ask"), solicits approval, or decorates with an emoji gets cut. Carve-out: a decision the reader genuinely has to make is content, and stays, asked plainly.
+
+## When the rules don't apply
+
+**Quoted, reproduced, and code text is never edited.** The passes run on prose you are writing. Text you are relaying stays byte-exact: the reader's own words, a quoted spec, log output, a diff, a code block, a filename, a URL. An em dash inside a quotation is the quotation's, not yours.
+
+**A rule that would delete the answer loses to the task.** The rules shape how you say it, never whether you say it. Rule 10 sizes prose and never removes content the reader needs. Test the draft for completeness rather than against a list: could someone carry out the task, or reach the conclusion, with only what you wrote? Anything whose absence fails that test stays. A plan missing one step is shorter and wrong. Rule 3 likewise keeps a technical term that has no plain equivalent.
+
+**An explicit instruction outranks this skill.** A harness system prompt, a required template, a house style, or a direct request from the reader takes precedence. Follow it, and apply the rules to whatever the instruction leaves open.
 
 ## Rewrite pairs
 
