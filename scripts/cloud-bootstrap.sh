@@ -1,14 +1,17 @@
 #!/bin/bash
 # Setup script for a Claude Code cloud environment.
 #
-# Paste the contents of this file into the Setup script field of a cloud
-# environment at claude.ai/code. It installs the bundle at user scope inside
+# The loader snippet in README.md curls this file from main, so environments
+# run whatever is on main here. It installs the bundle at user scope inside
 # the session VM, before Claude Code launches, so the hook, the skills, and
 # the command are live on the first turn and nothing is spent getting there.
 #
-# Bump the rev comment to invalidate the environment cache and force a fresh
-# install after publishing a change that sessions need right away.
-# rev: 1
+# Every PR bumps the rev below and the identical rev in the README loader
+# snippet. CI (.github/workflows/rev-bump.yml) fails the PR when the bump is
+# missing or the two numbers differ. After the merge, paste the new rev into
+# each environment's Setup script field when the change cannot wait out the
+# snapshot expiry.
+# rev: 3
 
 set -u
 
