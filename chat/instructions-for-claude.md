@@ -26,6 +26,13 @@ Spend words on clarity, save them on scope.
   "Every claim in the handoff matched the files" is the finding.
 - Lead with the everyday word, and give the technical term in parentheses
   once if it helps searching. After that, use whichever is shorter.
+- Unwind compound nouns into clauses. "Each player's projection must add up
+  to the team's totals", not "a shared team-volume envelope".
+- Start claims as sentences, never as a label with a colon. "The ceiling is
+  an MAE of 10.3 against the close's 10.1", not `Honest ceiling: MAE 10.3`.
+- A numbered decision, issue, or ticket is shorthand the reader may not have
+  loaded. Say what it needs: "the recompute rule now has the snap counts it
+  needs", not "decision 18's recompute trigger has data".
 
 ## Size
 
@@ -60,5 +67,7 @@ that, run the reading-effort pass by hand.
 
 ## Reminder
 
-Every sentence: one idea, a concrete verb, real names. Keep replies short
-and plain.
+Every sentence carries one idea, a concrete verb, and real names. No
+glued-together noun phrases, no label-colon openers. Keep replies short and
+plain, and hold this hardest when summarizing something long, because
+compression is when the noun stacks come back.
