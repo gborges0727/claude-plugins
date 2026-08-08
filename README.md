@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 2
+# rev: 3
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -52,6 +52,8 @@ The script installs at user scope inside the VM, which is a real user scope that
 Anthropic snapshots the VM filesystem after the setup script completes and reuses the snapshot for later sessions, which skip the script entirely. The install is idempotent and takes under ten seconds from cold, so either path is fine.
 
 What the cache does cost is freshness. A snapshot can serve a plugin version up to roughly a week old, and nothing inside the session can patch that, because plugins load while Claude Code launches. The cache rebuilds when the setup script text changes, when the allowed hosts change, or when it expires. So the loader's `rev` comment is the lever for a change that cannot wait out the expiry. Bumping it is the only reason to open the environment dialog again.
+
+Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.sh`, keeping the two equal. CI (`.github/workflows/rev-bump.yml`) fails the PR otherwise. The bump changes nothing in an environment by itself. It keeps the repo's number the source of truth. After a merge, the number to paste into the environment field is always the one on `main`.
 
 ## What the bundle contains
 
@@ -93,7 +95,7 @@ Add it to the `dependencies` array in `plugins/gborges-standard/.claude-plugin/p
 
 If it comes from any other marketplace, a dependency on it resolves only in sessions that already registered that marketplace, and it fails silently otherwise. Rather than adding the marketplace to every repo, add the plugin as a second entry in `.claude-plugin/marketplace.json` using a `git-subdir` source pointing at its upstream repo. The dependency then resolves inside `gborges` and consuming repos stay at one marketplace.
 
-Bump `version` in `plugin.json` when the set changes. Local sessions pick up changes on `claude plugin update gborges-standard` or when auto-update is enabled for the marketplace, which is off by default for non-Anthropic marketplaces. Cloud sessions running off a cached environment snapshot keep whatever the setup script installed when the snapshot was built, so bump the `rev` comment in `scripts/cloud-bootstrap.sh` too when a change needs to land immediately.
+Bump `version` in `plugin.json` when the set changes. Local sessions pick up changes on `claude plugin update gborges-standard` or when auto-update is enabled for the marketplace, which is off by default for non-Anthropic marketplaces. Cloud sessions running off a cached environment snapshot keep whatever the setup script installed when the snapshot was built. The PR carries the `rev` bump already, so when the change needs to land immediately, paste the merged rev into the environment's Setup script field and the snapshot rebuilds.
 
 ## Verifying the style
 

@@ -1,0 +1,37 @@
+name: rev-bump
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Require a rev bump with matching numbers
+        run: |
+          set -u
+          rev_of() { sed -n 's/^# rev: \([0-9][0-9]*\)$/\1/p' | head -1; }
+
+          script_rev=$(rev_of < scripts/cloud-bootstrap.sh)
+          readme_rev=$(rev_of < README.md)
+          base_rev=$(git show "origin/${GITHUB_BASE_REF}:scripts/cloud-bootstrap.sh" | rev_of)
+
+          echo "main rev: ${base_rev:-none}, PR script rev: ${script_rev:-none}, PR README rev: ${readme_rev:-none}"
+
+          if [ -z "${script_rev}" ] || [ -z "${readme_rev}" ]; then
+            echo 'A rev comment is missing. Both scripts/cloud-bootstrap.sh and the README loader snippet carry one.'
+            exit 1
+          fi
+          if [ "${script_rev}" != "${readme_rev}" ]; then
+            echo 'The two rev numbers differ. Set both to the same value.'
+            exit 1
+          fi
+          if [ -n "${base_rev}" ] && [ "${script_rev}" -le "${base_rev}" ]; then
+            echo "The rev did not move. main holds ${base_rev}, so set both files to $((base_rev + 1)) or higher."
+            exit 1
+          fi
