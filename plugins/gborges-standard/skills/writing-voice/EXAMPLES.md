@@ -11,6 +11,7 @@ and PR bodies on 2026-08-07.
 | "Its parlay slip was replaced, but the single-bet cascade still backs the Evaluate button on five game pages." | "The parlay slip was replaced. The Evaluate button on five game pages still opens the old single-bet flow." |
 | "Lead time, K lineup/realism guards, edge sanity caps, panel-coverage minimums, and cross-run line blocking all stay." | "Every existing safety check stays: the minimum lead time, the strikeout lineup checks, the edge caps, the panel-coverage minimums, and the block on re-picking a line across runs." |
 | "The ball-drag era coincided with an over-flag flood." | "While the ball was flying less, the model flagged far more overs than usual." |
+| "reconcile them through a shared team-volume envelope" | "price props separately, but each player's numbers must add up to the team's totals" |
 
 A defined term is the legal version: "the totals complex, meaning the three
 totals markets: game, home, away" earns reuse for the rest of that document.
@@ -53,6 +54,7 @@ After:
 | "Gates. Unchanged, deliberately, and frozen until the 14-day checkpoint." | "We deliberately changed no gate. All of them stay frozen until the August 20 checkpoint." |
 | "The regression is contained." | "The regression only affects two-way de-vig on EPL." |
 | "CLV is the early metric. It tells you whether you beat the close." | "CLV tells you whether you beat the close." |
+| "The biggest unlock: historical closing lines exist at zero cost." | "Historical closing lines exist for the whole 2015-2025 window at zero cost." |
 
 Keep the copula when the predicate is the fact: "CLV is the difference
 between your taken price and the close."
