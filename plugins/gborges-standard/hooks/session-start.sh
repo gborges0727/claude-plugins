@@ -1,34 +1,46 @@
 #!/usr/bin/env sh
-# SessionStart hook: prints the working conventions followed by the full
+# SessionStart hook: prints the working conventions followed by the
 # writing-voice ruleset, so the rules are present every session and after every
 # compaction rather than waiting on a skill to trigger.
 #
-# The skill sets disable-model-invocation, so this hook is the only loader.
-# EXAMPLES.md stays out: it is read on demand when a rule call is ambiguous.
+# The agent's harness caps hook output. Over the cap it keeps the head, saves
+# the rest to a file, and says so in a system reminder that is easy to read past
+# once the visible part looks like a whole document. On 2026-08-07 that dropped
+# the two passes while keeping the sentence instructing the agent to run them.
+# So the output is kept small by design (the eleven rules live in RULES.md,
+# reached by a pointer), and BUDGET below guards the rest: over it, the warning
+# prints first, where truncation cannot reach it.
 #
 # Never blocks session start. Any missing file is skipped and the hook exits 0.
+
+# Well under the observed cap. 14565 bytes truncated; 2048 survived.
+BUDGET=8000
 
 root="${CLAUDE_PLUGIN_ROOT:-$(dirname -- "$0")/..}"
 conventions="$root/CONVENTIONS.md"
 skill="$root/skills/writing-voice/SKILL.md"
 
-[ -f "$conventions" ] && cat "$conventions"
+# Drop a leading YAML frontmatter block. An unterminated fence is not
+# frontmatter, so the file prints whole unless the closing --- exists.
+strip_frontmatter() {
+  if [ "$(head -n 1 "$1")" = "---" ] && tail -n +2 "$1" | grep -q '^---[[:space:]]*$'; then
+    awk 'NR == 1 { next } !past && /^---[[:space:]]*$/ { past = 1; next } past' "$1"
+  else
+    cat "$1"
+  fi
+}
 
-if [ -f "$skill" ]; then
-  printf '\n'
-  # Strip a leading YAML frontmatter block. An unterminated fence is not
-  # frontmatter, so the file is printed whole unless the closing --- exists.
-  awk '
-    NR == FNR {
-      if (FNR == 1 && $0 ~ /^---[[:space:]]*$/) { open = 1; next }
-      if (open && $0 ~ /^---[[:space:]]*$/) { open = 0; closed = 1 }
-      next
-    }
-    FNR == 1 { skipping = closed }
-    skipping && FNR == 1 { next }
-    skipping && $0 ~ /^---[[:space:]]*$/ { skipping = 0; next }
-    !skipping { print }
-  ' "$skill" "$skill"
+body=""
+[ -f "$conventions" ] && body="$(cat "$conventions")"
+[ -f "$skill" ] && body="$body
+$(strip_frontmatter "$skill")"
+
+size=$(printf '%s' "$body" | wc -c | tr -d ' ')
+if [ "$size" -gt "$BUDGET" ]; then
+  printf 'WARNING: these conventions are %s bytes and may have been truncated.\n' "$size"
+  printf 'Read %s and %s in full before drafting.\n\n' "$conventions" "$skill"
 fi
+
+printf '%s\n' "$body"
 
 exit 0

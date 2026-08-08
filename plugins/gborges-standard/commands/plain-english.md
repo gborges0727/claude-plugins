@@ -13,7 +13,7 @@ If any text follows the command, read it as a description of what confused the r
 
 ## What to change
 
-**Unpack the compression.** Find every sentence carrying more than one idea and give each idea its own sentence. Find every step that was skipped as obvious and state it. Establish background the original assumed before using it.
+**Unpack the compression.** Split a sentence carrying more than one idea, and establish background the original assumed before using it. Unpack what actually blocked the reader, which is a smaller set than everything that could be unpacked. Spelling out a step they already had costs the length budget and teaches them nothing.
 
 **Lead with everyday words.** Where the original used a technical term, write the plain phrasing and put the term in parentheses once, on first use. `The command only writes files it has not already written (idempotent).` The plain words carry the sentence. The term rides along so it stays searchable and reusable, and it appears once, not on every mention.
 
@@ -25,9 +25,11 @@ If any text follows the command, read it as a description of what confused the r
 
 Flat prose. No headers, no bullet lists, no numbered steps, not even when the content is a sequence.
 
-Run as long as the explanation needs. There is no length budget and no instruction to be brief.
+**Land at or under the original's length.** This is a rephrasing, not an expansion. The original already said everything; the job is saying it in words that land. Swapping a dense sentence for a clear one is usually a wash, and dropping the terms that needed defining often comes out shorter. A version that runs materially longer than what it replaces has added content instead of clarifying it, which is the failure this command exists to avoid.
 
-Because there is no cap and no structure, paragraphs are the only navigation the reader gets. One idea per paragraph. Order them so each builds on the one before it, and never reach forward to something not yet explained.
+The reader asked for plain english because the original was hard to follow. A longer hard-to-follow answer is a worse answer.
+
+One idea per paragraph, since paragraphs are the only navigation on offer. Order them so each builds on the one before, and never reach forward to something not yet explained.
 
 ## Style
 
