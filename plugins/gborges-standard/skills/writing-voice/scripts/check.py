@@ -26,8 +26,8 @@ PATTERNS: list[tuple[int, str, str]] = [
     # Rule 1, packaging.
     (1, r"\bimportantly\b", "Importantly"),
     (1, r"\bnotably\b", "Notably"),
-    (1, r"it'?s worth noting", "It's worth noting"),
-    (1, r"it'?s important to note", "It's important to note"),
+    (1, r"it('?s| is) worth noting", "It's worth noting"),
+    (1, r"it('?s| is) important to note", "It's important to note"),
     (1, r"it bears mentioning", "It bears mentioning"),
     (1, r"worth flagging", "worth flagging"),
     (1, r"\bcritically,", "Critically,"),
