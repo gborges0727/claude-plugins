@@ -1,8 +1,8 @@
 {
   "name": "gborges-standard",
   "displayName": "Gabe's standard set",
-  "description": "Standard Claude Code setup used across all of Gabe Borges' repos. Injects working conventions at session start, strips AI-attribution footers from GitHub writes, and bundles the writing-voice, read-aloud-prep, and bear-notes skills, the add-to-git and plain-english commands, and the frontend-design, mattpocock-skills, and context7 plugins.",
-  "version": "1.5.1",
+  "description": "Standard Claude Code setup used across all of Gabe Borges' repos. Applies the Plain English output style everywhere, strips AI-attribution footers from GitHub writes, and bundles the writing-voice, read-aloud-prep, and bear-notes skills, the add-to-git command, and the frontend-design, mattpocock-skills, and context7 plugins.",
+  "version": "1.6.0",
   "author": {
     "name": "Gabe Borges",
     "email": "gbborges@proton.me"
