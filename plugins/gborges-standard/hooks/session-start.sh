@@ -17,8 +17,13 @@
 BUDGET=8000
 
 root="${CLAUDE_PLUGIN_ROOT:-$(dirname -- "$0")/..}"
+# The injected text names check.py and RULES.md, so it must carry paths the
+# agent can actually run from anywhere. Resolve to absolute; keep as-is if the
+# directory is unreadable.
+abs="$(CDPATH= cd -- "$root" 2>/dev/null && pwd)" && root="$abs"
 conventions="$root/CONVENTIONS.md"
 skill="$root/skills/writing-voice/SKILL.md"
+voice="$root/skills/writing-voice"
 
 # Drop a leading YAML frontmatter block. An unterminated fence is not
 # frontmatter, so the file prints whole unless the closing --- exists.
@@ -34,6 +39,12 @@ body=""
 [ -f "$conventions" ] && body="$(cat "$conventions")"
 [ -f "$skill" ] && body="$body
 $(strip_frontmatter "$skill")"
+body="$body
+
+File paths for this install (run check.py from anywhere with this path):
+- check.py: $voice/scripts/check.py
+- RULES.md: $voice/RULES.md
+- EXAMPLES.md: $voice/EXAMPLES.md"
 
 size=$(printf '%s' "$body" | wc -c | tr -d ' ')
 if [ "$size" -gt "$BUDGET" ]; then
