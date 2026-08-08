@@ -2,10 +2,11 @@
 """Literal scan for the writing-voice Pass 1 string list.
 
 Reads one or more files, or stdin when given no paths, and prints every banned
-string with the rule number it breaks. Quoted and code text is masked before
-scanning: fenced blocks, indented blocks, inline code spans, blockquote lines,
-and URLs. That mirrors the "when the rules don't apply" section of SKILL.md,
-where the passes run on your own prose only.
+string with the rule number it breaks, plus an advisory on every sentence over
+30 words (rule 4, overpacked). Quoted and code text is masked before scanning:
+fenced blocks, indented blocks, inline code spans, blockquote lines, table
+rows, and URLs. That mirrors the "when the rules don't apply" section of
+RULES.md, where the passes run on your own prose only.
 
     python3 check.py draft.md
     cat draft.md | python3 check.py
@@ -23,83 +24,83 @@ import sys
 # (rule number, regex, human label). Patterns are matched case-insensitively
 # unless they carry an inline flag. Order within a rule does not matter.
 PATTERNS: list[tuple[int, str, str]] = [
-    # Rule 1, packaging.
-    (1, r"\bimportantly\b", "Importantly"),
-    (1, r"\bnotably\b", "Notably"),
-    (1, r"it('?s| is) worth noting", "It's worth noting"),
-    (1, r"it('?s| is) important to note", "It's important to note"),
-    (1, r"it bears mentioning", "It bears mentioning"),
-    (1, r"worth flagging", "worth flagging"),
-    (1, r"\bcritically,", "Critically,"),
-    (1, r"the good news is", "The good news is"),
-    (1, r"the hard truth is", "The hard truth is"),
-    (1, r"the reality is", "The reality is"),
-    (1, r"the truth is", "The truth is"),
-    (1, r"the upshot:", "The upshot:"),
-    (1, r"a concrete consequence:", "A concrete consequence:"),
-    (1, r"the key point:", "The key point:"),
-    (1, r"and that'?s the key point", "and that's the key point"),
-    (1, r"which is the important part", "which is the important part"),
-    (1, r"and that'?s what matters here", "and that's what matters here"),
-    (1, r"the takeaway being", "the takeaway being"),
-    (1, r"honest answer", "Honest answer"),
-    (1, r"you'?re right\b", "You're right"),
-    (1, r"here'?s the thing", "Here's the thing"),
-    (1, r"that said,", "That said,"),
-    (1, r"that being said", "That being said"),
-    (1, r"with that said", "With that said"),
-    (1, r"to be clear,", "To be clear,"),
-    (1, r"zooming out", "Zooming out"),
-    (1, r"at its core", "at its core"),
-    (1, r"at a high level", "at a high level"),
-    (1, r"\bin essence\b", "In essence"),
-    (1, r"^essentially,", "Essentially,"),
-    (1, r"^fundamentally,", "Fundamentally,"),
-    (1, r"simply put,", "Simply put,"),
-    (1, r"first and foremost", "first and foremost"),
-    # Rule 2, no payload.
-    (2, r"non-?trivial", "non-trivial"),
-    (2, r"\bnuanced\b", "nuanced"),
-    (2, r"\bmultifaceted\b", "multifaceted"),
-    # Rule 3, stand-in nouns.
-    (3, r"is where the", "is where the"),
-    (3, r"north star", "north star"),
-    (3, r"\bplaybook\b", "playbook"),
-    (3, r"\blinchpin\b", "linchpin"),
-    (3, r"\bbackbone\b", "backbone"),
-    (3, r"\bcornerstone\b", "cornerstone"),
-    (3, r"load-?bearing", "load-bearing"),
-    (3, r"the lever\b", "the lever"),
-    (3, r"the unlock\b", "the unlock"),
-    (3, r"the lens\b", "the lens"),
-    (3, r"center of gravity", "center of gravity"),
-    (3, r"gold standard", "gold standard"),
-    (3, r"known recipe", "known recipe"),
-    # Rule 3, tech-culture jargon as seasoning.
-    (3, r"\bfootgun", "footgun"),
-    (3, r"happy path", "happy path"),
-    (3, r"sane defaults", "sane defaults"),
-    (3, r"escape hatch", "escape hatch"),
-    (3, r"\bgotcha", "gotcha"),
-    (3, r"belt and suspenders", "belt and suspenders"),
-    (3, r"\borthogonal", "orthogonal"),
-    (3, r"\bdelve", "delve"),
-    (3, r"rich tapestry", "rich tapestry"),
-    # Rule 4, discrete sentences.
-    (4, "—", "em dash"),
-    # Rule 7, asserted authenticity.
-    (7, r"\bhonestly\b", "honestly"),
-    (7, r"\bgenuinely\b", "genuinely"),
-    (7, r"real value", "real value"),
-    (7, r"\bcredible\b", "credible"),
-    # Rule 9, manufactured contrast.
-    (9, r"not just\b", "not just"),
-    (9, r"isn'?t about\b", "isn't about"),
-    (9, r"it wasn'?t\b", "it wasn't"),
-    (9, r"\bless\b[^.!?]{1,40}\bmore\b", "less ... more"),
-    (9, r"\bsure,", "Sure, ... But"),
-    (9, r"it'?s tempting to think", "It's tempting to think"),
-    (9, r"the real (point|question|issue) is", "the real point is"),
+    # Rule 7, packaging.
+    (7, r"\bimportantly\b", "Importantly"),
+    (7, r"\bnotably\b", "Notably"),
+    (7, r"it('?s| is) worth noting", "It's worth noting"),
+    (7, r"it('?s| is) important to note", "It's important to note"),
+    (7, r"it bears mentioning", "It bears mentioning"),
+    (7, r"worth flagging", "worth flagging"),
+    (7, r"\bcritically,", "Critically,"),
+    (7, r"the good news is", "The good news is"),
+    (7, r"the hard truth is", "The hard truth is"),
+    (7, r"the reality is", "The reality is"),
+    (7, r"the truth is", "The truth is"),
+    (7, r"the upshot:", "The upshot:"),
+    (7, r"a concrete consequence:", "A concrete consequence:"),
+    (7, r"the key point:", "The key point:"),
+    (7, r"and that'?s the key point", "and that's the key point"),
+    (7, r"which is the important part", "which is the important part"),
+    (7, r"and that'?s what matters here", "and that's what matters here"),
+    (7, r"the takeaway being", "the takeaway being"),
+    (7, r"honest answer", "Honest answer"),
+    (7, r"you'?re right\b", "You're right"),
+    (7, r"here'?s the thing", "Here's the thing"),
+    (7, r"that said,", "That said,"),
+    (7, r"that being said", "That being said"),
+    (7, r"with that said", "With that said"),
+    (7, r"to be clear,", "To be clear,"),
+    (7, r"zooming out", "Zooming out"),
+    (7, r"at its core", "at its core"),
+    (7, r"at a high level", "at a high level"),
+    (7, r"\bin essence\b", "In essence"),
+    (7, r"^essentially,", "Essentially,"),
+    (7, r"^fundamentally,", "Fundamentally,"),
+    (7, r"simply put,", "Simply put,"),
+    (7, r"first and foremost", "first and foremost"),
+    # Rule 5, verdict adjectives with no payload.
+    (5, r"non-?trivial", "non-trivial"),
+    (5, r"\bnuanced\b", "nuanced"),
+    (5, r"\bmultifaceted\b", "multifaceted"),
+    # Rule 6, stand-in nouns and coined abstractions.
+    (6, r"is where the", "is where the"),
+    (6, r"north star", "north star"),
+    (6, r"\bplaybook\b", "playbook"),
+    (6, r"\blinchpin\b", "linchpin"),
+    (6, r"\bbackbone\b", "backbone"),
+    (6, r"\bcornerstone\b", "cornerstone"),
+    (6, r"load-?bearing", "load-bearing"),
+    (6, r"the lever\b", "the lever"),
+    (6, r"the unlock\b", "the unlock"),
+    (6, r"the lens\b", "the lens"),
+    (6, r"center of gravity", "center of gravity"),
+    (6, r"gold standard", "gold standard"),
+    (6, r"known recipe", "known recipe"),
+    # Rule 6 continued, tech-culture jargon as seasoning.
+    (6, r"\bfootgun", "footgun"),
+    (6, r"happy path", "happy path"),
+    (6, r"sane defaults", "sane defaults"),
+    (6, r"escape hatch", "escape hatch"),
+    (6, r"\bgotcha", "gotcha"),
+    (6, r"belt and suspenders", "belt and suspenders"),
+    (6, r"\borthogonal", "orthogonal"),
+    (6, r"\bdelve", "delve"),
+    (6, r"rich tapestry", "rich tapestry"),
+    # Rule 12, discrete sentences (em dash).
+    (12, "—", "em dash"),
+    # Rule 9, asserted authenticity.
+    (9, r"\bhonestly\b", "honestly"),
+    (9, r"\bgenuinely\b", "genuinely"),
+    (9, r"real value", "real value"),
+    (9, r"\bcredible\b", "credible"),
+    # Rule 8, manufactured contrast.
+    (8, r"not just\b", "not just"),
+    (8, r"isn'?t about\b", "isn't about"),
+    (8, r"it wasn'?t\b", "it wasn't"),
+    (8, r"\bless\b[^.!?]{1,40}\bmore\b", "less ... more"),
+    (8, r"\bsure,", "Sure, ... But"),
+    (8, r"it'?s tempting to think", "It's tempting to think"),
+    (8, r"the real (point|question|issue) is", "the real point is"),
     # Rule 11, openers and closers.
     (11, r"you'?re absolutely", "You're absolutely"),
     (11, r"great question", "Great question"),
@@ -142,6 +143,11 @@ COMPILED = [
 FENCE = re.compile(r"^\s*(```|~~~)")
 BLOCKQUOTE = re.compile(r"^\s*>")
 INDENTED = re.compile(r"^(\t| {4,})\S")
+TABLE_ROW = re.compile(r"^\s*\|")
+
+# Rule 4 advisory: a sentence this long is a re-read risk, not a verdict.
+LONG_SENTENCE_WORDS = 30
+SENTENCE = re.compile(r"[^.!?]+(?:[.!?]+|$)")
 INLINE_CODE = re.compile(r"`[^`\n]*`")
 URL = re.compile(r"<?\bhttps?://\S+>?")
 MD_LINK_TARGET = re.compile(r"\]\([^)]*\)")
@@ -157,7 +163,7 @@ def mask(text: str) -> str:
             in_fence = not in_fence
             out.append(" " * len(line))
             continue
-        if in_fence or BLOCKQUOTE.match(line) or INDENTED.match(line):
+        if in_fence or BLOCKQUOTE.match(line) or INDENTED.match(line) or TABLE_ROW.match(line):
             out.append(" " * len(line))
             continue
         masked = line
@@ -188,6 +194,19 @@ def scan(text: str, source: str) -> list[str]:
         for match in pattern.finditer(masked):
             line, col = position(match.start())
             hits.append((line, col, rule, label, match.group(0).strip()))
+
+    for line_no, line in enumerate(masked.split("\n"), 1):
+        for sent in SENTENCE.finditer(line):
+            words = sent.group(0).split()
+            if len(words) > LONG_SENTENCE_WORDS:
+                head = " ".join(words[:6])
+                hits.append((
+                    line_no,
+                    sent.start() + 1,
+                    4,
+                    "overpacked sentence",
+                    f"{len(words)} words: {head}...",
+                ))
 
     hits.sort()
     return [
