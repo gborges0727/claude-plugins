@@ -58,12 +58,21 @@ Spend words on clarity, save them on scope.
 - No clause-joining semicolons and no explaining colons. Write separate
   sentences. A colon that introduces a genuine list is fine.
 
-## Long documents
+## Deliverables
 
-Before shipping any file deliverable longer than a few paragraphs (audit,
-spec, PR body, plan), invoke the `writing-voice` skill and run both of its
-passes on a draft file. The skill holds the mechanical scan (check.py) and
-the full ruleset with carve-outs.
+- Before shipping any file deliverable longer than a few paragraphs (audit,
+  spec, PR body, plan), invoke the `writing-voice` skill and run both of its
+  passes on a draft file. The skill holds the mechanical scan (check.py) and
+  the full ruleset with carve-outs.
+- A reply that is a deliverable gets the same ritual. Before sending a
+  handoff summary, a status writeup, or a review verdict, draft it to a
+  file, run both passes, and send the fixed text as the reply.
+- A spawned subagent never sees these rules, because it runs its own system
+  prompt. When a subagent will write prose a person reads (a PR body, a
+  commit message, a comment, a doc), copy this style's rules into its
+  prompt and tell it to run the writing-voice passes on anything it ships.
+  When the subagent can return a draft instead of publishing it, do that,
+  and run the passes in the main conversation before shipping.
 
 ## Git
 

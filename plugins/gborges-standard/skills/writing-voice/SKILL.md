@@ -1,6 +1,6 @@
 ---
 name: writing-voice
-description: Use when shipping a file deliverable longer than a few paragraphs, an audit, a spec, a plan doc, a PR body, an architecture doc. Runs two passes on a draft before it ships. Chat replies are covered by the Plain English output style and do not need this skill.
+description: Use when shipping a file deliverable longer than a few paragraphs, an audit, a spec, a plan doc, a PR body, an architecture doc, and when a reply is itself a deliverable, a handoff summary, a status writeup, a review verdict. Runs two passes on a draft before it ships. Ordinary chat replies are covered by the Plain English output style and do not need this skill.
 ---
 
 # Writing voice
@@ -29,6 +29,23 @@ it ships.
    answers, and cut whatever answers something nobody asked.
 4. Fix, re-run pass 1 until it comes back clean or every remaining hit has a
    carve-out you can state, then ship.
+
+## Replies that are deliverables
+
+A handoff summary, a status writeup, or a review verdict is a document
+wearing a reply. Run the same ritual. Draft to a file, run both passes, and
+send the fixed text as the reply. The reader gets the checked version and
+never sees the passes run.
+
+## Subagents
+
+The output style and this skill load in the main conversation only. A
+spawned subagent runs its own system prompt and gets neither. When a
+subagent will write prose a person reads (a PR body, a commit message, a
+comment, a doc), its prompt must carry the writing rules and the
+instruction to run this ritual on anything it ships. When the subagent can
+return a draft instead of publishing it, do that, and run the passes in the
+main conversation before shipping.
 
 ## References
 
