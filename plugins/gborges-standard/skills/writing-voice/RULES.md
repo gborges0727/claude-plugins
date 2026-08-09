@@ -62,9 +62,15 @@ functions, numbers, behaviors. Tech-culture jargon seasoning ordinary prose
 fails the same way: footgun, happy path, sane defaults, escape hatch,
 gotcha, belt and suspenders, orthogonal, delve, north star, playbook,
 linchpin, backbone, cornerstone, load-bearing, the lever, the unlock, the
-lens, center of gravity, gold standard. Keep a term where it names the
-literal technical thing (the happy path of a test suite, an orthogonal
-basis).
+lens, center of gravity, gold standard. A word borrowed from another field
+to name a mechanism fails both ways at once: "envelope" claims an outer
+limit without saying what limits what, and "flywheel" claims a self-feeding
+loop without naming what feeds what. State the mechanism ("each player's
+projection must add up to the team's totals", not "a shared team-volume
+envelope"). A document that must reuse the borrowed name falls under rule
+1's carve-out: define it in plain words at first use. Keep a term where it
+names the literal technical thing (the happy path of a test suite, an
+orthogonal basis, a back-of-the-envelope estimate).
 
 ## Padding
 

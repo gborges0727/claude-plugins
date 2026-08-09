@@ -68,9 +68,11 @@ between your taken price and the close."
 | "Caching is the lever here." | "Caching cuts the dashboard load from 45s to 0.5s." |
 | "Keeping them is a bit of a footgun." | "Keeping them makes the tic easy to reproduce by accident." |
 | "These patterns are somewhat orthogonal to intent." | "These patterns show up whatever the intent." |
+| "The envelope keeps decision 2's parallel tracks alive and survives a game-model slip." | "Pricing players as shares of team totals lets the two tracks build in parallel, and props still price if the game model slips." |
+| "The attack on the envelope: its Week 1 game-script tilt is neutral." | "The team-totals approach is weak in Week 1. It projects pace from last season with no margin input, so props are priced blind to the matchup." |
 
 Literal technical uses stay: "the happy path returns 200 and the error path
-retries".
+retries", "a back-of-the-envelope estimate".
 
 ## Rule 7, packaging
 

@@ -75,6 +75,10 @@ PATTERNS: list[tuple[int, str, str]] = [
     (6, r"center of gravity", "center of gravity"),
     (6, r"gold standard", "gold standard"),
     (6, r"known recipe", "known recipe"),
+    # Rule 6 continued, borrowed mechanism names. Carve-outs: a literal
+    # mailed envelope, a back-of-the-envelope estimate.
+    (6, r"\benvelope", "envelope"),
+    (6, r"\bflywheel", "flywheel"),
     # Rule 6 continued, tech-culture jargon as seasoning.
     (6, r"\bfootgun", "footgun"),
     (6, r"happy path", "happy path"),

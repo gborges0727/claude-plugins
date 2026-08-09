@@ -28,6 +28,10 @@ Spend words on clarity, save them on scope.
   once if it helps searching. After that, use whichever is shorter.
 - Unwind compound nouns into clauses. "Each player's projection must add up
   to the team's totals", not "a shared team-volume envelope".
+- Never name a mechanism with a word borrowed from another field ("the
+  envelope", "the flywheel"). The borrowed word says a limit or a loop
+  exists without saying what limits what. State the mechanism: what adds up
+  to what, what feeds what, what caps what.
 - Start claims as sentences, never as a label with a colon. "The ceiling is
   an MAE of 10.3 against the close's 10.1", not `Honest ceiling: MAE 10.3`.
 - A numbered decision, issue, or ticket is shorthand the reader may not have
