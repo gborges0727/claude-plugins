@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 6
+# rev: 7
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -61,6 +61,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 |---|---|---|
 | `plain-english.md` | Output style | Forced on whenever the plugin is enabled (`force-for-plugin`). Register, git, and plan rules in the system prompt of every session |
 | `strip-attribution.py` | `PreToolUse` hook | Removes AI-attribution footers from GitHub writes. Enforces the style's ban mechanically |
+| `inject-writing-rules.py` | `PreToolUse` hook | Appends the style's rules to every subagent prompt, since the output style never reaches a subagent |
 | `writing-voice` | Skill | Two-pass ritual for documents and for replies that are deliverables |
 | `read-aloud-prep` | Skill | Rewriting documents so a TTS voice reads them cleanly |
 | `bear-notes` | Skill | Writing into Bear without minting junk tags and wikilinks |
@@ -88,6 +89,12 @@ That conflict is instructions against instructions, both sitting in the system p
 It matches `mcp__github__.*` and inspects the `body`, `message`, and `commit_message` arguments. When it finds a footer it returns the call with the footer gone. When it finds nothing it prints nothing and exits, which matters more than it looks: rewriting a call requires approving it, so staying silent on clean bodies keeps the normal permission prompt on every GitHub write the hook did not touch. The implicit approval only ever covers a call it just corrected.
 
 Local sessions with no GitHub MCP server never fire it, since nothing matches the pattern.
+
+## Subagent rules injection
+
+The output style never reaches a spawned subagent, which runs its own system prompt. A CLAUDE.md pointer does not help, because a pointer names a style the subagent cannot load. So a subagent writing a PR body or a commit message ships unstyled prose.
+
+A second `PreToolUse` hook closes the gap. It matches the Agent tool (Task in older versions) and rewrites the spawn call, appending the style's Sentences, Punctuation, and Git sections plus the writing-voice ritual to the subagent's prompt. The block is read from the installed plain-english.md at run time, so the rules keep one source and the hook needs no edit when they change. Explore and Plan spawns are skipped, since only the styled main conversation reads their reports. A prompt already carrying the block is left alone, and on any read failure the hook stays silent rather than breaking the spawn.
 
 ## Adding a plugin to the set
 
