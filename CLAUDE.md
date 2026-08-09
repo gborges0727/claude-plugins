@@ -15,20 +15,22 @@ pasting the new rev into an environment's Setup script field is what forces
 the snapshot rebuild. The repo's number exists so the field and the repo
 never disagree about which rev is current.
 
-## Strip the server-appended attribution after creating a PR
+## No AI attribution on PRs or commits
 
 The cloud environment's PR-creation path appends a Claude Code attribution
 footer to the PR body server-side, after the submitted text leaves the
 session's hands. Writing the body without the footer does not prevent it.
 The update path does not re-append it, so an edit removes it for good.
 
-Immediately after creating a PR from a cloud session:
+A PostToolUse hook in `.claude/settings.json` fires after every
+`mcp__github__create_pull_request` call and injects the fix-up instruction
+(`scripts/strip-pr-attribution-hook.sh`): fetch the PR body, remove the
+trailing attribution block, confirm the body ends at the intended last line.
 
-1. Fetch the PR body you just created.
-2. If it ends with an attribution block (a `---` rule followed by a
-   "Generated with/by Claude Code" line, or the `🤖 Generated with
-   [Claude Code]` form), edit the PR body to remove that block.
-3. Confirm the body now ends at your intended last line.
+The hook only fires when the PR is created through that tool. If a PR gets
+created another way (the web UI's Create PR button) and shows the footer,
+apply the same edit by hand: fetch the body, strip the trailing `---` rule
+and "Generated with/by Claude Code" line.
 
-This repo carries no AI attribution on commits or PRs. The same applies to
-commit trailers: no `Co-Authored-By: Claude`, no generated-with footer.
+Commits carry no AI trailers either: no `Co-Authored-By: Claude`, no
+generated-with footer.
