@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 7
+# rev: 8
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -61,6 +61,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 |---|---|---|
 | `plain-english.md` | Output style | Forced on whenever the plugin is enabled (`force-for-plugin`). Register, git, and plan rules in the system prompt of every session |
 | `strip-attribution.py` | `PreToolUse` hook | Removes AI-attribution footers from GitHub writes. Enforces the style's ban mechanically |
+| `flag-server-attribution.py` | `PostToolUse` hook | Tells the session to delete the footer the GitHub server adds to a new PR body, which the `PreToolUse` hook cannot reach |
 | `inject-writing-rules.py` | `PreToolUse` hook | Appends the style's rules to every subagent prompt, since the output style never reaches a subagent |
 | `writing-voice` | Skill | Two-pass ritual for documents and for replies that are deliverables |
 | `read-aloud-prep` | Skill | Rewriting documents so a TTS voice reads them cleanly |
@@ -89,6 +90,14 @@ That conflict is instructions against instructions, both sitting in the system p
 It matches `mcp__github__.*` and inspects the `body`, `message`, and `commit_message` arguments. When it finds a footer it returns the call with the footer gone. When it finds nothing it prints nothing and exits, which matters more than it looks: rewriting a call requires approving it, so staying silent on clean bodies keeps the normal permission prompt on every GitHub write the hook did not touch. The implicit approval only ever covers a call it just corrected.
 
 Local sessions with no GitHub MCP server never fire it, since nothing matches the pattern.
+
+One call escapes it. `mcp__github__create_pull_request` appends the footer server-side, after the arguments leave the session, so a `PreToolUse` hook never sees the text that GitHub stores. FairLine PR #427 showed it: the submitted link was `https://claude.ai/code`, and the stored body read `https://claude.ai/code/session_<id>`, a session id the hook could not have written.
+
+`flag-server-attribution.py` covers that call as a `PostToolUse` hook. A hook runs as a local subprocess with no GitHub credentials, so it cannot rewrite the body itself. It returns `additionalContext` instead, telling the session to read the stored body and post a corrected one through `mcp__github__update_pull_request`. That follow-up call passes back through `strip-attribution.py`, and `update_pull_request` adds no footer of its own, so the correction sticks.
+
+It reads the body out of the tool response and stays silent when that body is clean, matching the `PreToolUse` hook's habit of only speaking up when something is wrong. When the response carries no readable body it speaks anyway and says the footer is unconfirmed, since a missed footer costs more than one wasted read.
+
+The comment and review write tools are left out. The GitHub MCP server offers no update tool for a posted comment, so there is no call to send the session to.
 
 ## Subagent rules injection
 
