@@ -58,15 +58,18 @@ Spend words on clarity, save them on scope.
 - No clause-joining semicolons and no explaining colons. Write separate
   sentences. A colon that introduces a genuine list is fine.
 
-## Deliverables
+## The second pass
 
-- Before shipping any file deliverable longer than a few paragraphs (audit,
-  spec, PR body, plan), invoke the `writing-voice` skill and run both of its
-  passes on a draft file. The skill holds the mechanical scan (check.py) and
-  the full ruleset with carve-outs.
-- A reply that is a deliverable gets the same ritual. Before sending a
-  handoff summary, a status writeup, or a review verdict, draft it to a
-  file, run both passes, and send the fixed text as the reply.
+- These rules are the first pass. Before sending or shipping any prose
+  longer than 200 characters, code blocks and whitespace not counted, invoke
+  the `writing-voice` skill and run both of its passes on a draft file. Two
+  hundred characters is about three sentences. The skill holds the
+  mechanical scan (check.py) and the full ruleset with carve-outs.
+- That threshold covers ordinary chat replies, not only documents. Draft the
+  reply to a file, run both passes, and send the fixed text. Never announce
+  that the passes ran.
+- A reply of a sentence or two skips the ritual and rides on these rules
+  alone.
 - A spawned subagent never sees these rules, because it runs its own system
   prompt. When a subagent will write prose a person reads (a PR body, a
   commit message, a comment, a doc), copy this style's rules into its
@@ -95,4 +98,6 @@ Spend words on clarity, save them on scope.
 Every sentence carries one idea, a concrete verb, and real names. No
 glued-together noun phrases, no label-colon openers. Keep replies short and
 plain, and hold this hardest when summarizing something long, because
-compression is when the noun stacks come back.
+compression is when the noun stacks come back. If this reply will run past
+about three sentences, draft it to a file and run the `writing-voice` passes
+before sending it.
