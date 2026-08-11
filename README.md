@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 9
+# rev: 10
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -64,7 +64,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `flag-server-attribution.py` | `PostToolUse` hook | Tells the session to delete the footer the GitHub server adds to a new PR body, which the `PreToolUse` hook cannot reach |
 | `inject-writing-rules.py` | `PreToolUse` hook | Appends the style's rules to every subagent prompt, since the output style never reaches a subagent |
 | `remind-writing-rules.py` | `UserPromptSubmit` hook | Returns the style's Reminder paragraph as context with every user message, so the rules sit next to the reply being written |
-| `writing-voice` | Skill | Two-pass ritual for documents and for replies that are deliverables |
+| `writing-voice` | Skill | Two-pass ritual for any prose past 200 characters, replies included |
 | `read-aloud-prep` | Skill | Rewriting documents so a TTS voice reads them cleanly |
 | `bear-notes` | Skill | Writing into Bear without minting junk tags and wikilinks |
 | `add-to-git` | Command | Explicit invocation only, never model-triggered |
@@ -109,9 +109,9 @@ A second `PreToolUse` hook closes the gap. It matches the Agent tool (Task in ol
 ## Reminding the rules each turn
 
 The output style sits at the top of the system prompt, and its pull on a
-reply weakens as the conversation grows over it. File deliverables get the
-writing-voice ritual. An ordinary chat reply has nothing between it and that
-drift.
+reply weakens as the conversation grows over it. The writing-voice ritual
+covers any prose past 200 characters, but the decision to run it gets made
+while the reply is being written, which is where that pull is weakest.
 
 `remind-writing-rules.py` fires on `UserPromptSubmit`, which runs when a
 message is sent and before Claude answers it. It reads the `## Reminder`
