@@ -63,7 +63,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `strip-attribution.py` | `PreToolUse` hook | Removes AI-attribution footers from GitHub writes. Enforces the style's ban mechanically |
 | `flag-server-attribution.py` | `PostToolUse` hook | Tells the session to delete the footer the GitHub server adds to a new PR body, which the `PreToolUse` hook cannot reach |
 | `inject-writing-rules.py` | `PreToolUse` hook | Appends the style's rules to every subagent prompt, since the output style never reaches a subagent |
-| `check-reply.py` | `MessageDisplay` hook | Runs the writing-voice string scan on every finished chat reply and appends the rules it broke. Screen only |
+| `remind-writing-rules.py` | `UserPromptSubmit` hook | Returns the style's Reminder paragraph as context with every user message, so the rules sit next to the reply being written |
 | `writing-voice` | Skill | Two-pass ritual for documents and for replies that are deliverables |
 | `read-aloud-prep` | Skill | Rewriting documents so a TTS voice reads them cleanly |
 | `bear-notes` | Skill | Writing into Bear without minting junk tags and wikilinks |
@@ -106,45 +106,34 @@ The output style never reaches a spawned subagent, which runs its own system pro
 
 A second `PreToolUse` hook closes the gap. It matches the Agent tool (Task in older versions) and rewrites the spawn call, appending the style's Sentences, Punctuation, and Git sections plus the writing-voice ritual to the subagent's prompt. The block is read from the installed plain-english.md at run time, so the rules keep one source and the hook needs no edit when they change. Explore and Plan spawns are skipped, since only the styled main conversation reads their reports. A prompt already carrying the block is left alone, and on any read failure the hook stays silent rather than breaking the spawn.
 
-## Checking chat replies
+## Reminding the rules each turn
 
-The writing-voice skill runs on file deliverables. An ordinary chat reply gets
-the output style and nothing else, so a reply that slips is only caught by
-reading it.
+The output style sits at the top of the system prompt, and its pull on a
+reply weakens as the conversation grows over it. File deliverables get the
+writing-voice ritual. An ordinary chat reply has nothing between it and that
+drift.
 
-`check-reply.py` runs the skill's pass 1 on every finished reply. It fires on
-`MessageDisplay`, which Claude Code sends once per streamed chunk of an
-assistant message, each fire a separate process carrying `message_id`, `index`,
-a `final` flag, and that chunk's `delta`. The hook writes each delta to a buffer
-file under `$TMPDIR/writing-voice-check/`, and scans on the chunk where `final`
-is true, once the whole reply exists. It then re-emits that last chunk with one
-line appended:
+`remind-writing-rules.py` fires on `UserPromptSubmit`, which runs when a
+message is sent and before Claude answers it. It reads the `## Reminder`
+section out of the installed plain-english.md and returns it as one line of
+context, so the style's own distillation sits at the bottom of the
+conversation, next to the reply being written, where recency gives it the
+most force. The section is read at run time, so the reminder keeps one
+source and the hook needs no edit when the style changes.
 
-```
-────────────────────────
-writing-voice: rule 12 em dash x3, rule 7 That said, x2, rule 11 Hope this helps
-```
+The line restates the rules and nothing else. A reminder that quotes a
+reply's mistakes pastes the banned phrasing back into fresh context and
+feeds the habit it polices, so no scan output belongs in it. Nothing scans
+chat replies at all: earlier designs that graded the finished reply either
+showed the grade to the wrong reader (a display report the model never
+sees) or arrived a turn too late to matter.
 
-The line names the rules and stops there. Six distinct hits get named and the
-rest are counted, since a reply breaking more than six needs a rewrite and not
-a list. Every hit is a report and not a verdict, the same as on the command
-line, because the rules carry carve-outs a string scan cannot evaluate.
+The cost is the line itself, about fifty tokens with every user message,
+and it stays in the transcript. `WRITING_VOICE_REMIND=0` turns it off.
 
-`displayContent` changes the screen only. The transcript and what Claude reads
-keep the original text, so the report never edits a reply and never enters the
-conversation. Nothing here calls a model. The scan is the same regex pass
-`check.py` runs on a draft, imported from the skill so the string list keeps
-one source.
-
-Replies with less than 200 characters of prose, code stripped, are skipped. A
-two-line answer draws hits on punctuation inside a quoted phrase more often
-than it catches anything worth fixing. `WRITING_VOICE_MIN_CHARS` moves the
-gate and `WRITING_VOICE_CHECK=0` turns the hook off.
-
-Every exit path fails open. A switch that is off, an event that will not parse,
-a buffer that will not write, a `check.py` that will not import: each prints
-nothing and exits 0, which leaves the reply on screen exactly as Claude wrote
-it. A display hook must never be able to swallow an answer.
+Every exit path fails open. A switch that is off, a missing style file, a
+Reminder section that has been renamed: each prints nothing and exits 0,
+and the turn proceeds without a reminder.
 
 ## Adding a plugin to the set
 

@@ -20,13 +20,13 @@
         ]
       }
     ],
-    "MessageDisplay": [
+    "UserPromptSubmit": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/check-reply.py\"",
-            "timeout": 10
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/remind-writing-rules.py\"",
+            "timeout": 5
           }
         ]
       }

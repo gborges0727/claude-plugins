@@ -13,9 +13,6 @@ RULES.md, where the passes run on your own prose only.
 
 Exit code is 1 when anything is found, 0 when clean. Every hit is a report, not
 a verdict: each rule carries carve-outs the script cannot evaluate.
-
-scan_hits() returns the same findings as tuples, for callers that format them
-themselves. The check-reply.py hook imports it to scan finished chat replies.
 """
 
 from __future__ import annotations
@@ -181,12 +178,7 @@ def mask(text: str) -> str:
     return "\n".join(out)
 
 
-def scan_hits(text: str) -> list[tuple[int, int, int, str, str]]:
-    """Return every hit as (line, column, rule number, label, matched text).
-
-    The structured form other callers read. check-reply.py groups these into a
-    one-line report under a chat reply, and scan() below formats them for the
-    command line."""
+def scan(text: str, source: str) -> list[str]:
     masked = mask(text)
     starts = [0]
     for line in masked.split("\n"):
@@ -222,14 +214,9 @@ def scan_hits(text: str) -> list[tuple[int, int, int, str, str]]:
                 ))
 
     hits.sort()
-    return hits
-
-
-def scan(text: str, source: str) -> list[str]:
-    """Format every hit as one command-line report line."""
     return [
         f"{source}:{line}:{col}  rule {rule:<2} {label}  ({found!r})"
-        for line, col, rule, label, found in scan_hits(text)
+        for line, col, rule, label, found in hits
     ]
 
 
