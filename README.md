@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 8
+# rev: 9
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -63,6 +63,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `strip-attribution.py` | `PreToolUse` hook | Removes AI-attribution footers from GitHub writes. Enforces the style's ban mechanically |
 | `flag-server-attribution.py` | `PostToolUse` hook | Tells the session to delete the footer the GitHub server adds to a new PR body, which the `PreToolUse` hook cannot reach |
 | `inject-writing-rules.py` | `PreToolUse` hook | Appends the style's rules to every subagent prompt, since the output style never reaches a subagent |
+| `remind-writing-rules.py` | `UserPromptSubmit` hook | Returns the style's Reminder paragraph as context with every user message, so the rules sit next to the reply being written |
 | `writing-voice` | Skill | Two-pass ritual for documents and for replies that are deliverables |
 | `read-aloud-prep` | Skill | Rewriting documents so a TTS voice reads them cleanly |
 | `bear-notes` | Skill | Writing into Bear without minting junk tags and wikilinks |
@@ -104,6 +105,35 @@ The comment and review write tools are left out. The GitHub MCP server offers no
 The output style never reaches a spawned subagent, which runs its own system prompt. A CLAUDE.md pointer does not help, because a pointer names a style the subagent cannot load. So a subagent writing a PR body or a commit message ships unstyled prose.
 
 A second `PreToolUse` hook closes the gap. It matches the Agent tool (Task in older versions) and rewrites the spawn call, appending the style's Sentences, Punctuation, and Git sections plus the writing-voice ritual to the subagent's prompt. The block is read from the installed plain-english.md at run time, so the rules keep one source and the hook needs no edit when they change. Explore and Plan spawns are skipped, since only the styled main conversation reads their reports. A prompt already carrying the block is left alone, and on any read failure the hook stays silent rather than breaking the spawn.
+
+## Reminding the rules each turn
+
+The output style sits at the top of the system prompt, and its pull on a
+reply weakens as the conversation grows over it. File deliverables get the
+writing-voice ritual. An ordinary chat reply has nothing between it and that
+drift.
+
+`remind-writing-rules.py` fires on `UserPromptSubmit`, which runs when a
+message is sent and before Claude answers it. It reads the `## Reminder`
+section out of the installed plain-english.md and returns it as one line of
+context, so the style's own distillation sits at the bottom of the
+conversation, next to the reply being written, where recency gives it the
+most force. The section is read at run time, so the reminder keeps one
+source and the hook needs no edit when the style changes.
+
+The line restates the rules and nothing else. A reminder that quotes a
+reply's mistakes pastes the banned phrasing back into fresh context and
+feeds the habit it polices, so no scan output belongs in it. Nothing scans
+chat replies at all: earlier designs that graded the finished reply either
+showed the grade to the wrong reader (a display report the model never
+sees) or arrived a turn too late to matter.
+
+The cost is the line itself, about fifty tokens with every user message,
+and it stays in the transcript. `WRITING_VOICE_REMIND=0` turns it off.
+
+Every exit path fails open. A switch that is off, a missing style file, a
+Reminder section that has been renamed: each prints nothing and exits 0,
+and the turn proceeds without a reminder.
 
 ## Adding a plugin to the set
 
