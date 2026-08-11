@@ -57,6 +57,37 @@ PATTERNS: list[tuple[int, str, str]] = [
     (7, r"^fundamentally,", "Fundamentally,"),
     (7, r"simply put,", "Simply put,"),
     (7, r"first and foremost", "first and foremost"),
+    # Rule 7 continued, a question you ask and then answer yourself. The
+    # lookbehind keeps this to sentence-initial noun-phrase questions, so a
+    # real question ("Should we cache this?") does not match.
+    (7, r"(?:^|(?<=[.!?] ))(?:\*\*)?(?:and )?the [\w' -]{2,30}\?", "self-answered question"),
+    (7, r"why does (?:this|that|it) matter\?", "Why does this matter?"),
+    (7, r"what does (?:this|that|it) mean\?", "What does this mean?"),
+    (7, r"so,? what\?", "So what?"),
+    (7, r"read that again", "Read that again"),
+    (7, r"let that sink in", "Let that sink in"),
+    # Rule 7 continued, a counted preview announcing a list it does not deliver.
+    (
+        7,
+        r"\b(?:one|two|three|four|five|six|seven|eight|nine|ten|\d+) things?\s+"
+        r"(?:will|to|that|you|can|are|here)\b",
+        "counted preview",
+    ),
+    (
+        7,
+        r"there are (?:two|three|four|five|six|seven|eight|nine|ten|\d+) "
+        r"(?:things|reasons|ways|problems|issues|places|cases|gotchas)",
+        "counted preview",
+    ),
+    # Rule 2, vivid metaphors standing in for the failure.
+    (2, r"\bbite you\b", "bite you"),
+    (2, r"come back to bite", "come back to bite"),
+    (2, r"blow up in your face", "blow up in your face"),
+    (2, r"shoot yourself in the foot", "shoot yourself in the foot"),
+    # Rule 10, repeated rhythm standing in for content.
+    (10, r"\bno [\w-]+\.\s+no [\w-]+\.", "repeated fragment shape"),
+    (10, r"\bstop [\w-]+\.\s+start [\w-]+\.", "repeated fragment shape"),
+    (10, r"\bbecame [\w -]{1,24}\.\s+\w+ became\b", "escalating ladder"),
     # Rule 5, verdict adjectives with no payload.
     (5, r"non-?trivial", "non-trivial"),
     (5, r"\bnuanced\b", "nuanced"),

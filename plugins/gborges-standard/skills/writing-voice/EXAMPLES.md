@@ -24,6 +24,7 @@ totals markets: game, home, away" earns reuse for the rest of that document.
 | "That starves the lineup-conditional K menu at exactly the run it was built for." | "That run gets no strikeout props, and it is the one run built to price them." |
 | "Your principle survives intact and gets sharper." | "Your principle still holds, and it's clearer now." |
 | "The digest keeps feeding every proposer and judge." | "Every proposer and judge still reads the digest before voting." |
+| "Four things will bite you." | "Four things break, all of them at import time." (then list them) |
 
 ## Rule 3, verbless note-compression
 
@@ -82,6 +83,12 @@ retries", "a back-of-the-envelope estimate".
 | "The single most important thing to know up front is that the close is immutable." | "The close is immutable once the game starts." |
 | "Honest answer: the backtest doesn't support it." | "The backtest doesn't support it." |
 | "The worker re-aligns at startup, and that's the key point." | "The worker re-aligns at startup." |
+| "Why does this matter? Because the cache never invalidates." | "The cache never invalidates." |
+| "The result? A 40x speedup." | "The dashboard loads in 0.5s instead of 20s." |
+| "There are three problems here. First, ..." | "The parser drops trailing commas." (then the other two) |
+
+A question the reader must actually answer stays: "Should this rule live in
+the hook or the skill?"
 
 ## Rule 8, manufactured contrast
 
@@ -111,6 +118,8 @@ Plain factual uses stay: "the true probability", "the actual count was 11".
 | "It's a hard problem. A genuinely hard problem, actually." | "The problem is hard because suppressing one tic surfaces the next." |
 | "So, to recap: the fix is invalidating on write." (after a ten-line answer) | (delete, the answer is still on screen) |
 | "What you've identified here is that the patterns are structural." | (delete, the reader wrote it) |
+| "No gimmicks. No hacks. No filler." | "The script only reports strings it matched." |
+| "One check became five. Five became the whole suite." | "The suite grew from one check to twelve." |
 
 ## Rule 11, openers and closers
 
