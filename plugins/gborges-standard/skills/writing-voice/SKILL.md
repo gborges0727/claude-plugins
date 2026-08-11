@@ -30,6 +30,11 @@ it ships.
 4. Fix, re-run pass 1 until it comes back clean or every remaining hit has a
    carve-out you can state, then ship.
 
+Pass 1 also runs on its own on every finished chat reply, through the
+`check-reply.py` display hook, which appends the rules the reply broke under
+it. That report is a prompt to fix the next reply. It never edits the one on
+screen, and it does not replace the ritual on a document.
+
 ## Replies that are deliverables
 
 A handoff summary, a status writeup, or a review verdict is a document

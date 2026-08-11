@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 8
+# rev: 9
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -63,6 +63,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `strip-attribution.py` | `PreToolUse` hook | Removes AI-attribution footers from GitHub writes. Enforces the style's ban mechanically |
 | `flag-server-attribution.py` | `PostToolUse` hook | Tells the session to delete the footer the GitHub server adds to a new PR body, which the `PreToolUse` hook cannot reach |
 | `inject-writing-rules.py` | `PreToolUse` hook | Appends the style's rules to every subagent prompt, since the output style never reaches a subagent |
+| `check-reply.py` | `MessageDisplay` hook | Runs the writing-voice string scan on every finished chat reply and appends the rules it broke. Screen only |
 | `writing-voice` | Skill | Two-pass ritual for documents and for replies that are deliverables |
 | `read-aloud-prep` | Skill | Rewriting documents so a TTS voice reads them cleanly |
 | `bear-notes` | Skill | Writing into Bear without minting junk tags and wikilinks |
@@ -104,6 +105,46 @@ The comment and review write tools are left out. The GitHub MCP server offers no
 The output style never reaches a spawned subagent, which runs its own system prompt. A CLAUDE.md pointer does not help, because a pointer names a style the subagent cannot load. So a subagent writing a PR body or a commit message ships unstyled prose.
 
 A second `PreToolUse` hook closes the gap. It matches the Agent tool (Task in older versions) and rewrites the spawn call, appending the style's Sentences, Punctuation, and Git sections plus the writing-voice ritual to the subagent's prompt. The block is read from the installed plain-english.md at run time, so the rules keep one source and the hook needs no edit when they change. Explore and Plan spawns are skipped, since only the styled main conversation reads their reports. A prompt already carrying the block is left alone, and on any read failure the hook stays silent rather than breaking the spawn.
+
+## Checking chat replies
+
+The writing-voice skill runs on file deliverables. An ordinary chat reply gets
+the output style and nothing else, so a reply that slips is only caught by
+reading it.
+
+`check-reply.py` runs the skill's pass 1 on every finished reply. It fires on
+`MessageDisplay`, which Claude Code sends once per streamed chunk of an
+assistant message, each fire a separate process carrying `message_id`, `index`,
+a `final` flag, and that chunk's `delta`. The hook writes each delta to a buffer
+file under `$TMPDIR/writing-voice-check/`, and scans on the chunk where `final`
+is true, once the whole reply exists. It then re-emits that last chunk with one
+line appended:
+
+```
+────────────────────────
+writing-voice: rule 12 em dash x3, rule 7 That said, x2, rule 11 Hope this helps
+```
+
+The line names the rules and stops there. Six distinct hits get named and the
+rest are counted, since a reply breaking more than six needs a rewrite and not
+a list. Every hit is a report and not a verdict, the same as on the command
+line, because the rules carry carve-outs a string scan cannot evaluate.
+
+`displayContent` changes the screen only. The transcript and what Claude reads
+keep the original text, so the report never edits a reply and never enters the
+conversation. Nothing here calls a model. The scan is the same regex pass
+`check.py` runs on a draft, imported from the skill so the string list keeps
+one source.
+
+Replies with less than 200 characters of prose, code stripped, are skipped. A
+two-line answer draws hits on punctuation inside a quoted phrase more often
+than it catches anything worth fixing. `WRITING_VOICE_MIN_CHARS` moves the
+gate and `WRITING_VOICE_CHECK=0` turns the hook off.
+
+Every exit path fails open. A switch that is off, an event that will not parse,
+a buffer that will not write, a `check.py` that will not import: each prints
+nothing and exits 0, which leaves the reply on screen exactly as Claude wrote
+it. A display hook must never be able to swallow an answer.
 
 ## Adding a plugin to the set
 
