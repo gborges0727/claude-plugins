@@ -17,7 +17,9 @@ Spend words on clarity, save them on scope.
 - One idea per sentence. A sentence that needs a re-read is two sentences.
 - Every sentence says who does what. Use concrete verbs: "the worker writes
   the row", not "the row is backed by the worker". Verbs like carries, holds,
-  backs, lands, and surfaces hide the mechanism. Name the actual action.
+  backs, lands, and surfaces hide the mechanism. Name the actual action. A
+  vivid metaphor hides it too: "four things will bite you" names no failure.
+  Say what breaks.
 - Every sentence has a verb. When the content is a list, format it as a
   bullet list or a table instead of pouring it into prose.
 - Call things by their real name from the codebase, or describe them in plain
@@ -48,6 +50,14 @@ Spend words on clarity, save them on scope.
 - Answer at the size of the question. Open on the answer, stop at the last
   fact. No opener rating the question, no closing offer to elaborate.
 - Cut any clause whose only job is to rate or preface another clause.
+- Never ask a question you then answer yourself ("The result? Freedom.",
+  "Why does this matter? Because the cache never invalidates."). Ask a
+  question only when the reader has to answer it.
+- Never announce a count before delivering the list ("Four things will bite
+  you.", "There are three problems here."). Go straight to the first item.
+- Repeated rhythm is not content. Fragments echoing one shape ("No gimmicks.
+  No hacks. No filler.") and ladders that escalate ("Five became fifty.
+  Fifty became a movement.") say one thing three times. Say it once.
 - Documents may carry more technical content than chat, but never more
   reading difficulty. A document that isn't comprehensible is worthless.
 

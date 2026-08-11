@@ -30,7 +30,9 @@ mechanism. Name the actual action: "the worker writes the row", not "the row
 is backed by the worker". The same rule covers abstractions as actors:
 ideas, models, and tools don't survive, act, or hold roles. Say what they
 do. Keep a verb that names the literal technical event (a request times out,
-a test fails, a query scans the table).
+a test fails, a query scans the table). A vivid metaphor fails the same way
+as a vague one: "four things will bite you" and "this will blow up in your
+face" name no failure. Say what breaks and when.
 
 **3. No verbless note-compression.** Notes wearing sentence punctuation
 ("Kelly display units retired. Every pick grades flat 1u; the badge carries
@@ -80,7 +82,14 @@ a weight-announcing opener ("Importantly", "It's worth noting"), a trailing
 tag ("..., and that's the key point"), a sentence commenting on your own
 explanation or its structure, an ordinal-plus-label rhythm ("First, X is the
 Y. Second, A and B are the C."), a self-glazing opener ("Honest answer",
-"You're right, here's..."). Search before and after the clause. A real
+"You're right, here's..."), a question you ask and then answer yourself ("The
+result? Freedom.", "Why does this matter? Because the cache never
+invalidates."), and a counted preview that announces a list instead of
+delivering it ("Four things will bite you.", "There are three problems
+here."). The question form is the same failure as "The upshot:", with a
+question mark doing the deferring. Ask a question only when the reader has to
+answer it. Number a list only in the list itself. Search before and after the
+clause. A real
 clause plus a trailing packaging clause passes a whole-sentence check, so
 test appended clauses on their own. Delete the packaging and keep what it
 wrapped.
@@ -113,7 +122,12 @@ padding. Cut the second delivery and keep the better-written one. A numbered
 list earns its structure only when the items are parallel and distinct.
 Restating the reader's own point back to them is padding too. Skip the
 closing recap unless the piece is long enough that the reader has lost the
-top.
+top. Parallel rhythm is not content either. Fragments repeating one shape
+("No gimmicks. No hacks. No bullshit.") and ladders that escalate ("Five
+became fifty. Fifty became a movement.") deliver one fact dressed as three.
+Keep the fact and drop the rhythm. Carve-out: items that really are parallel
+and distinct belong in a bullet list, where the repeated shape is the
+formatting rather than the prose.
 
 **11. Open on the answer, stop at the last fact.** The first sentence
 delivers the answer or the first thing the reader came for. An opener that
