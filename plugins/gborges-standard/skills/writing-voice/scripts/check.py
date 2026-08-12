@@ -40,7 +40,6 @@ PATTERNS: list[tuple[int, str, str]] = [
     (7, r"a concrete consequence:", "A concrete consequence:"),
     (7, r"the key point:", "The key point:"),
     (7, r"and that'?s the key point", "and that's the key point"),
-    (7, r"which is the important part", "which is the important part"),
     (7, r"and that'?s what matters here", "and that's what matters here"),
     (7, r"the takeaway being", "the takeaway being"),
     (7, r"you'?re right\b", "You're right"),
@@ -79,6 +78,13 @@ PATTERNS: list[tuple[int, str, str]] = [
         r"(?:things|reasons|ways|problems|issues|places|cases|gotchas)",
         "counted preview",
     ),
+    # Rule 7 continued, a stakes flag that ranks an item without a reason.
+    (7, r"the (?:one|ones) that matters?\b", "the one that matters"),
+    (7, r"is the important (?:one|part)\b", "is the important one"),
+    (7, r"what (?:really |actually )?matters (?:here )?is\b", "what matters is"),
+    (7, r"the (?:big|main) one (?:is|here)\b", "the big one is"),
+    (7, r"the main thing (?:is|here)\b", "the main thing is"),
+    (7, r"the (?:key|critical) (?:issue|one|item|question) (?:is|here)\b", "the key issue is"),
     # Rule 2, vivid metaphors standing in for the failure.
     (2, r"\bbite you\b", "bite you"),
     (2, r"come back to bite", "come back to bite"),
@@ -90,6 +96,13 @@ PATTERNS: list[tuple[int, str, str]] = [
     (10, r"\bbecame [\w -]{1,24}\.\s+\w+ became\b", "escalating ladder"),
     # Rule 5, verdict adjectives with no payload.
     (5, r"non-?trivial", "non-trivial"),
+    # Rule 5 continued, naming a change's category instead of the change.
+    (
+        5,
+        r"\b(?:is|are|was|were)\s+(?:purely\s+|mostly\s+|just\s+|mainly\s+)?"
+        r"(?:structural|architectural|cosmetic|mechanical|conceptual|philosophical)\b",
+        "category instead of the change",
+    ),
     (5, r"\bnuanced\b", "nuanced"),
     (5, r"\bmultifaceted\b", "multifaceted"),
     # Rule 6, stand-in nouns and coined abstractions.

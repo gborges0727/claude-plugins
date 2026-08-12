@@ -51,7 +51,10 @@ sentence with one idea can stay.
 holds.", "One reframe.", "None.") postures instead of informing. A verdict
 adjective with no fact behind it ("the regression is contained",
 "non-trivial") is the same failure inside a sentence, and so is the
-"X is the Y" opening that defers its payload to the next sentence. State the
+"X is the Y" opening that defers its payload to the next sentence. Naming the
+category of a change instead of the change fails the same way: "the fix is
+structural", "this one is architectural", "the rest is cosmetic". The reader
+learns which drawer you filed it in and not what moved. State the
 fact that earns the verdict: "Every claim in the handoff matched the files."
 Carve-out: keep the copula when the predicate is the fact itself ("CLV is
 the difference between your taken price and the close").
@@ -84,12 +87,21 @@ explanation or its structure, an ordinal-plus-label rhythm ("First, X is the
 Y. Second, A and B are the C."), a self-glazing opener ("Honest answer",
 "You're right, here's..."), a question you ask and then answer yourself ("The
 result? Freedom.", "Why does this matter? Because the cache never
-invalidates."), and a counted preview that announces a list instead of
+invalidates."), a counted preview that announces a list instead of
 delivering it ("Four things will bite you.", "There are three problems
-here."). The question form is the same failure as "The upshot:", with a
-question mark doing the deferring. Ask a question only when the reader has to
-answer it. Number a list only in the list itself. Search before and after the
-clause. A real
+here."), and a stakes flag that ranks one item over the rest ("the company
+page is the one that matters", "this is the important one", "what really
+matters is X"). The question form is the same failure as "The upshot:", with
+a question mark doing the deferring. Ask a question only when the reader has
+to answer it. Number a list only in the list itself. Attaching a reason does
+not rescue a stakes flag, because the flag is still a sentence about your
+ranking rather than about the work. Cut it and let the order rank the items.
+Lead with the one you would have flagged, written as its own claim, and
+trail the rest in a plain mention: "The company page is still open. I also
+filed five smaller questions." Going first and getting its own sentence
+already tells the reader which item to read first. The same holds in a list:
+put the item at the top and leave the others below it, rather than labelling
+one of them. A real
 clause plus a trailing packaging clause passes a whole-sentence check, so
 test appended clauses on their own. Delete the packaging and keep what it
 wrapped.

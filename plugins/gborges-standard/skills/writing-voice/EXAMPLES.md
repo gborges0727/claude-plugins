@@ -56,6 +56,8 @@ After:
 | "The regression is contained." | "The regression only affects two-way de-vig on EPL." |
 | "CLV is the early metric. It tells you whether you beat the close." | "CLV tells you whether you beat the close." |
 | "The biggest unlock: historical closing lines exist at zero cost." | "Historical closing lines exist for the whole 2015-2025 window at zero cost." |
+| "The fix is structural." | "You reorder the items now instead of labelling one of them." |
+| "The rest of the diff is cosmetic." | "The rest of the diff renames two variables." |
 
 Keep the copula when the predicate is the fact: "CLV is the difference
 between your taken price and the close."
@@ -86,6 +88,9 @@ retries", "a back-of-the-envelope estimate".
 | "Why does this matter? Because the cache never invalidates." | "The cache never invalidates." |
 | "The result? A 40x speedup." | "The dashboard loads in 0.5s instead of 20s." |
 | "There are three problems here. First, ..." | "The parser drops trailing commas." (then the other two) |
+| "Six items are open, and the company page is the one that matters." | "The company page is still open. I also filed five smaller questions." |
+| "I found one critical bug and five minor ones. The critical one is the important one." | "The token refresh drops the session on retry. I also filed five smaller bugs." |
+| "What really matters is the retry limit." | "The retry limit caps the job at 3 attempts." |
 
 A question the reader must actually answer stays: "Should this rule live in
 the hook or the skill?"
