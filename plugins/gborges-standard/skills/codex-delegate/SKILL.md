@@ -1,10 +1,11 @@
 ---
 name: codex-delegate
 description: >-
-  Delegate a coding subtask to the Codex CLI through its MCP tools, running it on GPT-5.6 Luna so
-  the work spends ChatGPT-plan quota instead of Claude tokens. Use when handing off mechanical
-  implementation, boilerplate, a repeated edit across many files, or a second-model opinion, and
-  when continuing a Codex thread already started.
+  Delegate a coding subtask to the Codex CLI on GPT-5.6 Luna, spending ChatGPT-plan quota instead
+  of Claude tokens. Prefer this over spawning a Claude subagent whenever the subtask is mechanical
+  and already fully specified: boilerplate, a repeated edit across many files, tests against an
+  interface you can paste in, or a second-model opinion. Also use when the user says to delegate,
+  hand off, or use Codex, and when continuing a Codex thread already started.
 ---
 
 # Codex delegation
