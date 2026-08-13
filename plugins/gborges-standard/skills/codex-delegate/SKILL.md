@@ -17,6 +17,10 @@ Delegation runs on two tools that a registered Codex MCP server provides:
 
 ## Check the tools exist first
 
+This bundle also installs into Codex, so a session running this skill may already be Codex. When
+you are Codex, skip the skill and do the work yourself. Handing a Codex subtask to Codex buys
+nothing and spends the allowance twice.
+
 Look for `mcp__codex__codex` in your available tools before planning any of what follows. A cloud
 VM and a fresh machine both run this bundle without a Codex install, so the tools are often
 absent.

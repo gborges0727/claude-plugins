@@ -1,6 +1,6 @@
 # claude-plugins
 
-Gabe Borges' personal Claude Code marketplace. One bundle plugin, `gborges-standard`, carrying the working conventions, skills, and third-party plugins used across every repo.
+Gabe Borges' personal plugin marketplace. One bundle plugin, `gborges-standard`, carrying the working conventions, skills, and third-party plugins used across every repo. Claude Code installs it from `.claude-plugin/marketplace.json` and the Codex CLI installs the same folder from `.agents/plugins/marketplace.json`. See [Codex](#codex).
 
 It exists because a cloud session never sees the `~/.claude/` on a local machine. That config does not travel, so anything living only there is missing the moment work happens outside a local terminal. This marketplace is the copy that does travel, and edits here propagate to every repo without touching any of them.
 
@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 15
+# rev: 16
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -74,6 +74,60 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `context7` | Dependency | From `claude-plugins-official` |
 
 Dependencies resolve to the same identifiers a user-scope install uses, so a machine that already has them does not get a second copy.
+
+## Codex
+
+The same plugin folder installs into the Codex CLI. Codex reads its own
+marketplace file at `.agents/plugins/marketplace.json`, next to the Claude
+one at `.claude-plugin/marketplace.json`, and both point at
+`plugins/gborges-standard`. Every skill has one copy and both hosts read it.
+
+```bash
+codex plugin marketplace add gborges0727/claude-plugins
+codex plugin add gborges-standard@gborges
+```
+
+Then open a Codex session, run `/hooks`, and trust the five hooks the plugin
+ships. Codex hashes each hook and refuses to run one nobody approved, so the
+skills work on install and the hooks stay dead until that step. Editing a
+hook changes its hash and asks again. Codex installs a snapshot of the
+plugin, so a local edit also needs the `version` in
+`.codex-plugin/plugin.json` raised and `codex plugin add` run again.
+
+Point the marketplace at a local checkout instead of GitHub to test a change
+before it merges:
+
+```bash
+codex plugin marketplace add ~/git/claude-plugins
+```
+
+### What Codex loads
+
+Codex accepts `.claude-plugin/plugin.json` as a manifest and prefers
+`.codex-plugin/plugin.json` when both exist. The Codex manifest names
+`hooks/codex-hooks.json` and the Claude manifest names
+`hooks/claude-hooks.json`, so neither host reads the other's hook set. That
+is why no `hooks/hooks.json` exists: both hosts discover that name on their
+own, and a file at it would fire twice.
+
+| Component | Codex | Notes |
+|---|---|---|
+| The four skills | Yes | `SKILL.md` loads unchanged on both hosts |
+| `plain-english.md` | Yes, through a hook | Codex has no output styles. `codex-session-style.py` returns the style body as `SessionStart` context |
+| `strip-attribution.py` | Yes | Codex passes the same `tool_name` and `tool_input` fields and accepts the same `updatedInput` reply |
+| `flag-server-attribution.py` | Yes | Same `PostToolUse` contract |
+| `remind-writing-rules.py` | Yes | Same `UserPromptSubmit` contract |
+| `inject-writing-rules.py` | Yes, on a different event | Codex spawns subagents through a tool no `Agent` matcher catches, and fires `SubagentStart`. `--subagent-start` answers that event with the same rules block as context |
+| `add-to-git` | No | A Claude command. Codex loads skills, not commands |
+| The three dependencies | No | `frontend-design`, `mattpocock-skills`, and `context7` live in a Claude marketplace that Codex cannot install from |
+
+The style arrives as about 6,300 characters of session context, which is the
+one real cost of the Codex path. `WRITING_VOICE_STYLE=0` turns it off, and
+`WRITING_VOICE_REMIND=0` turns off the per-turn reminder as it always did.
+
+Installing the bundle into Codex retires the hand-copied writing rules in
+`~/.codex/AGENTS.md`. Delete that section once the hooks are trusted, or the
+rules arrive twice.
 
 ## The Claude apps
 
