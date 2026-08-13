@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 13
+# rev: 14
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -67,6 +67,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `writing-voice` | Skill | Two-pass ritual for any prose past 200 characters, replies included |
 | `read-aloud-prep` | Skill | Rewriting documents so a TTS voice reads them cleanly |
 | `bear-notes` | Skill | Writing into Bear without minting junk tags and wikilinks |
+| `codex-delegate` | Skill | Handing a mechanical subtask to the Codex CLI on GPT-5.6 Luna, so ChatGPT-plan quota pays for it instead of Claude tokens. Needs the `codex` MCP server registered |
 | `add-to-git` | Command | Explicit invocation only, never model-triggered |
 | `frontend-design` | Dependency | From `claude-plugins-official` |
 | `mattpocock-skills` | Dependency | From `claude-plugins-official` |
