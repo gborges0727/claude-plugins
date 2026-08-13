@@ -9,10 +9,29 @@ description: >-
 
 # Codex delegation
 
-Codex runs as an MCP server registered at user scope, so two tools are in reach:
+Delegation runs on two tools that a registered Codex MCP server provides:
 
 - `mcp__codex__codex` starts a thread. It returns Codex's final text and a `threadId`.
 - `mcp__codex__codex-reply` continues that thread. It takes `threadId` and `prompt`.
+
+## Check the tools exist first
+
+Look for `mcp__codex__codex` in your available tools before planning any of what follows. A cloud
+VM and a fresh machine both run this bundle without a Codex install, so the tools are often
+absent.
+
+When they are absent, do the work in this session and say once, in a sentence, that Codex was not
+reachable. Offer the registration command only if the user asks how to get it:
+
+```
+claude mcp add --transport stdio --scope user codex -- codex mcp-server
+```
+
+That command needs the Codex CLI installed and `codex login` already run, so it is the user's
+step, not yours. A session that adds the server mid-conversation still sees no tools until it
+restarts.
+
+## The allowance you are spending
 
 Codex signs in through the ChatGPT account, not an API key, so a delegated call spends the same
 five-hour allowance as the Codex web app and the IDE extension. Delegating a whole afternoon of
