@@ -31,6 +31,9 @@ Spend words on clarity, save them on scope.
   "performance gradient"), replace it with the concrete thing it stands for.
 - State findings as full claims. "The diagnosis holds." says nothing.
   "Every claim in the handoff matched the files" is the finding.
+- Never name the category of a change instead of the change ("the fix is
+  structural", "the rest is cosmetic"). Say what moved: "you reorder the
+  items now instead of labelling one of them".
 - Lead with the everyday word, and give the technical term in parentheses
   once if it helps searching. After that, use whichever is shorter.
 - Unwind compound nouns into clauses. "Each player's projection must add up
@@ -55,6 +58,11 @@ Spend words on clarity, save them on scope.
   question only when the reader has to answer it.
 - Never announce a count before delivering the list ("Four things will bite
   you.", "There are three problems here."). Go straight to the first item.
+- Never tell the reader which item outranks the others ("the company page is
+  the one that matters", "what really matters is X"). Adding a reason does
+  not fix it. Cut the ranking and let the order rank: lead with the item you
+  would have flagged, then trail the rest in a plain mention. "The company
+  page is still open. I also filed five smaller questions."
 - Repeated rhythm is not content. Fragments echoing one shape ("No gimmicks.
   No hacks. No filler.") and ladders that escalate ("Five became fifty.
   Fifty became a movement.") say one thing three times. Say it once.
