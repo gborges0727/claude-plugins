@@ -15,6 +15,17 @@ pasting the new rev into an environment's Setup script field is what forces
 the snapshot rebuild. The repo's number exists so the field and the repo
 never disagree about which rev is current.
 
+## Never create `hooks/hooks.json`
+
+Claude Code and the Codex CLI both discover a plugin's hooks at
+`hooks/hooks.json`, and both install this plugin folder. A file at that name
+loads on both hosts and fires its hooks twice.
+
+The hook sets are split instead. `.claude-plugin/plugin.json` names
+`hooks/claude-hooks.json` and `.codex-plugin/plugin.json` names
+`hooks/codex-hooks.json`. A new hook goes in whichever file matches the host
+that runs it, or in both.
+
 ## No AI attribution on PRs or commits
 
 The cloud environment's PR-creation path appends a Claude Code attribution

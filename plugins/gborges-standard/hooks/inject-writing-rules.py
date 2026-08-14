@@ -8,6 +8,12 @@ comment) ships unstyled. The style asks the main agent to copy the rules
 into spawn prompts by hand, and that instruction fails the way any
 instruction fails. This hook does the same copy mechanically.
 
+Codex spawns subagents through its own tool, which no Agent matcher
+catches, and it fires a SubagentStart event instead. Passing
+--subagent-start handles that event: same block, delivered as
+additionalContext rather than as a rewritten prompt, since SubagentStart
+cannot edit the prompt.
+
 The injected block is read from the installed plain-english.md at run time,
 so the rules keep one source and the hook needs no edit when they change.
 Explore and Plan spawns are skipped: they publish nothing, and only the
@@ -60,10 +66,34 @@ def rules_block():
     )
 
 
+def subagent_start(event):
+    """Return the block to Codex as context on the spawned agent's first turn."""
+    if event.get("agent_type") in SKIP_TYPES:
+        return
+
+    block = rules_block()
+    if block is None:
+        return
+
+    json.dump(
+        {
+            "hookSpecificOutput": {
+                "hookEventName": "SubagentStart",
+                "additionalContext": block,
+            }
+        },
+        sys.stdout,
+    )
+
+
 def main():
     try:
         event = json.load(sys.stdin)
     except (json.JSONDecodeError, ValueError):
+        return
+
+    if "--subagent-start" in sys.argv:
+        subagent_start(event)
         return
 
     if event.get("tool_name") not in SPAWN_TOOLS:
