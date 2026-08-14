@@ -2,3 +2,6 @@
 __pycache__/
 *.pyc
 chat/dist/
+
+# Scratch page snapshots from Playwright MCP sessions
+.playwright-mcp/

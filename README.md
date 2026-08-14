@@ -68,6 +68,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `read-aloud-prep` | Skill | Rewriting documents so a TTS voice reads them cleanly |
 | `bear-notes` | Skill | Writing into Bear without minting junk tags and wikilinks |
 | `codex-delegate` | Skill | Handing a mechanical subtask to the Codex CLI on GPT-5.6 Luna, so ChatGPT-plan quota pays for it instead of Claude tokens. Needs the `codex` MCP server registered |
+| `op-run` | Skill | Wrapping a command in `op run` so a credential reaches the process and never the transcript. Fires on a missing key, an auth failure, or a request to add or rotate a secret |
 | `add-to-git` | Command | Explicit invocation only, never model-triggered |
 | `frontend-design` | Dependency | From `claude-plugins-official` |
 | `mattpocock-skills` | Dependency | From `claude-plugins-official` |
