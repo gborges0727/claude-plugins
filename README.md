@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 16
+# rev: 17
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -69,6 +69,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `bear-notes` | Skill | Writing into Bear without minting junk tags and wikilinks |
 | `codex-delegate` | Skill | Handing a mechanical subtask to the Codex CLI on GPT-5.6 Luna, so ChatGPT-plan quota pays for it instead of Claude tokens. Needs the `codex` MCP server registered |
 | `add-to-git` | Command | Explicit invocation only, never model-triggered |
+| `default-agent` | Agent | Opus at medium effort for general delegated work. The style's Subagents section routes every dispatch that would use `general-purpose` to `gborges-standard:default-agent` |
 | `frontend-design` | Dependency | From `claude-plugins-official` |
 | `mattpocock-skills` | Dependency | From `claude-plugins-official` |
 | `context7` | Dependency | From `claude-plugins-official` |
@@ -119,6 +120,7 @@ own, and a file at it would fire twice.
 | `remind-writing-rules.py` | Yes | Same `UserPromptSubmit` contract |
 | `inject-writing-rules.py` | Yes, on a different event | Codex spawns subagents through a tool no `Agent` matcher catches, and fires `SubagentStart`. `--subagent-start` answers that event with the same rules block as context |
 | `add-to-git` | No | A Claude command. Codex loads skills, not commands |
+| `default-agent` | No | A Claude Code agent. `codex-session-style.py` drops the style's Subagents section so Codex never gets sent to a name it cannot resolve |
 | The three dependencies | No | `frontend-design`, `mattpocock-skills`, and `context7` live in a Claude marketplace that Codex cannot install from |
 
 The style arrives as about 6,300 characters of session context, which is the
@@ -160,6 +162,26 @@ The comment and review write tools are left out. The GitHub MCP server offers no
 The output style never reaches a spawned subagent, which runs its own system prompt. A CLAUDE.md pointer does not help, because a pointer names a style the subagent cannot load. So a subagent writing a PR body or a commit message ships unstyled prose.
 
 A second `PreToolUse` hook closes the gap. It matches the Agent tool (Task in older versions) and rewrites the spawn call, appending the style's Sentences, Punctuation, and Git sections plus the writing-voice ritual to the subagent's prompt. The block is read from the installed plain-english.md at run time, so the rules keep one source and the hook needs no edit when they change. Explore and Plan spawns are skipped, since only the styled main conversation reads their reports. A prompt already carrying the block is left alone, and on any read failure the hook stays silent rather than breaking the spawn.
+
+## The default subagent
+
+A subagent spawned with the built-in `general-purpose` type inherits the
+orchestrating session's model and effort, so the same delegated task runs
+on Sonnet at low effort in one session and on Opus at max in another.
+`agents/default-agent.md` pins Opus at medium effort. Claude Code loads it
+from the plugin as `gborges-standard:default-agent`.
+
+The definition alone does not change anything, because Claude reaches for
+`general-purpose` by habit. The style's Subagents section is the routing
+rule: any dispatch that would use `general-purpose` uses
+`gborges-standard:default-agent` instead. Explore, Plan, and the specialist
+types keep their names. The rule is an instruction, not a setting, so a
+session can still ignore it.
+
+Claude Code re-reads the agent list on each Agent call, so a running session
+picks the agent up without a restart. The routing rule lives in the output
+style, which loads at session start, so a session that was open before the
+plugin updated follows the rule only after a restart.
 
 ## Reminding the rules each turn
 

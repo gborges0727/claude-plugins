@@ -10,7 +10,9 @@ one file governs both hosts and ~/.codex/AGENTS.md stops carrying a
 hand-copied duplicate.
 
 The frontmatter is dropped: name, description, and force-for-plugin are
-Claude Code loader keys and mean nothing to a reader.
+Claude Code loader keys and mean nothing to a reader. The Subagents section
+is dropped too: it routes dispatches to a plugin agent that only Claude Code
+loads, and Codex has no agent under that name.
 
 SessionStart fires on startup, resume, clear, and compact, so the rules come
 back after a compaction drops them.
@@ -33,6 +35,9 @@ STYLE = Path(__file__).resolve().parent.parent / "output-styles" / "plain-englis
 
 FRONTMATTER = re.compile(r"\A---\n.*?\n---\n", re.DOTALL)
 
+# Level-two sections that only make sense in Claude Code.
+DROP_SECTIONS = ("Subagents",)
+
 PREAMBLE = (
     "These rules govern every reply, document, commit message, and PR body "
     "you write in this session. They come from the gborges-standard plugin "
@@ -43,7 +48,14 @@ PREAMBLE = (
 
 def style_body():
     text = STYLE.read_text(encoding="utf-8")
-    body = FRONTMATTER.sub("", text).strip()
+    body = FRONTMATTER.sub("", text)
+    parts = re.split(r"^## (.+)$", body, flags=re.M)
+    kept = [parts[0].rstrip()]
+    for i in range(1, len(parts), 2):
+        if parts[i] in DROP_SECTIONS:
+            continue
+        kept.append(f"## {parts[i]}\n\n{parts[i + 1].strip()}")
+    body = "\n\n".join(kept).strip()
     return body or None
 
 
