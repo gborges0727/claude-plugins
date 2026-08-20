@@ -29,7 +29,7 @@ DIST = CHAT / "dist"
 # Sections of the output style that mean nothing in a chat app. The apps do
 # not write commits, and the style's pointer at the skill assumes a slash
 # command that does not exist there.
-DROP_SECTIONS = ("Git", "Deliverables")
+DROP_SECTIONS = ("Git", "Deliverables", "Subagents")
 
 # Replaces the dropped "Deliverables" section. The apps spawn no subagents
 # and their replies rarely ship deliverables, so the chat version keeps only

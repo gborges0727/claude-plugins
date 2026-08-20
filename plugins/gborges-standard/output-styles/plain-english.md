@@ -95,6 +95,14 @@ Spend words on clarity, save them on scope.
   When the subagent can return a draft instead of publishing it, do that,
   and run the passes in the main conversation before shipping.
 
+## Subagents
+
+- For any subagent dispatch that would otherwise use `general-purpose`, use
+  `subagent_type: gborges-standard:default-agent` instead. That agent pins
+  Opus at medium effort, so delegated work runs the same whatever model and
+  effort the orchestrating session is set to. Explore, Plan, and the other
+  specialist types keep their own names.
+
 ## Git
 
 - Conventional Commits: `type(scope): subject`. Single quotes only in commit
