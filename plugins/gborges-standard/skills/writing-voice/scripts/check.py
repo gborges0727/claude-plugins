@@ -85,6 +85,59 @@ PATTERNS: list[tuple[int, str, str]] = [
     (7, r"the (?:big|main) one (?:is|here)\b", "the big one is"),
     (7, r"the main thing (?:is|here)\b", "the main thing is"),
     (7, r"the (?:key|critical) (?:issue|one|item|question) (?:is|here)\b", "the key issue is"),
+    # Rule 7 continued, staged emphasis that announces a point instead of
+    # making it (mined from the claudish spec, 2026-08-22).
+    (7, r"the (?:key|core|deeper|real|crucial) (?:distinction|point|insight|question) (?:is|here)\b", "the key distinction is"),
+    (7, r"the cleanest way to (?:see|say|put) (?:this|it)", "the cleanest way to see this"),
+    (7, r"the verdict (?:here|is)\b", "the verdict here"),
+    (7, r"\bsmoking gun\b", "smoking gun"),
+    (7, r"where i'?d (?:hold the line|draw the line|push back)", "where I'd hold the line"),
+    (7, r"\bin one sentence[,:]", "in one sentence"),
+    (7, r"\bput (?:differently|simply|another way)[,:]", "put differently"),
+    (7, r"\bin other words[,:]", "in other words"),
+    (7, r"\bstated plainly[,:]", "stated plainly"),
+    # Rule 7 continued, aphoristic closers that restate the claim as a motto.
+    (7, r"that (?:distinction|difference|gap|nuance) matters\.", "that distinction matters"),
+    (7, r"that(?:'s| is) the (?:boundary|actual constraint|real constraint|whole point|gate|line)\.", "that is the boundary"),
+    (7, r"\b(?:is|as) (?:the|a) (?:gate|hard stop|hard boundary|hard constraint|hard gate), not a\b", "X is the gate, not a Y"),
+    (7, r"\bnot a suggestion\.", "not a suggestion"),
+    # Rule 11 continued, validation and candor framing.
+    (11, r"\bfair (?:hit|point|push|pushback|enough)\b", "fair hit"),
+    (11, r"\bgood catch\b", "good catch"),
+    (11, r"one honest caveat", "one honest caveat"),
+    # Rule 2 continued, relation verbs that hide the mechanism. Carve-out: a
+    # literal event (the plane landed, the diver surfaced, a backed-up file).
+    (2, r"\b(?:lands|landed) (?:in|on|as|cleanly|without)\b", "landed"),
+    (2, r"\b(?:surfaces|surfaced) (?:in|as|when|during|that)\b", "surfaced"),
+    (2, r"\b(?:carries|carry) the (?:weight|load|burden|margin|meaning|signal)\b", "carries the"),
+    (2, r"\bdoes the heavy lifting\b", "does the heavy lifting"),
+    (2, r"\b(?:survives|survived) (?:contact|scrutiny|intact|the (?:rewrite|refactor|review|test|cut))\b", "survives"),
+    (2, r"\bclears the (?:bar|gate|threshold)\b", "clears the bar"),
+    (2, r"\bcleanly\b", "cleanly"),
+    # Rule 6 continued, structure and process metaphors (gate, spine, seam,
+    # scaffold, wiring, routing layer). Carve-out: the literal thing (a CI
+    # gate job, a network router, the scaffold command of a generator).
+    (6, r"\b\w+-(?:gated|backed|bounded|surface|boundary|layer|path|shaped|aware)\b", "hyphenated compound"),
+    (6, r"\bgated (?:on|by|behind)\b", "gated on"),
+    (6, r"\bhard (?:gate|stop|boundary|constraint|requirement)\b", "hard gate"),
+    (6, r"\bthe (?:spine|seam|scaffold|scaffolding|wiring|plumbing|grain|shape) of\b", "the spine of"),
+    (6, r"\b(?:routing|context) layer\b", "routing layer"),
+    (6, r"\bthe (?:right|wrong) (?:surface|layer|seam|shape)\b", "the right surface"),
+    (6, r"\bat the (?:seam|boundary|surface|layer)\b", "at the seam"),
+    # Rule 6 continued, over-formal research register used rhetorically.
+    (6, r"\b(?:the|a|this) (?:frontier|horizon|regime|trajectory)\b", "research register"),
+    (6, r"\bheadline (?:number|figure|result|metric|finding|claim)\b", "headline number"),
+    (6, r"\bconfirmatory\b", "confirmatory"),
+    (6, r"\bimplicates?\b", "implicates"),
+    (6, r"\b(?:claim|quality|evidence) gate\b", "claim gate"),
+    # Rule 8 continued, "not X but Y" and "less X than Y". The trailing "X, not
+    # Y" punchline is caught only in its gate form under rule 7, because plain
+    # negation that does work also takes that shape.
+    (8, r"(?:^|(?<=[.!?] ))not [\w' -]{2,40}\b but\b", "not X but Y"),
+    (8, r"\bless [\w' -]{1,25} than [\w' -]{1,25}\.", "less X than Y"),
+    # Rule 10 continued, a mirrored pair: two clauses with the same shape,
+    # split by a semicolon, delivering one contrast.
+    (10, r"\b\w+ (?:landed|held|passed|shipped|worked|did); \w+ did not\b", "mirrored pair"),
     # Rule 2, vivid metaphors standing in for the failure.
     (2, r"\bbite you\b", "bite you"),
     (2, r"come back to bite", "come back to bite"),

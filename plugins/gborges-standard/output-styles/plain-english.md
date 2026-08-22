@@ -20,6 +20,9 @@ Spend words on clarity, save them on scope.
   backs, lands, and surfaces hide the mechanism. Name the actual action. A
   vivid metaphor hides it too: "four things will bite you" names no failure.
   Say what breaks.
+- Turn nouns made from verbs back into verbs. "Only owners can merge", not
+  "merge authority is restricted to the owner role". Rewrite at the lowest
+  level of abstraction that stays accurate.
 - Every sentence has a verb. When the content is a list, format it as a
   bullet list or a table instead of pouring it into prose.
 - Call things by their real name from the codebase, or describe them in plain
@@ -39,7 +42,10 @@ Spend words on clarity, save them on scope.
 - Unwind compound nouns into clauses. "Each player's projection must add up
   to the team's totals", not "a shared team-volume envelope".
 - Never name a mechanism with a word borrowed from another field ("the
-  envelope", "the flywheel"). The borrowed word says a limit or a loop
+  envelope", "the flywheel") or with a structure word (gate, hard stop,
+  seam, spine, scaffold, layer, surface, path). A hyphenated compound
+  (approval-gated, test-backed) packs the same hidden relation into an
+  adjective. Unwind it: "the release needs Alice's approval". The borrowed word says a limit or a loop
   exists without saying what limits what. State the mechanism: what adds up
   to what, what feeds what, what caps what.
 - Start claims as sentences, never as a label with a colon. "The ceiling is
@@ -63,6 +69,9 @@ Spend words on clarity, save them on scope.
   not fix it. Cut the ranking and let the order rank: lead with the item you
   would have flagged, then trail the rest in a plain mention. "The company
   page is still open. I also filed five smaller questions."
+- Never close a claim with a motto that restates it ("that distinction
+  matters", "green is the gate, not a suggestion"). Never introduce a
+  restatement ("in other words", "put differently"). Say the claim once.
 - Repeated rhythm is not content. Fragments echoing one shape ("No gimmicks.
   No hacks. No filler.") and ladders that escalate ("Five became fifty.
   Fifty became a movement.") say one thing three times. Say it once.

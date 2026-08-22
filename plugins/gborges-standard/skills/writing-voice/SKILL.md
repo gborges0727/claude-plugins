@@ -44,7 +44,9 @@ longer than its subject line, a document heading into a repo.
    other ways. When the pass ends, reread the question or task the document
    answers, and cut whatever answers something nobody asked.
 4. Fix, re-run pass 1 until it comes back clean or every remaining hit has a
-   carve-out you can state, then ship.
+   carve-out you can state, then ship. A fix changes wording, never scope.
+   "Required" does not become "sufficient", "not tested" does not become
+   "incorrect", and "do X if Y" does not become "X only when Y".
 
 ## Replies
 
