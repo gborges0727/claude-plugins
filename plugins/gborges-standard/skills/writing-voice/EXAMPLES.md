@@ -25,6 +25,9 @@ totals markets: game, home, away" earns reuse for the rest of that document.
 | "Your principle survives intact and gets sharper." | "Your principle still holds, and it's clearer now." |
 | "The digest keeps feeding every proposer and judge." | "Every proposer and judge still reads the digest before voting." |
 | "Four things will bite you." | "Four things break, all of them at import time." (then list them) |
+| "Merge authority is restricted to the owner role." | "Only owners can merge." |
+| "The timestamp provides verified evidence of cache staleness." | "The timestamp shows the cache is stale." |
+| "The fix landed cleanly on the routing layer." | "The fix merged, and the request handler now routes by tenant id." |
 
 ## Rule 3, verbless note-compression
 
@@ -77,10 +80,23 @@ between your taken price and the close."
 Literal technical uses stay: "the happy path returns 200 and the error path
 retries", "a back-of-the-envelope estimate".
 
+## Rule 6, name the checkable thing (continued)
+
+| Structure word | Named relation |
+|---|---|
+| "The release path is approval-gated." | "The release needs Alice's approval." |
+| "Passing tests is a hard gate." | "Do not launch until the tests pass." |
+| "The worker is the spine of the pipeline." | "Every stage reads its input from the worker's output table." |
+| "The headline number survives scrutiny." | "The 12% figure held when we re-ran it on the holdout set." |
+
 ## Rule 7, packaging
 
 | Cut | Keep |
 |---|---|
+| "Here's where I'd hold the line: do not launch until the tests pass. Green is the gate, not a suggestion." | "Do not launch until the tests pass." |
+| "The key distinction is that the cache never invalidates." | "The cache never invalidates." |
+| "The cache never invalidates. In other words, every read after the first is stale." | "Every read after the first returns the stale value, because the cache never invalidates." |
+| "Only owners can merge. That distinction matters." | "Only owners can merge." |
 | "Now I can explain it precisely. The pipeline re-prices at lineup lock." | "The pipeline re-prices at lineup lock." |
 | "The single most important thing to know up front is that the close is immutable." | "The close is immutable once the game starts." |
 | "Honest answer: the backtest doesn't support it." | "The backtest doesn't support it." |
@@ -102,6 +118,8 @@ the hook or the skill?"
 | "That's not a caching problem, it's a query problem." | "The query is doing a sequential scan." |
 | "It's not just faster, it's cheaper." | "Faster and cheaper both." |
 | "Sure, the tests pass. But the types don't check." | "The tests pass and the types don't check." |
+| "This is less a bug than a design choice." | "The author chose this. The ticket that added it explains why." |
+| "Not a caching problem but a query problem." | "The query does a sequential scan." |
 
 Negation that does real work stays: "This isn't a memory leak. The handles
 aren't being closed."
@@ -125,6 +143,13 @@ Plain factual uses stay: "the true probability", "the actual count was 11".
 | "What you've identified here is that the patterns are structural." | (delete, the reader wrote it) |
 | "No gimmicks. No hacks. No filler." | "The script only reports strings it matched." |
 | "One check became five. Five became the whole suite." | "The suite grew from one check to twelve." |
+
+## Rule 10, size and padding (continued)
+
+| Mirrored | One claim |
+|---|---|
+| "Correctness landed; legibility did not." | "The output is correct and hard to read." |
+| "The honest shape is asymmetric: the data is correct; the format is hard to read." | "The data is correct and the format is hard to read." |
 
 ## Rule 11, openers and closers
 

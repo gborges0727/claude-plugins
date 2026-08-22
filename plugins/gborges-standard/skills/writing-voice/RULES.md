@@ -10,7 +10,10 @@ packs too much into each sentence, so the reader decodes instead of reads.
 **Padding** adds sentences that deliver nothing new, so the reader wades.
 Rules 1 through 6 target density, 7 through 11 target padding, 12 through 14
 cover mechanics. The pattern names were confirmed against 72 real examples
-mined from transcripts, audits, and PR bodies on 2026-08-07.
+mined from transcripts, audits, and PR bodies on 2026-08-07. On 2026-08-22
+the rules absorbed the vocabulary and shape lists from the claudish specs
+(github.com/programasweights/claudish), which describe the same tics from
+the outside.
 
 ## Density
 
@@ -32,7 +35,16 @@ ideas, models, and tools don't survive, act, or hold roles. Say what they
 do. Keep a verb that names the literal technical event (a request times out,
 a test fails, a query scans the table). A vivid metaphor fails the same way
 as a vague one: "four things will bite you" and "this will blow up in your
-face" name no failure. Say what breaks and when.
+face" name no failure. Say what breaks and when. A noun made from a verb
+(a nominalization) hides the actor the same way: "merge authority is
+restricted to the owner role" has no one doing anything. Recover the
+sentence underneath: "only owners can merge". Rewrite at the lowest level
+of abstraction that stays accurate. "The timestamp shows the cache is
+stale", not "the timestamp provides verified evidence of cache staleness".
+Some relation verbs have a plain reading to reach for: landed means merged,
+deployed, or finished; surfaced means appeared, was found, or was reported;
+gated on means requires; clears the bar means passes; survives means still
+holds. Pick the one that is true and write that.
 
 **3. No verbless note-compression.** Notes wearing sentence punctuation
 ("Kelly display units retired. Every pick grades flat 1u; the badge carries
@@ -70,12 +82,21 @@ linchpin, backbone, cornerstone, load-bearing, the lever, the unlock, the
 lens, center of gravity, gold standard. A word borrowed from another field
 to name a mechanism fails both ways at once: "envelope" claims an outer
 limit without saying what limits what, and "flywheel" claims a self-feeding
-loop without naming what feeds what. State the mechanism ("each player's
+loop without naming what feeds what. Structure words do the same: gate,
+hard stop, boundary, seam, spine, scaffold, wiring, layer, surface, path,
+and routing layer each claim a dependency or a shape without naming it.
+"The release is approval-gated" hides who approves what. "The release
+needs Alice's approval" does not. A hyphenated compound (X-gated, X-backed,
+X-boundary, X-layer, X-surface, X-path) packs that hidden relation into an
+adjective. Unwind it into a clause. The research register does the same
+with frontier, horizon, regime, trajectory, headline number, confirmatory,
+and implicates when no experiment or measurement is in sight. State the mechanism ("each player's
 projection must add up to the team's totals", not "a shared team-volume
 envelope"). A document that must reuse the borrowed name falls under rule
 1's carve-out: define it in plain words at first use. Keep a term where it
 names the literal technical thing (the happy path of a test suite, an
-orthogonal basis, a back-of-the-envelope estimate).
+orthogonal basis, a back-of-the-envelope estimate, a CI gate job, a
+network router, a mixed-effects regime in a paper that fits one).
 
 ## Padding
 
@@ -91,7 +112,15 @@ invalidates."), a counted preview that announces a list instead of
 delivering it ("Four things will bite you.", "There are three problems
 here."), and a stakes flag that ranks one item over the rest ("the company
 page is the one that matters", "this is the important one", "what really
-matters is X"). The question form is the same failure as "The upshot:", with
+matters is X"). Staged emphasis is packaging with a spotlight: "the key
+distinction is", "the deeper point", "the cleanest way to see this", "the
+verdict here", "the smoking gun", "here's where I'd hold the line". A
+restatement marker ("in other words", "put differently", "in one
+sentence") announces that the next sentence repeats the last one, so cut
+both the marker and the repeat. An aphoristic closer restates the claim as
+a motto after it has already been made: "that distinction matters", "that
+is the boundary", "green is the gate, not a suggestion". Delete it. The
+claim before it already did the work. The question form is the same failure as "The upshot:", with
 a question mark doing the deferring. Ask a question only when the reader has
 to answer it. Number a list only in the list itself. Attaching a reason does
 not rescue a stakes flag, because the flag is still a sentence about your
@@ -110,7 +139,9 @@ wrapped.
 one thing to set up another: "That's not X, that's Y", "It wasn't X. It was
 Y", "This isn't about X, it's about Y", "not just X but Y", "less X, more
 Y", "Sure, X. But Y", "It's tempting to think X, but Y". This applies when
-the pattern splits across sentences. Rewrite by leading with the positive
+the pattern splits across sentences. The same tic hides in "not X but Y", "less X than Y", and a trailing ",
+not Y" punchline that knocks down an alternative nobody proposed ("a hard
+requirement, not a preference"). Rewrite by leading with the positive
 claim alone. For additive forms where X is also true, state both plainly:
 "X and Y both". Carve-out: keep negation that does informational work.
 Correcting a specific wrong belief the reader actually holds ("This isn't a
@@ -137,15 +168,20 @@ closing recap unless the piece is long enough that the reader has lost the
 top. Parallel rhythm is not content either. Fragments repeating one shape
 ("No gimmicks. No hacks. No bullshit.") and ladders that escalate ("Five
 became fifty. Fifty became a movement.") deliver one fact dressed as three.
-Keep the fact and drop the rhythm. Carve-out: items that really are parallel
+Keep the fact and drop the rhythm. A mirrored pair does it with two
+clauses: "Correctness landed; legibility did not" and a long
+explanatory clause followed by a short sharp one ("The data is right. The
+format is not.") deliver one contrast dressed as cadence. Write the one
+claim. Carve-out: items that really are parallel
 and distinct belong in a bullet list, where the repeated shape is the
 formatting rather than the prose.
 
 **11. Open on the answer, stop at the last fact.** The first sentence
 delivers the answer or the first thing the reader came for. An opener that
 rates the question ("Great question", "You're absolutely right"), announces
-what the reply will do ("Let me break this down"), or reacts emotionally to
-a problem ("Uh oh", "Something went wrong") gets cut. Doing the thing does
+what the reply will do ("Let me break this down"), reacts emotionally to
+a problem ("Uh oh", "Something went wrong"), or grades the reader's
+pushback ("fair hit", "fair point", "good catch") gets cut. Doing the thing does
 the announcing, and a failure gets reported by naming its cause and its fix.
 The last sentence delivers the last fact. A closer that offers more work
 ("Would you like me to elaborate", "Hope this helps"), solicits approval, or
