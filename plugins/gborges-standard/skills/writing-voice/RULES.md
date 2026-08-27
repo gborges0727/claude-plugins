@@ -1,6 +1,6 @@
 # Writing voice rules
 
-The fourteen rules in full, with their carve-outs, plus the cases where the
+The sixteen rules in full, with their carve-outs, plus the cases where the
 passes do not run at all. The Plain English output style carries the compact
 version in every session's system prompt. This file is the adjudication
 reference: open it when a call is ambiguous.
@@ -9,11 +9,13 @@ The budget is the reader's effort. Prose overspends it two ways. **Density**
 packs too much into each sentence, so the reader decodes instead of reads.
 **Padding** adds sentences that deliver nothing new, so the reader wades.
 Rules 1 through 6 target density, 7 through 11 target padding, 12 through 14
-cover mechanics. The pattern names were confirmed against 72 real examples
+cover mechanics, and 15 and 16 write for a reader who is new to the task. The pattern names were confirmed against 72 real examples
 mined from transcripts, audits, and PR bodies on 2026-08-07. On 2026-08-22
 the rules absorbed the vocabulary and shape lists from the claudish specs
 (github.com/programasweights/claudish), which describe the same tics from
-the outside.
+the outside. On 2026-08-27 rules 15 and 16 arrived from the Hush output
+style (github.com/V-Songbird/flint), after replies that followed every
+other rule still needed a second "break that down for me" pass.
 
 ## Density
 
@@ -213,6 +215,41 @@ give the technical term in parentheses once, on first use ("the command only
 writes files it has not already written (idempotent)"). After that, use
 whichever is shorter. Lead with the plain claim and give the reason in the
 same breath, rather than opening on a slogan and unpacking it afterwards.
+
+## A reader who is new to this
+
+**15. Say what it does, then name it, and let the reply stand alone.** The
+reader is new to the task. Everything the agent learned this turn is new to
+them too, and a reply that follows every other rule can still assume a name
+or a number the reader never loaded. The first time a file, function, flag,
+or term appears, say what it does in a few plain words, then give the name:
+"the file that lists the plugin's hooks, `hooks/claude-hooks.json`". Keep
+proper names and gloss them in three words ("Redis, the shared cache"),
+because a plain word swapped in for a proper name ("the cache") hides which
+thing is meant. Plain words keep numbers exact: names, times, counts, and
+errors stay as they are. The reply also stands alone. Do the arithmetic and
+give the number. Write the real date and clock time. Say what a file says
+instead of pointing at it: "`coupon.js` treats flat amounts as USD", not
+"see `coupon.js`". Every line then passes the "what does that mean" test.
+A line that would send the reader back with that question gets rewritten in
+plainer words, in place, since a second line explaining the first costs two
+reads. Carve-out: a name the reader used in their own message is already
+loaded, and repeats plainly. A document that defines a term at first use
+under rule 1 has met this rule for that term.
+
+**16. Report where things stand, and shape by fact count.** The reader
+wants the state of the work now. The path there (what you looked at first,
+what you ruled out, what failed on the way, which files you opened,
+anything the reader already told you) stays out unless they asked for it. A
+diagnosis is state, not path: what broke and why belongs next to the fix.
+Shape follows the fact count. One fact is one sentence. Two or three facts
+are a sentence or two. Bullets hold items that are separate, parallel
+things, and a numbered list holds steps in order. When in doubt, prose. A
+point you would drop the moment the reader pushed back gets dropped now.
+Test results take one line: pass and fail counts, runtime, failures quoted
+exact, the suite named only when it failed. Carve-out: a handoff, an audit,
+or a debugging writeup the reader asked for carries the path, because there
+the path is the deliverable.
 
 ## When the rules don't apply
 
