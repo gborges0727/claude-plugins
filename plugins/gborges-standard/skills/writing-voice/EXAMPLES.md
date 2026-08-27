@@ -177,3 +177,21 @@ the skill? The hook pays its cost every session."
 |---|---|
 | "The command is idempotent." | "The command only writes files it has not already written (idempotent)." |
 | "Closing line value is the north star. It measures whether your price beat the market." | "What matters most is closing line value, because it measures whether your price beat the market." |
+
+## Rule 15, say what it does, then name it
+
+| Name first | Plain first |
+|---|---|
+| "The change is in `remind-writing-rules.py`." | "The hook that re-sends the writing reminder on every message, `remind-writing-rules.py`, now reads the new section." |
+| "The cache was stale." | "Redis, the shared cache, held the old price for 5 minutes." |
+| "See `coupon.js` for the currency handling." | "`coupon.js` treats flat amounts as USD." |
+| "The run took about as long as last time." | "The run took 3.2 seconds. Last time took 3.1." |
+| "The rev needs bumping in the usual two places." | "The rev goes from 18 to 19 in `README.md` and `scripts/cloud-bootstrap.sh`." |
+
+## Rule 16, where things stand
+
+| Path | State |
+|---|---|
+| "I first checked the hook config, which looked fine, then ruled out the matcher, and finally found that the script path was relative." | "The hook script path was relative, so the hook never ran. It is absolute now." |
+| Two bullets, "The build passes" and "The lint passes." | "The build and the lint both pass." |
+| "All 214 tests in the pricing, checkout, and auth suites pass, with pricing taking 1.1s, checkout 1.4s, and auth 0.7s." | "All 214 tests pass in 3.2s." |

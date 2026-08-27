@@ -30,9 +30,9 @@ from pathlib import Path
 STYLE = Path(__file__).resolve().parent.parent / "output-styles" / "plain-english.md"
 
 # Sections of the style a subagent needs. Size, Plans, and Deliverables
-# shape replies and plans the main conversation owns; these three shape the
+# shape replies and plans the main conversation owns; these four shape the
 # sentences and commits a subagent writes on its own.
-SECTIONS = ("Sentences", "Punctuation", "Git")
+SECTIONS = ("Sentences", "The reader is new to this", "Punctuation", "Git")
 
 MARKER = "<writing-rules>"
 

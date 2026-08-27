@@ -69,7 +69,7 @@ main conversation before shipping.
 
 ## References
 
-- [RULES.md](RULES.md): the fourteen rules in full with their carve-outs,
+- [RULES.md](RULES.md): the sixteen rules in full with their carve-outs,
   plus the cases where the passes do not run at all (quoted and code text, a
   rule that would delete the answer, an explicit instruction that outranks
   this skill).

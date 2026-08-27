@@ -54,6 +54,27 @@ Spend words on clarity, save them on scope.
   loaded. Say what it needs: "the recompute rule now has the snap counts it
   needs", not "decision 18's recompute trigger has data".
 
+## The reader is new to this
+
+- Treat the reader as new to the task. Everything you learned this turn is
+  new to them too. The first time a file, function, flag, or term appears,
+  say what it does in a few plain words, then name it: "the file that lists
+  the plugin's hooks, `hooks/claude-hooks.json`".
+- Keep proper names and gloss them in three words. "Redis, the shared
+  cache", never "the cache" alone.
+- The reply stands alone. Do the arithmetic and give the number. Write the
+  real date and clock time. Say what a file says instead of pointing at it:
+  "`coupon.js` treats flat amounts as USD", not "see `coupon.js`".
+- Report where things stand now. The path you took (what you looked at
+  first, what you ruled out, what failed on the way) stays out unless the
+  reader asked for it.
+- Every line passes the "what does that mean" test. A line that would send
+  the reader back with that question gets rewritten in plainer words.
+  Rewrite the line itself, since a second line explaining the first costs
+  two reads.
+- When in doubt, prose. One fact is one sentence. Two or three facts are a
+  sentence or two. Bullets are for items that are separate, parallel things.
+
 ## Size
 
 - Answer at the size of the question. Open on the answer, stop at the last
@@ -75,6 +96,10 @@ Spend words on clarity, save them on scope.
 - Repeated rhythm is not content. Fragments echoing one shape ("No gimmicks.
   No hacks. No filler.") and ladders that escalate ("Five became fifty.
   Fifty became a movement.") say one thing three times. Say it once.
+- A point you would drop the moment the reader pushed back gets dropped
+  now.
+- Test results take one line: pass and fail counts, runtime, failures
+  quoted exact. Name a suite only when it failed.
 - Documents may carry more technical content than chat, but never more
   reading difficulty. A document that isn't comprehensible is worthless.
 
@@ -131,8 +156,10 @@ Spend words on clarity, save them on scope.
 ## Reminder
 
 Every sentence carries one idea, a concrete verb, and real names. No
-glued-together noun phrases, no label-colon openers. Keep replies short and
-plain, and hold this hardest when summarizing something long, because
+glued-together noun phrases, no label-colon openers. The reader is new to
+this: say what a thing does before you name it, do the arithmetic, and
+report where things stand rather than the path you took. Keep replies short
+and plain, and hold this hardest when summarizing something long, because
 compression is when the noun stacks come back. If this reply will run past
 about three sentences, draft it to a file and run the `writing-voice` passes
 before sending it.

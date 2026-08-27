@@ -235,6 +235,25 @@ PATTERNS: list[tuple[int, str, str]] = [
         "]",
         "emoji",
     ),
+    # Rule 15, the reply stands alone. Pointing the reader at a file or
+    # implying they already knew. mask() blanks inline code to spaces, so
+    # "see `file`" scans as "see" plus a run of spaces.
+    (15, r"\b(?:see|refer to|look (?:at|in)|have a look at) {3,}", "see `file`"),
+    (15, r"for (?:details|more),? see\b", "for details, see"),
+    (15, r"\bas you know\b", "as you know"),
+    (15, r"\bas you(?:'?re| are) aware\b", "as you're aware"),
+    (15, r"\bobviously\b", "obviously"),
+    (15, r"\bof course,", "of course,"),
+    (15, r"\bneedless to say\b", "needless to say"),
+    (15, r"\bthe usual (?:two|three|few|several) ", "the usual N places"),
+    # Rule 16, the path you took.
+    (16, r"\bi (?:first|initially|started by|began by)\b", "I first"),
+    (16, r"\bat first,? i\b", "At first, I"),
+    (16, r"\bi (?:also )?(?:tried|attempted|checked|looked (?:at|into)|ruled out|considered|explored)\b", "I tried"),
+    (16, r"\bruled out\b", "ruled out"),
+    (16, r"\bturns out\b", "turns out"),
+    (16, r"\bafter (?:some|a bit of|a lot of) (?:digging|investigation|poking|searching)\b", "after some digging"),
+    (16, r"\bwhich (?:led me to|didn'?t work|turned out to be)\b", "which led me to"),
 ]
 
 COMPILED = [
