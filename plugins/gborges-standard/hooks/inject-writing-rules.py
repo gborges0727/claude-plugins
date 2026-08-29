@@ -85,10 +85,10 @@ SUBSTITUTE_REASON = (
     "subagent prompt."
 )
 
-CODA = """Before shipping any file deliverable longer than a few paragraphs (a PR
-body, an audit, a spec, a plan), draft it to a file and run both passes of
-the writing-voice skill on the draft. When you cannot run the skill, return
-the draft in your final report instead of publishing it."""
+CODA = """Before shipping any artifact (a PR body, a commit message, a comment, a
+doc, an audit, a spec, a plan), whatever its length, draft it to a file and
+run both passes of the writing-voice skill on the draft. When you cannot run
+the skill, return the draft in your final report instead of publishing it."""
 
 
 def rules_block():

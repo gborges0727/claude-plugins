@@ -1,6 +1,6 @@
 ---
 name: writing-voice
-description: Use before sending or shipping any prose longer than 200 characters, code blocks excluded. That covers ordinary chat replies of more than about three sentences, and every file deliverable, audit, spec, plan doc, PR body, architecture doc, handoff summary, status writeup, and review verdict. Runs two passes on a draft before it ships. Only a reply of a couple of sentences or less skips it.
+description: Use before shipping any artifact, whatever its length. An artifact is prose that lives on after the turn: a repo file, a PR body, a commit message, a comment, a doc, a note, a spec, a plan. Runs two passes on a draft before it ships. Chat replies never get it and ride on the output style alone.
 ---
 
 # Writing voice
@@ -12,19 +12,17 @@ because writing and revising are different jobs.
 
 ## When it runs
 
-Run it on any prose you are about to send or ship that is longer than 200
-characters, counting only the prose. Exclude fenced code blocks and their
-contents, and do not count whitespace. Two hundred characters is roughly
-three sentences, so the count rarely needs doing by hand. A reply that runs
-past a short paragraph qualifies.
+Run it on every artifact, whatever its length. An artifact is prose that
+lives on after the turn and that a person may read more than once: a file
+written into a repo, a PR body, a commit message past its subject line, a
+comment on a PR or a ticket, a doc, a note, an audit, a spec, a plan, a
+handoff summary. A one-line commit subject and a one-line comment get the
+ritual too, because a short artifact is read as often as a long one.
 
-The threshold applies to chat replies and to files alike. A one-line answer,
-a yes or no, a single sentence confirming a command ran, all skip the ritual
-and rely on the output style alone.
-
-The threshold is a floor, not the only trigger. Anything a person will read
-twice gets the ritual regardless of length: a PR body, a commit message
-longer than its subject line, a document heading into a repo.
+A chat reply never gets the ritual. The output style shapes it as it is
+written, and that is the whole treatment. Drafting a reply to a file for
+checking doubles its cost and, measured over a session, catches only long
+sentences the style already forbids.
 
 ## The ritual
 
@@ -50,18 +48,18 @@ longer than its subject line, a document heading into a repo.
 
 ## Replies
 
-A reply past the threshold gets the same treatment as a file. Draft it to a
-file in the scratchpad, run both passes, and send the fixed text as the
-reply. The reader gets the checked version and never sees the passes run.
+A chat reply rides on the output style alone. When a reply carries an
+artifact inside it (a PR body pasted for approval, a comment to be posted),
+run the ritual on the artifact and paste the checked text.
 
 Do not announce the ritual, apologize for the delay, or mention the draft
-file. The reply arrives as a reply.
+file. The artifact arrives as an artifact.
 
 ## Subagents
 
 The output style and this skill load in the main conversation only. A
 spawned subagent runs its own system prompt and gets neither. When a
-subagent will write prose a person reads (a PR body, a commit message, a
+subagent will write an artifact (a PR body, a commit message, a
 comment, a doc), its prompt must carry the writing rules and the
 instruction to run this ritual on anything it ships. When the subagent can
 return a draft instead of publishing it, do that, and run the passes in the
