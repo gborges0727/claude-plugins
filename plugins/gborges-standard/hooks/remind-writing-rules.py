@@ -19,13 +19,25 @@ The line restates the rules and nothing else. A reminder that quotes
 mistakes pastes the banned phrasing back into fresh context and feeds the
 habit it polices, so no scan output and no violation content belongs here.
 
-Fail-open contract: on any problem (the switch is off, the style file is
-missing, the Reminder section is gone), the hook prints nothing and exits
-0, and the turn proceeds without a reminder. Keep every exit path in this
-file that way.
+The hook does two more jobs on the same event. It records whether this
+message names the Fable agent, writing 1 or 0 to a per-session file under
+~/.claude/gborges-standard/state. Every message rewrites that file, so it
+always describes the latest message. inject-writing-rules.py reads the
+record and denies a Fable spawn the user never asked for.
+
+It also appends one sentence saying whether this machine may hand coding
+subtasks to the Codex CLI. The "codex" key in ~/.claude/gborges-standard.json
+decides the wording, and plugin_config.load() reads it. The main agent then
+knows the answer with no tool call and no guess.
+
+On any problem (the style file is missing, the Reminder section is gone,
+the settings file will not read) the hook still exits 0 and the turn
+proceeds. The switch below silences the reminder line only. The mention
+record and the Codex line are written either way, because the two rules
+they feed do not depend on the writing style.
 
 Config:
-  WRITING_VOICE_REMIND  1|0  master switch (default 1)
+  WRITING_VOICE_REMIND  1|0  switch for the reminder line (default 1)
 """
 
 import json
@@ -33,6 +45,24 @@ import os
 import re
 import sys
 from pathlib import Path
+
+try:
+    import plugin_config
+except ImportError:
+    # Fail open when the sibling module is missing. The reminder line still
+    # goes out, and the two switches take their defaults.
+    class plugin_config:  # noqa: N801
+        @staticmethod
+        def load():
+            return {"fable": True, "codex": False}
+
+        @staticmethod
+        def mention_from_prompt(prompt):
+            return False
+
+        @staticmethod
+        def write_mention(session_id, mentioned):
+            return None
 
 STYLE = Path(__file__).resolve().parent.parent / "output-styles" / "plain-english.md"
 
@@ -49,21 +79,38 @@ def reminder_line():
 
 
 def main():
-    if os.environ.get("WRITING_VOICE_REMIND", "1") != "1":
-        return
-
-    # The event payload carries nothing this hook needs. It is read anyway so
-    # the parent process never blocks writing to a closed pipe.
     try:
-        sys.stdin.read()
+        raw = sys.stdin.read()
     except OSError:
-        pass
-
+        raw = ""
     try:
-        line = reminder_line()
-    except OSError:
-        return
-    if not line:
+        event = json.loads(raw)
+    except (json.JSONDecodeError, ValueError):
+        event = {}
+    if not isinstance(event, dict):
+        event = {}
+
+    plugin_config.write_mention(
+        event.get("session_id"),
+        plugin_config.mention_from_prompt(event.get("prompt")),
+    )
+
+    lines = []
+    if os.environ.get("WRITING_VOICE_REMIND", "1") == "1":
+        try:
+            line = reminder_line()
+        except OSError:
+            line = None
+        if line:
+            lines.append(PREFIX + line)
+
+    # A Codex session is already Codex, so the line that steers Claude toward
+    # the codex-delegate skill has nothing to say there. codex-hooks.json
+    # passes --codex-host to leave it out.
+    if "--codex-host" not in sys.argv:
+        state = "on" if plugin_config.load()["codex"] else "off"
+        lines.append(f"Codex delegation is {state} for this machine.")
+    if not lines:
         return
 
     try:
@@ -71,7 +118,7 @@ def main():
             {
                 "hookSpecificOutput": {
                     "hookEventName": "UserPromptSubmit",
-                    "additionalContext": PREFIX + line,
+                    "additionalContext": "\n".join(lines),
                 }
             },
             sys.stdout,
