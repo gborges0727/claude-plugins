@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 20
+# rev: 21
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -64,7 +64,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `flag-server-attribution.py` | `PostToolUse` hook | Tells the session to delete the footer the GitHub server adds to a new PR body, which the `PreToolUse` hook cannot reach |
 | `inject-writing-rules.py` | `PreToolUse` hook | Appends the style's rules to every subagent prompt, since the output style never reaches a subagent. Refuses a `fable-xhigh` dispatch the user did not summon, and rewrites it to `opus-xhigh` when `~/.claude/gborges-standard.json` says the account cannot run Fable |
 | `remind-writing-rules.py` | `UserPromptSubmit` hook | Returns the style's Reminder paragraph as context with every user message, so the rules sit next to the reply being written. Records whether the message named `@agent-fable-xhigh`, and adds one line saying whether Codex delegation is on |
-| `writing-voice` | Skill | Two-pass ritual for any prose past 200 characters, replies included |
+| `writing-voice` | Skill | Two-pass ritual for every artifact (a file, a PR body, a commit message, a comment), whatever its length. Chat replies ride on the style alone |
 | `read-aloud-prep` | Skill | Rewriting documents so a TTS voice reads them cleanly |
 | `bear-notes` | Skill | Writing into Bear without minting junk tags and wikilinks |
 | `codex-delegate` | Skill | Handing a mechanical subtask to the Codex CLI on GPT-5.6 Luna, so ChatGPT-plan quota pays for it instead of Claude tokens. Needs the `codex` MCP server registered |
@@ -201,8 +201,8 @@ plugin updated follows the rule only after a restart.
 
 The output style sits at the top of the system prompt, and its pull on a
 reply weakens as the conversation grows over it. The writing-voice ritual
-covers any prose past 200 characters, but the decision to run it gets made
-while the reply is being written, which is where that pull is weakest.
+covers artifacts only, so a chat reply is shaped while it is being written,
+which is where that pull is weakest.
 
 `remind-writing-rules.py` fires on `UserPromptSubmit`, which runs when a
 message is sent and before Claude answers it. It reads the `## Reminder`

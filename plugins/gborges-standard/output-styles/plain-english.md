@@ -112,22 +112,19 @@ Spend words on clarity, save them on scope.
 
 ## The second pass
 
-- These rules are the first pass. Before sending or shipping any prose
-  longer than 200 characters, code blocks and whitespace not counted, invoke
-  the `writing-voice` skill and run both of its passes on a draft file. Two
-  hundred characters is about three sentences. The skill holds the
-  mechanical scan (check.py) and the full ruleset with carve-outs.
-- That threshold covers ordinary chat replies, not only documents. Draft the
-  reply to a file, run both passes, and send the fixed text. Never announce
-  that the passes ran.
-- A reply of a sentence or two skips the ritual and rides on these rules
-  alone.
+- These rules are the first pass, and a chat reply rides on them alone.
+  Never draft a chat reply to a file for checking.
+- Every artifact gets a second pass before it ships, whatever its length.
+  An artifact is any prose that lives on after the turn: a file written
+  into a repo, a PR body, a commit message, a comment on a PR or a ticket,
+  a doc, a note. Invoke the `writing-voice` skill and run both of its
+  passes on a draft file. The skill holds the mechanical scan (check.py)
+  and the full ruleset with carve-outs. Never announce that the passes ran.
 - A spawned subagent never sees these rules, because it runs its own system
-  prompt. When a subagent will write prose a person reads (a PR body, a
-  commit message, a comment, a doc), copy this style's rules into its
-  prompt and tell it to run the writing-voice passes on anything it ships.
-  When the subagent can return a draft instead of publishing it, do that,
-  and run the passes in the main conversation before shipping.
+  prompt. When a subagent will write an artifact, copy this style's rules
+  into its prompt and tell it to run the writing-voice passes on anything
+  it ships. When the subagent can return a draft instead of publishing it,
+  do that, and run the passes in the main conversation before shipping.
 
 ## Subagents
 
@@ -197,6 +194,6 @@ glued-together noun phrases, no label-colon openers. The reader is new to
 this: say what a thing does before you name it, do the arithmetic, and
 report where things stand rather than the path you took. Keep replies short
 and plain, and hold this hardest when summarizing something long, because
-compression is when the noun stacks come back. If this reply will run past
-about three sentences, draft it to a file and run the `writing-voice` passes
-before sending it.
+compression is when the noun stacks come back. A chat reply rides on these
+rules alone. Every artifact (a file, a PR body, a commit message, a comment)
+gets the `writing-voice` passes before it ships, whatever its length.

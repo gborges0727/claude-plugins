@@ -3,9 +3,9 @@
 
 Runs as a UserPromptSubmit hook. The Plain English output style sits at the
 top of the system prompt, and its pull on a reply weakens as the
-conversation grows over it. The writing-voice ritual covers any prose past
-200 characters, but the decision to run it is made while the reply is being
-written, which is exactly where the style's pull is weakest. This hook
+conversation grows over it. The writing-voice ritual covers artifacts only, so
+a chat reply is shaped while it is being written, which is exactly where
+the style's pull is weakest. This hook
 fires after the user sends a message and before Claude answers it, and
 returns the style's own ## Reminder section as one line of context. The
 distillation of the rules then sits at the bottom of the conversation, next
