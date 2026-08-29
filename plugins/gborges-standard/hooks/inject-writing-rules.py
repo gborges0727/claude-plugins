@@ -16,16 +16,43 @@ cannot edit the prompt.
 
 The injected block is read from the installed plain-english.md at run time,
 so the rules keep one source and the hook needs no edit when they change.
-Explore and Plan spawns are skipped: they publish nothing, and only the
+Explore and Plan spawns are skipped. They publish nothing, and only the
 styled main conversation reads their reports. A prompt that already carries
 the block is left alone, and on any read failure the hook stays silent
 rather than breaking the spawn.
+
+The same hook also decides who may run the Fable agent. Fable is the
+expensive model, so gborges-standard:fable-xhigh runs only when the user
+asked for it by name in their latest message. remind-writing-rules.py
+records that answer per session, and this hook reads the record. A Fable
+spawn with no such record comes back denied, and the reason tells the main
+agent to send the same brief to gborges-standard:opus-xhigh instead.
+
+Some machines have no Fable access at all. The "fable" key in
+~/.claude/gborges-standard.json says so, and plugin_config.load() reads it.
+When the user named Fable but the key is false, the hook rewrites
+subagent_type to gborges-standard:opus-xhigh and lets the spawn through.
+The writing rules still get appended to the rewritten spawn.
 """
 
 import json
 import re
 import sys
 from pathlib import Path
+
+try:
+    import plugin_config
+except ImportError:
+    # Fail safe when the sibling module is missing. A Fable spawn reads as
+    # unmentioned and is refused, and every other spawn runs as before.
+    class plugin_config:  # noqa: N801
+        @staticmethod
+        def load():
+            return {"fable": True, "codex": False}
+
+        @staticmethod
+        def read_mention(session_id):
+            return False
 
 STYLE = Path(__file__).resolve().parent.parent / "output-styles" / "plain-english.md"
 
@@ -40,6 +67,23 @@ SPAWN_TOOLS = ("Agent", "Task")
 
 # Read-only searchers. Their output goes to the main agent, not a person.
 SKIP_TYPES = ("Explore", "Plan")
+
+# Both ways a dispatch can name the Fable agent.
+FABLE_TYPES = ("gborges-standard:fable-xhigh", "fable-xhigh")
+
+FALLBACK_TYPE = "gborges-standard:opus-xhigh"
+
+DENY_REASON = (
+    "The Fable agent runs only when the user's own message names "
+    "@agent-fable-xhigh. This message did not, so send the same brief to "
+    "gborges-standard:opus-xhigh instead."
+)
+
+SUBSTITUTE_REASON = (
+    "Fable is turned off on this machine, so this spawn goes to "
+    "gborges-standard:opus-xhigh. Appended the writing rules to the "
+    "subagent prompt."
+)
 
 CODA = """Before shipping any file deliverable longer than a few paragraphs (a PR
 body, an audit, a spec, a plan), draft it to a file and run both passes of
@@ -105,23 +149,49 @@ def main():
     if tool_input.get("subagent_type") in SKIP_TYPES:
         return
 
-    prompt = tool_input.get("prompt")
-    if not isinstance(prompt, str) or not prompt.strip() or MARKER in prompt:
-        return
+    reason = "Appended the writing rules to the subagent prompt"
+    substitute = False
 
+    if tool_input.get("subagent_type") in FABLE_TYPES:
+        if not plugin_config.read_mention(event.get("session_id")):
+            json.dump(
+                {
+                    "hookSpecificOutput": {
+                        "hookEventName": "PreToolUse",
+                        "permissionDecision": "deny",
+                        "permissionDecisionReason": DENY_REASON,
+                    }
+                },
+                sys.stdout,
+            )
+            return
+        if not plugin_config.load()["fable"]:
+            substitute = True
+            reason = SUBSTITUTE_REASON
+
+    prompt = tool_input.get("prompt")
     block = rules_block()
-    if block is None:
+    injectable = (
+        isinstance(prompt, str)
+        and prompt.strip()
+        and MARKER not in prompt
+        and block is not None
+    )
+    if not injectable and not substitute:
         return
 
     updated = dict(tool_input)
-    updated["prompt"] = f"{prompt.rstrip()}\n\n{block}"
+    if injectable:
+        updated["prompt"] = f"{prompt.rstrip()}\n\n{block}"
+    if substitute:
+        updated["subagent_type"] = FALLBACK_TYPE
 
     json.dump(
         {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
                 "permissionDecision": "allow",
-                "permissionDecisionReason": "Appended the writing rules to the subagent prompt",
+                "permissionDecisionReason": reason,
                 "updatedInput": updated,
             }
         },

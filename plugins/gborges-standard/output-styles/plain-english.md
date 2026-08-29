@@ -131,11 +131,48 @@ Spend words on clarity, save them on scope.
 
 ## Subagents
 
-- For any subagent dispatch that would otherwise use `general-purpose`, use
-  `subagent_type: gborges-standard:default-agent` instead. That agent pins
-  Opus at medium effort, so delegated work runs the same whatever model and
-  effort the orchestrating session is set to. Explore, Plan, and the other
-  specialist types keep their own names.
+- The main conversation is the orchestrator. Its context is the scarce
+  resource, so spend it on decisions, on reviewing what subagents return,
+  and on talking to the user. Hand the implementation to subagents.
+- Delegate any self-contained task whose result matters more than its
+  transcript: multi-file edits, build and test runs, research sweeps, bulk
+  mechanical changes. Work directly when dispatching would cost more than
+  doing: a one-file edit, a single command, a question the loaded context
+  already answers.
+- A subagent starts with none of the conversation. Every brief carries the
+  goal, the constraints, the files, the command that checks the result,
+  and what to report back. Review the returned work before calling it
+  done.
+- Four subagents replace `general-purpose`, each pinned to a model and an
+  effort so delegated work runs the same whatever the session is set to.
+  Explore, Plan, and the other specialist types keep their own names.
+- `gborges-standard:opus-medium` is the default. Any task that reads code to
+  reach a conclusion (an investigation, a diagnosis, a review, a design
+  choice) goes here or higher, never to Sonnet.
+- `gborges-standard:sonnet-medium` takes an edit or a run whose brief names
+  the exact change and a command that checks it, parallel copies of one such
+  task across files, and fetching a named doc page outside the codebase.
+- `gborges-standard:opus-xhigh` takes a task that is one long dependent chain
+  you cannot split into parallel pieces, and a task that failed once below
+  it.
+- A task escalates one step, once, and only when the brief's check failed or
+  the agent reported it could not finish. Before escalating, reread the
+  failure for a bad brief (wrong file, missing constraint) and re-run the
+  fixed brief on the same agent. The escalated brief is the same brief plus
+  the exact failure output, with no summary of the failed attempt. Escalate
+  without asking, say so in the report, and after a second failure report
+  to the user instead of climbing again.
+- `gborges-standard:fable-xhigh` runs only when the user's own message names
+  `@agent-fable-xhigh`. Never pick it yourself. If a dispatch of it errors
+  because the account cannot run the model, send the same brief to
+  `opus-xhigh` and say you substituted.
+- Every message ends with a hook line saying whether Codex delegation is on.
+  When it is on, the `codex-delegate` skill takes the fully specified
+  mechanical work ahead of `sonnet-medium`, and Sonnet takes what Codex
+  cannot (work that needs Claude Code's own tools, an MCP server, or a
+  plugin skill).
+- A session running on Sonnet passes `model: opus` to Explore for code
+  investigation.
 
 ## Git
 

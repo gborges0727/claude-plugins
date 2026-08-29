@@ -11,7 +11,7 @@
 # missing or the two numbers differ. After the merge, paste the new rev into
 # each environment's Setup script field when the change cannot wait out the
 # snapshot expiry.
-# rev: 19
+# rev: 20
 
 set -u
 
@@ -24,6 +24,12 @@ claude plugin marketplace add anthropics/claude-plugins-official || true
 claude plugin marketplace add gborges0727/claude-plugins || true
 
 claude plugin install gborges-standard@gborges --scope user || true
+
+# A cloud VM signs in to an account that usually cannot run Claude Fable 5, so
+# presetting the config here saves one wasted dispatch. Leave the line
+# commented out unless it earns its keep, because the routing rule already
+# re-sends the brief to opus-xhigh when fable-xhigh fails with a model error.
+# bash "$(ls -d ~/.claude/plugins/cache/gborges/gborges-standard/*/ | tail -1)scripts/setup.sh" --fable off --codex off
 
 # Surface the result in the setup log. A dependency that fails to resolve
 # leaves the bundle at 'failed to load' and is otherwise silent.

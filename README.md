@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 19
+# rev: 20
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -62,14 +62,18 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `plain-english.md` | Output style | Forced on whenever the plugin is enabled (`force-for-plugin`). Register, git, and plan rules in the system prompt of every session |
 | `strip-attribution.py` | `PreToolUse` hook | Removes AI-attribution footers from GitHub writes. Enforces the style's ban mechanically |
 | `flag-server-attribution.py` | `PostToolUse` hook | Tells the session to delete the footer the GitHub server adds to a new PR body, which the `PreToolUse` hook cannot reach |
-| `inject-writing-rules.py` | `PreToolUse` hook | Appends the style's rules to every subagent prompt, since the output style never reaches a subagent |
-| `remind-writing-rules.py` | `UserPromptSubmit` hook | Returns the style's Reminder paragraph as context with every user message, so the rules sit next to the reply being written |
+| `inject-writing-rules.py` | `PreToolUse` hook | Appends the style's rules to every subagent prompt, since the output style never reaches a subagent. Refuses a `fable-xhigh` dispatch the user did not summon, and rewrites it to `opus-xhigh` when `~/.claude/gborges-standard.json` says the account cannot run Fable |
+| `remind-writing-rules.py` | `UserPromptSubmit` hook | Returns the style's Reminder paragraph as context with every user message, so the rules sit next to the reply being written. Records whether the message named `@agent-fable-xhigh`, and adds one line saying whether Codex delegation is on |
 | `writing-voice` | Skill | Two-pass ritual for any prose past 200 characters, replies included |
 | `read-aloud-prep` | Skill | Rewriting documents so a TTS voice reads them cleanly |
 | `bear-notes` | Skill | Writing into Bear without minting junk tags and wikilinks |
 | `codex-delegate` | Skill | Handing a mechanical subtask to the Codex CLI on GPT-5.6 Luna, so ChatGPT-plan quota pays for it instead of Claude tokens. Needs the `codex` MCP server registered |
 | `add-to-git` | Command | Explicit invocation only, never model-triggered |
-| `default-agent` | Agent | Opus at medium effort for general delegated work. The style's Subagents section routes every dispatch that would use `general-purpose` to `gborges-standard:default-agent` |
+| `setup` | Command | Writes `~/.claude/gborges-standard.json`, the per-machine switches for Fable access and Codex delegation. Wraps `scripts/setup.sh`, which does the same with no model turn |
+| `sonnet-medium` | Agent | Sonnet 5 at medium effort. Edits and runs with a command check in the brief, parallel copies of one such task, and fetching a named doc page |
+| `opus-medium` | Agent | Opus 5 at medium effort. The default, and the floor for anything that reads code to reach a conclusion |
+| `opus-xhigh` | Agent | Opus 5 at xhigh effort. One escalation step for a task that failed below it, and the stand-in for Fable on an account without it |
+| `fable-xhigh` | Agent | Fable 5 at xhigh effort. Runs only when the user's message names `@agent-fable-xhigh`. See [docs/subagent-routing.md](docs/subagent-routing.md) for the routing rule and the cost reasoning |
 | `frontend-design` | Dependency | From `claude-plugins-official` |
 | `mattpocock-skills` | Dependency | From `claude-plugins-official` |
 | `context7` | Dependency | From `claude-plugins-official` |
@@ -117,10 +121,10 @@ own, and a file at it would fire twice.
 | `plain-english.md` | Yes, through a hook | Codex has no output styles. `codex-session-style.py` returns the style body as `SessionStart` context |
 | `strip-attribution.py` | Yes | Codex passes the same `tool_name` and `tool_input` fields and accepts the same `updatedInput` reply |
 | `flag-server-attribution.py` | Yes | Same `PostToolUse` contract |
-| `remind-writing-rules.py` | Yes | Same `UserPromptSubmit` contract |
+| `remind-writing-rules.py` | Yes, with `--codex-host` | Same `UserPromptSubmit` contract. The flag leaves out the Codex delegation line, which has nothing to tell a session that already is Codex |
 | `inject-writing-rules.py` | Yes, on a different event | Codex spawns subagents through a tool no `Agent` matcher catches, and fires `SubagentStart`. `--subagent-start` answers that event with the same rules block as context |
 | `add-to-git` | No | A Claude command. Codex loads skills, not commands |
-| `default-agent` | No | A Claude Code agent. `codex-session-style.py` drops the style's Subagents section so Codex never gets sent to a name it cannot resolve |
+| The four agents | No | Claude Code agents. `codex-session-style.py` drops the style's Subagents section so Codex never gets sent to a name it cannot resolve |
 | The three dependencies | No | `frontend-design`, `mattpocock-skills`, and `context7` live in a Claude marketplace that Codex cannot install from |
 
 The style arrives as about 6,300 characters of session context, which is the
@@ -163,23 +167,33 @@ The output style never reaches a spawned subagent, which runs its own system pro
 
 A second `PreToolUse` hook closes the gap. It matches the Agent tool (Task in older versions) and rewrites the spawn call, appending the style's Sentences, Punctuation, and Git sections plus the writing-voice ritual to the subagent's prompt. The block is read from the installed plain-english.md at run time, so the rules keep one source and the hook needs no edit when they change. Explore and Plan spawns are skipped, since only the styled main conversation reads their reports. A prompt already carrying the block is left alone, and on any read failure the hook stays silent rather than breaking the spawn.
 
-## The default subagent
+## The routed subagents
 
 A subagent spawned with the built-in `general-purpose` type inherits the
 orchestrating session's model and effort, so the same delegated task runs
-on Sonnet at low effort in one session and on Opus at max in another.
-`agents/default-agent.md` pins Opus at medium effort. Claude Code loads it
-from the plugin as `gborges-standard:default-agent`.
+on Sonnet at low effort in one session and on Opus at max in another. The
+four files in `agents/` pin a model and an effort each, and their names say
+which: `sonnet-medium`, `opus-medium`, `opus-xhigh`, and `fable-xhigh`.
+Claude Code loads them as `gborges-standard:<name>`.
 
-The definition alone does not change anything, because Claude reaches for
+The definitions alone change nothing, because Claude reaches for
 `general-purpose` by habit. The style's Subagents section is the routing
-rule: any dispatch that would use `general-purpose` uses
-`gborges-standard:default-agent` instead. Explore, Plan, and the specialist
-types keep their names. The rule is an instruction, not a setting, so a
-session can still ignore it.
+rule. `opus-medium` is the default and the floor for any task that reads
+code to reach a conclusion. `sonnet-medium` takes work a command can check.
+`opus-xhigh` is one escalation step, taken once, after a failed check.
+`fable-xhigh` runs only when the user's own message names
+`@agent-fable-xhigh`, and `inject-writing-rules.py` refuses every other
+dispatch of it. [docs/subagent-routing.md](docs/subagent-routing.md) holds
+the cost reasoning.
+
+`/gborges-standard:setup` writes `~/.claude/gborges-standard.json`, two
+switches per machine. `fable` false makes the hook rewrite `fable-xhigh` to
+`opus-xhigh`. `codex` true tells the session, through one line the
+per-message hook adds, to send fully specified mechanical work to the
+`codex-delegate` skill first.
 
 Claude Code re-reads the agent list on each Agent call, so a running session
-picks the agent up without a restart. The routing rule lives in the output
+picks the agents up without a restart. The routing rule lives in the output
 style, which loads at session start, so a session that was open before the
 plugin updated follows the rule only after a restart.
 
