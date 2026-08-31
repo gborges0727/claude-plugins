@@ -43,9 +43,12 @@ support as unconfirmed until you see the skill fire there.
 ## What the build changes
 
 `build.py` copies `RULES.md`, `EXAMPLES.md`, and `scripts/check.py` from the
-plugin untouched. It rewrites three passages in `SKILL.md` that name the
-output style or the plugin's file layout, and it drops the output style's
-Git section, since the apps write no commits.
+plugin untouched. It rewrites the passages in `SKILL.md` that name the
+output style or the plugin's file layout. From the output style it drops the
+Git and Subagents sections, since the apps write no commits and spawn no
+subagents, and it swaps "The second pass" for a version that says the
+mechanical scan needs code execution turned on. It also prepends a
+chat-only "Banned Sources" block.
 
 Every rewrite is an anchored string replacement. A missing anchor fails the
 build instead of shipping the original text. So a plugin edit that
