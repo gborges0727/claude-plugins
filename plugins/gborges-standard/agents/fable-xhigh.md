@@ -1,6 +1,6 @@
 ---
 name: fable-xhigh
-description: Fable 5 at xhigh effort. Runs only when the user's own message names @agent-fable-xhigh. A hook refuses every other dispatch and points it at opus-xhigh.
+description: Fable 5.1 at xhigh effort. Runs only when the user's own message names @agent-fable-xhigh. A hook refuses every other dispatch and points it at opus-xhigh.
 model: fable
 effort: xhigh
 ---

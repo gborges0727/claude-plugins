@@ -1,7 +1,7 @@
 #!/bin/bash
 # Writes the per-machine config file the gborges-standard hooks read,
 # ~/.claude/gborges-standard.json. Two keys live there. 'fable' says whether
-# this account can run the Claude Fable 5 model. When it is false, a hook
+# this account can run the Claude Fable 5.1 model. When it is false, a hook
 # rewrites the plugin's fable-xhigh subagent to opus-xhigh. 'codex' says
 # whether the Codex CLI is installed and signed in on this machine. When it
 # is true, the orchestrator hands fully specified mechanical work to the
@@ -19,7 +19,7 @@ Write ~/.claude/gborges-standard.json, the config the gborges-standard hooks rea
 
 Usage: setup.sh [--fable on|off] [--codex on|off]
 
-  --fable on|off   This account can run the Claude Fable 5 model. Default on.
+  --fable on|off   This account can run the Claude Fable 5.1 model. Default on.
   --codex on|off   The Codex CLI is available for delegated work. Default off.
   -h, --help       Print this text.
 
@@ -97,7 +97,7 @@ ask() {
 }
 
 if [ -z "$fable" ]; then
-  fable=$(ask fable on 'Can this account run the Claude Fable 5 model? (on/off)') || exit 2
+  fable=$(ask fable on 'Can this account run the Claude Fable 5.1 model? (on/off)') || exit 2
 fi
 if [ -z "$codex" ]; then
   codex=$(ask codex off 'Delegate mechanical work to the Codex CLI? (on/off)') || exit 2

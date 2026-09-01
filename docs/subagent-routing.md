@@ -14,7 +14,7 @@ numbers below are from Anthropic's API pricing and cost guidance as of
 | `sonnet-medium` | Sonnet 5 | medium | An edit or a run whose brief names the exact change and a command that checks it. Parallel copies of one such task across files. Fetching a named doc page outside the codebase |
 | `opus-medium` | Opus 5 | medium | The default. The floor for any task that reads code to reach a conclusion |
 | `opus-xhigh` | Opus 5 | xhigh | A task that failed once below it. A task that is one dependent chain the orchestrator cannot split. The stand-in for Fable on an account without it |
-| `fable-xhigh` | Fable 5 | xhigh | Only when the user's message names `@agent-fable-xhigh` |
+| `fable-xhigh` | Fable 5.1 | xhigh | Only when the user's message names `@agent-fable-xhigh` |
 
 Each name states its model and effort so the orchestrator sees the cost of
 a dispatch in the name it types.
@@ -25,7 +25,7 @@ a dispatch in the name it types.
 |---|---|---|---|
 | Sonnet 5 | 2 | 10 | 40% |
 | Opus 5 | 5 | 25 | 100% |
-| Fable 5 | 10 | 50 | 200% |
+| Fable 5.1 | 10 | 50 | 200% |
 
 Per-token price is an input to the analysis, not the ranking. The ranking
 is cost per finished task, which counts the retry a cheap failure causes

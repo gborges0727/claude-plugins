@@ -11,7 +11,7 @@
 # missing or the two numbers differ. After the merge, paste the new rev into
 # each environment's Setup script field when the change cannot wait out the
 # snapshot expiry.
-# rev: 22
+# rev: 23
 
 set -u
 
@@ -25,7 +25,7 @@ claude plugin marketplace add gborges0727/claude-plugins || true
 
 claude plugin install gborges-standard@gborges --scope user || true
 
-# A cloud VM signs in to an account that usually cannot run Claude Fable 5, so
+# A cloud VM signs in to an account that usually cannot run Claude Fable 5.1, so
 # presetting the config here saves one wasted dispatch. Leave the line
 # commented out unless it earns its keep, because the routing rule already
 # re-sends the brief to opus-xhigh when fable-xhigh fails with a model error.
