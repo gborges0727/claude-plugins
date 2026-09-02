@@ -167,55 +167,26 @@ class OtherSpawns(HookCase):
         self.assertIn("<writing-rules>", block["updatedInput"]["prompt"])
 
 
-class CodexLine(HookCase):
-    def test_no_config_file_reports_codex_off(self):
-        out = self.submit("Hello.")
-        self.assertIn("Codex delegation is off for this machine.", out["hookSpecificOutput"]["additionalContext"])
-
-    def test_codex_true_reports_codex_on(self):
+class NoCodexLine(HookCase):
+    def test_codex_on_prints_no_codex_line(self):
         self.write_config('{"fable": true, "codex": true}')
         out = self.submit("Hello.")
-        self.assertIn("Codex delegation is on for this machine.", out["hookSpecificOutput"]["additionalContext"])
+        self.assertNotIn("Codex delegation", out["hookSpecificOutput"]["additionalContext"])
 
-    def test_a_malformed_config_reports_codex_off(self):
-        self.write_config("{not json")
-        out = self.submit("Hello.")
-        self.assertIn("Codex delegation is off for this machine.", out["hookSpecificOutput"]["additionalContext"])
-
-    def test_the_reminder_line_comes_before_the_codex_line(self):
-        out = self.submit("Hello.")
-        context = out["hookSpecificOutput"]["additionalContext"]
-        lines = [line for line in context.splitlines() if line.strip()]
-        self.assertIn("Plain English reminder: ", lines[0])
-        self.assertEqual(lines[-1], "Codex delegation is off for this machine.")
-
-    def test_the_codex_host_flag_leaves_the_codex_line_out(self):
-        self.write_config('{"fable": true, "codex": true}')
-        done = subprocess.run(
-            [sys.executable, str(REMIND), "--codex-host"],
-            input=json.dumps({"session_id": "s9", "prompt": "Hello."}),
-            capture_output=True, text=True, env={**os.environ, "HOME": str(self.home)},
-        )
-        context = json.loads(done.stdout)["hookSpecificOutput"]["additionalContext"]
-        self.assertNotIn("Codex delegation", context)
-        self.assertIn("Plain English reminder: ", context)
-
-    def test_the_switch_off_still_records_the_mention_and_prints_codex(self):
-        env_home = self.home
+    def test_the_switch_off_prints_nothing_but_records_the_mention(self):
         done = subprocess.run(
             [sys.executable, str(REMIND)],
             input=json.dumps({"session_id": "s3", "prompt": "Use @agent-fable-xhigh."}),
             capture_output=True,
             text=True,
-            env={**os.environ, "HOME": str(env_home), "WRITING_VOICE_REMIND": "0"},
+            env={**os.environ, "HOME": str(self.home), "WRITING_VOICE_REMIND": "0"},
         )
         self.assertEqual(done.returncode, 0, done.stderr)
-        context = json.loads(done.stdout)["hookSpecificOutput"]["additionalContext"]
-        self.assertEqual(context.strip(), "Codex delegation is off for this machine.")
+        self.assertEqual(done.stdout, "")
         out = self.spawn(FABLE, session_id="s3")
         self.assertEqual(out["hookSpecificOutput"]["permissionDecision"], "allow")
 
-    def test_a_non_json_event_still_prints_the_codex_line(self):
+    def test_a_non_json_event_still_prints_the_reminder(self):
         done = subprocess.run(
             [sys.executable, str(REMIND)],
             input="not json at all",
@@ -224,7 +195,8 @@ class CodexLine(HookCase):
             env={**os.environ, "HOME": str(self.home)},
         )
         self.assertEqual(done.returncode, 0, done.stderr)
-        self.assertIn("Codex delegation is off for this machine.", done.stdout)
+        self.assertIn("Plain English reminder: ", done.stdout)
+        self.assertNotIn("Codex delegation", done.stdout)
 
 
 if __name__ == "__main__":

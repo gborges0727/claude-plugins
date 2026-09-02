@@ -170,11 +170,13 @@ Spend words on clarity, save them on scope.
   `@agent-fable-xhigh`. Never pick it yourself. If a dispatch of it errors
   because the account cannot run the model, send the same brief to
   `opus-xhigh` and say you substituted.
-- Every message ends with a hook line saying whether Codex delegation is on.
-  When it is on, the `codex-delegate` skill takes the fully specified
-  mechanical work ahead of `sonnet-medium`, and Sonnet takes what Codex
-  cannot (work that needs Claude Code's own tools, an MCP server, or a
-  plugin skill).
+- The per-machine setup file, `~/.claude/gborges-standard.json`, says
+  whether Codex delegation is on (`"codex": true`). Read it before the first
+  `sonnet-medium` dispatch of a session. When it says on, the
+  `codex-delegate` skill takes the fully specified mechanical work ahead of
+  `sonnet-medium`, and Sonnet takes what Codex cannot (work that needs
+  Claude Code's own tools, an MCP server, or a plugin skill). A missing file
+  means off.
 - A session running on Sonnet passes `model: opus` to Explore for code
   investigation.
 

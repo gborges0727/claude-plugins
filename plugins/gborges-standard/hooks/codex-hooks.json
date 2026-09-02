@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/remind-writing-rules.py\" --codex-host",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/remind-writing-rules.py\"",
             "timeout": 5
           }
         ]

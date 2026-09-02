@@ -2,8 +2,8 @@
 name: codex-delegate
 description: >-
   Delegate a coding subtask to the Codex CLI on GPT-5.6 Luna, spending ChatGPT-plan quota instead
-  of Claude tokens. Use only when the per-message hook line says Codex delegation is on for this
-  machine. Then prefer this over the sonnet-medium subagent whenever the subtask is mechanical and
+  of Claude tokens. Use only when `~/.claude/gborges-standard.json` says `"codex": true` (a missing file means
+  off). Then prefer this over the sonnet-medium subagent whenever the subtask is mechanical and
   already fully specified: boilerplate, a repeated edit across many files, tests against an
   interface you can paste in, or a second-model opinion. Also use when the user says to delegate,
   hand off, or use Codex, and when continuing a Codex thread already started.

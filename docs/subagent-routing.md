@@ -176,7 +176,6 @@ thinking and again as the reply.
 
 `hooks/remind-writing-rules.py` runs on every user message. It records
 whether the message named `@agent-fable-xhigh` in a per-session state file
-under `~/.claude/gborges-standard/state/`, and adds one line saying whether
-Codex delegation is on.
+under `~/.claude/gborges-standard/state/`.
 
 `tests/test_hooks.py` covers both hooks and runs in CI.

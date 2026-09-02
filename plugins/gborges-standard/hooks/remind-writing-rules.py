@@ -104,12 +104,6 @@ def main():
         if line:
             lines.append(PREFIX + line)
 
-    # A Codex session is already Codex, so the line that steers Claude toward
-    # the codex-delegate skill has nothing to say there. codex-hooks.json
-    # passes --codex-host to leave it out.
-    if "--codex-host" not in sys.argv:
-        state = "on" if plugin_config.load()["codex"] else "off"
-        lines.append(f"Codex delegation is {state} for this machine.")
     if not lines:
         return
 
