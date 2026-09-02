@@ -21,9 +21,16 @@ reports it back. The record is one file per session under
 UserPromptSubmit hook rewrites it on every message, so it always describes
 the latest message and never an earlier one. A session with no file counts
 as no mention.
+
+A second record of the same shape says whether the latest message asked
+for a fork. fork_from_prompt() looks for the word "fork" in the message,
+write_fork() records the answer, and read_fork() reports it back. The
+spawn hook uses it to let a fork through on a Fable session when the user
+asked for one.
 """
 
 import json
+import re
 from pathlib import Path
 
 CONFIG = ".claude/gborges-standard.json"
@@ -68,33 +75,61 @@ def mention_from_prompt(prompt):
     return any(form in prompt for form in MENTIONS)
 
 
-def _record_path(session_id):
+FORK_WORD = re.compile(r"\bfork\b", re.IGNORECASE)
+
+
+def fork_from_prompt(prompt):
+    """Say whether this message text asks for a fork."""
+    if not isinstance(prompt, str):
+        return False
+    return FORK_WORD.search(prompt) is not None
+
+
+def _record_path(session_id, kind="fable-mention"):
     # A session id reaches this hook from outside, so strip anything that
     # would climb out of the state folder or name a file elsewhere.
     safe = "".join(c for c in str(session_id) if c.isalnum() or c in "-_")
     if not safe:
         return None
-    return Path.home() / STATE / f"fable-mention-{safe}"
+    return Path.home() / STATE / f"{kind}-{safe}"
 
 
-def write_mention(session_id, mentioned):
-    """Record for this session whether the latest message named Fable."""
-    path = _record_path(session_id)
+def _write_record(session_id, value, kind):
+    path = _record_path(session_id, kind)
     if path is None:
         return
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text("1" if mentioned else "0", encoding="utf-8")
+        path.write_text("1" if value else "0", encoding="utf-8")
     except OSError:
         pass
 
 
-def read_mention(session_id):
-    """Report whether this session's latest message named Fable."""
-    path = _record_path(session_id)
+def _read_record(session_id, kind):
+    path = _record_path(session_id, kind)
     if path is None:
         return False
     try:
         return path.read_text(encoding="utf-8").strip() == "1"
     except OSError:
         return False
+
+
+def write_mention(session_id, mentioned):
+    """Record for this session whether the latest message named Fable."""
+    _write_record(session_id, mentioned, "fable-mention")
+
+
+def read_mention(session_id):
+    """Report whether this session's latest message named Fable."""
+    return _read_record(session_id, "fable-mention")
+
+
+def write_fork(session_id, asked):
+    """Record for this session whether the latest message asked for a fork."""
+    _write_record(session_id, asked, "fork-request")
+
+
+def read_fork(session_id):
+    """Report whether this session's latest message asked for a fork."""
+    return _read_record(session_id, "fork-request")

@@ -165,17 +165,28 @@ can call.
 
 ## The hooks
 
-`hooks/inject-writing-rules.py` runs before every Agent dispatch. It
-refuses a `fable-xhigh` dispatch unless the latest user message named the
-agent, with a reason that points the orchestrator at `opus-xhigh`. When
-the setup file says Fable is off, it rewrites the dispatch to `opus-xhigh`
-instead. It then appends the writing rules as before, and on a spawn that
-does go to Fable it also appends Anthropic's long-output note, which tells
-Fable at xhigh to write a long deliverable once instead of drafting it in
-thinking and again as the reply.
+`hooks/route-spawns.py` runs before every Agent dispatch, including the
+ones a skill or a forked agent makes. It rewrites an unpinned type
+(`general-purpose`, `claude`, `default-agent`, or none) to `opus-medium`,
+so a built-in skill's spawns land on the default instead of the session's
+model. It refuses a `fork` on a Fable session, since a fork copies the
+whole transcript onto the session's model, with a reason that tells the
+orchestrator to send the task to `opus-medium` with a brief. The fork
+passes on any other session, and on Fable when the user's latest message
+used the word fork or the session's model cannot be read from the
+transcript.
+
+The same hook refuses a `fable-xhigh` dispatch
+unless the latest user message named the agent, with a reason that points
+the orchestrator at `opus-xhigh`. When the setup file says Fable is off,
+it rewrites the dispatch to `opus-xhigh` instead. It then appends the
+writing rules, and on a spawn that does go to Fable it also appends
+Anthropic's long-output note, which tells Fable at xhigh to write a long
+deliverable once instead of drafting it in thinking and again as the reply.
 
 `hooks/remind-writing-rules.py` runs on every user message. It records
-whether the message named `@agent-fable-xhigh` in a per-session state file
-under `~/.claude/gborges-standard/state/`.
+whether the message named `@agent-fable-xhigh`, and whether it used the
+word fork, in two per-session state files under
+`~/.claude/gborges-standard/state/`.
 
 `tests/test_hooks.py` covers both hooks and runs in CI.

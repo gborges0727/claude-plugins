@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/inject-writing-rules.py\" --subagent-start",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/route-spawns.py\" --subagent-start",
             "timeout": 5
           }
         ]

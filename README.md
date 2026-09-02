@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 26
+# rev: 27
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -62,7 +62,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `plain-english.md` | Output style | Forced on whenever the plugin is enabled (`force-for-plugin`). Register, git, plan, and file-edit rules in the system prompt of every session. The file-edit rule is Anthropic's answer to Fable 5.1 rewriting a whole file for a small change |
 | `strip-attribution.py` | `PreToolUse` hook | Removes AI-attribution footers from GitHub writes. Enforces the style's ban mechanically |
 | `flag-server-attribution.py` | `PostToolUse` hook | Tells the session to delete the footer the GitHub server adds to a new PR body, which the `PreToolUse` hook cannot reach |
-| `inject-writing-rules.py` | `PreToolUse` hook | Appends the style's rules to every subagent prompt, since the output style never reaches a subagent. Refuses a `fable-xhigh` dispatch the user did not summon, and rewrites it to `opus-xhigh` when `~/.claude/gborges-standard.json` says the account cannot run Fable. Appends Anthropic's long-output note to a `fable-xhigh` prompt, so Fable writes a long deliverable once instead of drafting it in thinking and again as the reply |
+| `route-spawns.py` | `PreToolUse` hook | Decides which agent every spawn runs on, then appends the style's rules to its prompt, since the output style never reaches a subagent. Rewrites an unpinned type (`general-purpose`, `claude`, `default-agent`, or none) to `opus-medium`. Refuses a `fork` on a Fable session, since a fork copies the whole transcript onto the session's model, unless the user's latest message asked for one. Refuses a `fable-xhigh` dispatch the user did not summon, and rewrites it to `opus-xhigh` when `~/.claude/gborges-standard.json` says the account cannot run Fable. Appends Anthropic's long-output note to a `fable-xhigh` prompt, so Fable writes a long deliverable once instead of drafting it in thinking and again as the reply |
 | `remind-writing-rules.py` | `UserPromptSubmit` hook | Returns the style's Reminder paragraph as context with every user message, so the rules sit next to the reply being written. Records whether the message named `@agent-fable-xhigh` |
 | `writing-voice` | Skill | Two-pass ritual for every artifact (a file, a PR body, a commit message, a comment), whatever its length. The style alone shapes chat replies |
 | `read-aloud-prep` | Skill | Rewriting documents so a TTS voice reads them cleanly |
@@ -122,7 +122,7 @@ own, and a file at it would fire twice.
 | `strip-attribution.py` | Yes | Codex passes the same `tool_name` and `tool_input` fields and accepts the same `updatedInput` reply |
 | `flag-server-attribution.py` | Yes | Same `PostToolUse` contract |
 | `remind-writing-rules.py` | Yes | Same `UserPromptSubmit` contract |
-| `inject-writing-rules.py` | Yes, on a different event | Codex spawns subagents through a tool no `Agent` matcher catches, and fires `SubagentStart`. `--subagent-start` answers that event with the same rules block as context |
+| `route-spawns.py` | Yes, on a different event | Codex spawns subagents through a tool no `Agent` matcher catches, and fires `SubagentStart`. `--subagent-start` answers that event with the same rules block as context |
 | `add-to-git` | No | A Claude command. Codex loads skills, not commands |
 | The four agents | No | Claude Code agents. `codex-session-style.py` drops the style's Subagents section so Codex never gets sent to a name it cannot resolve |
 | The three dependencies | No | `frontend-design`, `mattpocock-skills`, and `context7` live in a Claude marketplace that Codex cannot install from |
@@ -161,11 +161,19 @@ It reads the body out of the tool response and stays silent when that body is cl
 
 The comment and review write tools are left out. The GitHub MCP server offers no update tool for a posted comment, so there is no call to send the session to.
 
-## Subagent rules injection
+## Spawn routing and rules injection
 
-The output style never reaches a spawned subagent, which runs its own system prompt. A CLAUDE.md pointer does not help, because a pointer names a style the subagent cannot load. So a subagent writing a PR body or a commit message ships unstyled prose.
+A second `PreToolUse` hook, `route-spawns.py`, runs before every Agent call (Task in older versions), including the calls a skill or a forked agent makes. It decides which agent the spawn runs on, then appends the writing rules to the spawn's prompt.
 
-A second `PreToolUse` hook closes the gap. It matches the Agent tool (Task in older versions) and rewrites the spawn call, appending the style's Sentences, The reader is new to this, Punctuation, Git, and File edits sections plus the writing-voice ritual to the subagent's prompt. The block is read from the installed plain-english.md at run time, so the rules keep one source and the hook needs no edit when they change. Explore and Plan spawns are skipped, since only the styled main conversation reads their reports. A prompt already carrying the block is left alone, and on any read failure the hook stays silent rather than breaking the spawn.
+The routing part exists because a spawn that names `general-purpose`, `claude`, `default-agent`, or no type at all inherits the session's model and effort. The style tells Claude to use the plugin's pinned agents, but a built-in skill's procedure names the built-in types, so its spawns slipped through on the session's model. The hook rewrites those types to `opus-medium` and lets the spawn through. Pinned types, Explore, Plan, and any other named type pass as they are.
+
+A `fork` is handled by the session's model instead. A fork copies the whole transcript into a second agent on the session's model, and a fork with a different type is no longer a fork. On an Opus or Sonnet session the fork passes untouched, since it already runs on a model the style would pick. On a Fable session the hook refuses it, and the refusal's reason tells the session to send the same task to `opus-medium` with a brief. The built-in `code-review` skill forks its reviewer, so this is what moves that reviewer onto Opus while the skill stays usable.
+
+A fork still passes on Fable when the user's latest message used the word fork. It also passes when the hook cannot read the session's model from the transcript file the event names.
+
+The rules part exists because the output style never reaches a spawned subagent, which runs its own system prompt. A CLAUDE.md pointer does not help, because a pointer names a style the subagent cannot load. So a subagent writing a PR body or a commit message would ship unstyled prose.
+
+The hook rewrites the spawn call, appending the style's Sentences, The reader is new to this, Punctuation, Git, and File edits sections plus the writing-voice ritual to the subagent's prompt. The block is read from the installed plain-english.md at run time, so the rules keep one source and the hook needs no edit when they change. Explore and Plan spawns are skipped, since only the styled main conversation reads their reports. A prompt already carrying the block is left alone, and on any read failure the hook stays silent rather than breaking the spawn.
 
 A `fable-xhigh` dispatch gets one more paragraph after the rules. At xhigh effort Fable can draft a long deliverable in its thinking and then write it out again as the reply, which doubles the turn's output. Anthropic's Fable 5.1 prompting guide gives a note that stops that, and the hook appends it to a Fable dispatch's prompt only, since no other agent needs it.
 
@@ -184,7 +192,7 @@ rule. `opus-medium` is the default and the floor for any task that reads
 code to reach a conclusion. `sonnet-medium` takes work a command can check.
 `opus-xhigh` is one escalation step, taken once, after a failed check.
 `fable-xhigh` runs only when the user's own message names
-`@agent-fable-xhigh`, and `inject-writing-rules.py` refuses every other
+`@agent-fable-xhigh`, and `route-spawns.py` refuses every other
 dispatch of it. [docs/subagent-routing.md](docs/subagent-routing.md) holds
 the cost reasoning.
 

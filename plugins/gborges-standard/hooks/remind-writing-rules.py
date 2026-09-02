@@ -22,8 +22,10 @@ habit it polices, so no scan output and no violation content belongs here.
 The hook does two more jobs on the same event. It records whether this
 message names the Fable agent, writing 1 or 0 to a per-session file under
 ~/.claude/gborges-standard/state. Every message rewrites that file, so it
-always describes the latest message. inject-writing-rules.py reads the
-record and denies a Fable spawn the user never asked for.
+always describes the latest message. route-spawns.py reads the
+record and denies a Fable spawn the user never asked for. A second record
+of the same shape says whether the message used the word "fork", which
+lets a fork through on a Fable session when the user asked for one.
 
 It also appends one sentence saying whether this machine may hand coding
 subtasks to the Codex CLI. The "codex" key in ~/.claude/gborges-standard.json
@@ -64,6 +66,14 @@ except ImportError:
         def write_mention(session_id, mentioned):
             return None
 
+        @staticmethod
+        def fork_from_prompt(prompt):
+            return False
+
+        @staticmethod
+        def write_fork(session_id, asked):
+            return None
+
 STYLE = Path(__file__).resolve().parent.parent / "output-styles" / "plain-english.md"
 
 SECTION = re.compile(r"^## Reminder\s*\n(.*?)(?=^#|\Z)", re.MULTILINE | re.DOTALL)
@@ -93,6 +103,10 @@ def main():
     plugin_config.write_mention(
         event.get("session_id"),
         plugin_config.mention_from_prompt(event.get("prompt")),
+    )
+    plugin_config.write_fork(
+        event.get("session_id"),
+        plugin_config.fork_from_prompt(event.get("prompt")),
     )
 
     lines = []

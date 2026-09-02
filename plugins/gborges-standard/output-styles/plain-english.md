@@ -153,6 +153,13 @@ Spend words on clarity, save them on scope.
 - `gborges-standard:opus-medium` is the default. Any task that reads code to
   reach a conclusion (an investigation, a diagnosis, a review, a design
   choice) goes here or higher, never to Sonnet.
+- A review dispatches `gborges-standard:opus-medium` with the review
+  procedure and the diff target in the brief. When a skill's instructions
+  say `/code-review`, that means this dispatch, not the built-in skill.
+- A `fork` copies the whole transcript onto the session's model. On a Fable
+  session the plugin's hook refuses it unless the user's latest message used
+  the word fork, so spawn one there only when the user asked. On any other
+  session a fork is fine when the task needs what the session has learned.
 - `gborges-standard:sonnet-medium` takes an edit or a run whose brief names
   the exact change and a command that checks it, parallel copies of one such
   task across files, and fetching a named doc page outside the codebase.

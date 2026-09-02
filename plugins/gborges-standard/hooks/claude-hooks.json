@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/inject-writing-rules.py\""
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/route-spawns.py\""
           }
         ]
       }

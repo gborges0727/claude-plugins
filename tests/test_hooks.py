@@ -17,11 +17,12 @@ import unittest
 from pathlib import Path
 
 HOOKS = Path(__file__).resolve().parent.parent / "plugins" / "gborges-standard" / "hooks"
-INJECT = HOOKS / "inject-writing-rules.py"
+ROUTE = HOOKS / "route-spawns.py"
 REMIND = HOOKS / "remind-writing-rules.py"
 
 FABLE = "gborges-standard:fable-xhigh"
 OPUS = "gborges-standard:opus-xhigh"
+OPUS_MEDIUM = "gborges-standard:opus-medium"
 
 # A phrase from the long-output note that only a Fable spawn receives.
 LONG_OUTPUT = "as reasoning and then again as a reply"
@@ -63,16 +64,28 @@ class HookCase(unittest.TestCase):
             self.home,
         )
 
-    def spawn(self, subagent_type, session_id="s1", prompt="Do the work."):
-        return run_hook(
-            INJECT,
-            {
-                "session_id": session_id,
-                "tool_name": "Agent",
-                "tool_input": {"subagent_type": subagent_type, "prompt": prompt},
-            },
-            self.home,
-        )
+    def spawn(self, subagent_type, session_id="s1", prompt="Do the work.", transcript=None):
+        event = {
+            "session_id": session_id,
+            "tool_name": "Agent",
+            "tool_input": {"subagent_type": subagent_type, "prompt": prompt},
+        }
+        if transcript is not None:
+            event["transcript_path"] = str(transcript)
+        return run_hook(ROUTE, event, self.home)
+
+    def write_transcript(self, model, name="t.jsonl"):
+        """Write a transcript whose newest reply came from the given model."""
+        path = self.home / name
+        lines = [
+            json.dumps({"type": "user", "message": {"role": "user", "content": "hi"}}),
+            json.dumps({"type": "assistant", "message": {"model": "claude-sonnet-5", "content": []}}),
+            json.dumps({"type": "user", "message": {"role": "user", "content": "more"}}),
+            json.dumps({"type": "assistant", "message": {"model": model, "content": []}}),
+            json.dumps({"type": "user", "message": {"role": "user", "content": "go"}}),
+        ]
+        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        return path
 
 
 class FableMentionRule(HookCase):
@@ -156,6 +169,94 @@ class OtherSpawns(HookCase):
 
     def test_an_explore_spawn_produces_no_output(self):
         self.assertIsNone(self.spawn("Explore"))
+
+    def test_a_named_specialist_keeps_its_type(self):
+        block = self.spawn("claude-code-guide")["hookSpecificOutput"]
+        self.assertEqual(block["updatedInput"]["subagent_type"], "claude-code-guide")
+
+
+class UnpinnedSpawns(HookCase):
+    def test_general_purpose_is_rewritten_to_opus_medium(self):
+        block = self.spawn("general-purpose")["hookSpecificOutput"]
+        self.assertEqual(block["permissionDecision"], "allow")
+        self.assertEqual(block["updatedInput"]["subagent_type"], OPUS_MEDIUM)
+        self.assertIn("<writing-rules>", block["updatedInput"]["prompt"])
+        self.assertIn(OPUS_MEDIUM, block["permissionDecisionReason"])
+
+    def test_every_unpinned_name_is_rewritten(self):
+        for name in ("claude", "default-agent", "gborges-standard:default-agent", ""):
+            with self.subTest(name=name):
+                block = self.spawn(name)["hookSpecificOutput"]
+                self.assertEqual(block["updatedInput"]["subagent_type"], OPUS_MEDIUM)
+
+    def test_a_missing_type_is_rewritten(self):
+        out = run_hook(
+            ROUTE,
+            {"session_id": "s1", "tool_name": "Agent", "tool_input": {"prompt": "Do the work."}},
+            self.home,
+        )
+        self.assertEqual(out["hookSpecificOutput"]["updatedInput"]["subagent_type"], OPUS_MEDIUM)
+
+    def test_an_unpinned_spawn_with_an_empty_prompt_is_still_rewritten(self):
+        block = self.spawn("general-purpose", prompt="")["hookSpecificOutput"]
+        self.assertEqual(block["updatedInput"]["subagent_type"], OPUS_MEDIUM)
+        self.assertEqual(block["updatedInput"]["prompt"], "")
+
+
+class ForkSpawns(HookCase):
+    def test_a_fork_on_a_fable_session_is_denied_and_pointed_at_opus_medium(self):
+        transcript = self.write_transcript("claude-fable-5-1")
+        block = self.spawn("fork", transcript=transcript)["hookSpecificOutput"]
+        self.assertEqual(block["permissionDecision"], "deny")
+        self.assertIn(OPUS_MEDIUM, block["permissionDecisionReason"])
+        self.assertNotIn("updatedInput", block)
+
+    def test_a_fork_on_an_opus_session_passes_untouched(self):
+        transcript = self.write_transcript("claude-opus-5")
+        self.assertIsNone(self.spawn("fork", transcript=transcript))
+
+    def test_the_newest_reply_decides_the_model(self):
+        # The transcript's earlier reply is Sonnet; only the newest one counts.
+        transcript = self.write_transcript("claude-fable-5-1")
+        self.assertEqual(
+            self.spawn("fork", transcript=transcript)["hookSpecificOutput"]["permissionDecision"],
+            "deny",
+        )
+
+    def test_a_fork_on_fable_passes_when_the_message_asked_for_one(self):
+        transcript = self.write_transcript("claude-fable-5-1")
+        self.submit("Fork this and try the other approach.")
+        self.assertIsNone(self.spawn("fork", transcript=transcript))
+
+    def test_a_later_message_without_the_word_locks_forks_again(self):
+        transcript = self.write_transcript("claude-fable-5-1")
+        self.submit("Fork this.")
+        self.submit("Now review it.")
+        self.assertEqual(
+            self.spawn("fork", transcript=transcript)["hookSpecificOutput"]["permissionDecision"],
+            "deny",
+        )
+
+    def test_a_fork_request_does_not_unlock_fable(self):
+        self.submit("Fork this.")
+        self.assertEqual(self.spawn(FABLE)["hookSpecificOutput"]["permissionDecision"], "deny")
+
+    def test_a_fork_passes_when_the_session_model_is_unknown(self):
+        self.assertIsNone(self.spawn("fork"))
+        self.assertIsNone(self.spawn("fork", transcript=self.home / "missing.jsonl"))
+        empty = self.home / "empty.jsonl"
+        empty.write_text("", encoding="utf-8")
+        self.assertIsNone(self.spawn("fork", transcript=empty))
+
+    def test_a_long_transcript_is_read_from_the_tail(self):
+        transcript = self.home / "long.jsonl"
+        filler = json.dumps({"type": "user", "message": {"content": "x" * 300_000}})
+        newest = json.dumps({"type": "assistant", "message": {"model": "claude-fable-5-1", "content": []}})
+        transcript.write_text(filler + "\n" + newest + "\n" + filler + "\n", encoding="utf-8")
+        self.assertEqual(
+            self.spawn("fork", transcript=transcript)["hookSpecificOutput"]["permissionDecision"],
+            "deny",
+        )
 
     def test_a_malformed_config_leaves_a_mentioned_fable_spawn_on_fable(self):
         self.write_config("{not json")
