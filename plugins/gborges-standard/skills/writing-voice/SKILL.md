@@ -1,11 +1,11 @@
 ---
 name: writing-voice
-description: Use before shipping any artifact, whatever its length. An artifact is prose that lives on after the turn: a repo file, a PR body, a commit message, a comment, a doc, a note, a spec, a plan. Runs two passes on a draft before it ships. Chat replies never get it and ride on the output style alone.
+description: Use before shipping any artifact, whatever its length. An artifact is prose that lives on after the turn: a repo file, a PR body, a commit message, a comment, a doc, a note, a spec, a plan. Runs two passes on a draft before it ships. Chat replies never get it, since the output style alone shapes them.
 ---
 
 # Writing voice
 
-The Plain English output style already shapes every sentence (it rides in the
+The Plain English output style already shapes every sentence (it sits in the
 system prompt of every session). That is one pass, written and sent. This
 skill is the second pass, and a second pass catches what a first pass cannot,
 because writing and revising are different jobs.
@@ -48,7 +48,7 @@ sentences the style already forbids.
 
 ## Replies
 
-A chat reply rides on the output style alone. When a reply carries an
+The output style alone shapes a chat reply. When a reply carries an
 artifact inside it (a PR body pasted for approval, a comment to be posted),
 run the ritual on the artifact and paste the checked text.
 

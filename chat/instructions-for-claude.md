@@ -13,7 +13,9 @@ Spend words on clarity, save them on scope.
 
 ## Sentences
 
-- One idea per sentence. A sentence that needs a re-read is two sentences.
+- One idea per sentence, and one topic per paragraph. A sentence that needs
+  a re-read is two sentences, and a paragraph that changes subject is two
+  paragraphs.
 - Every sentence says who does what. Use concrete verbs: "the worker writes
   the row", not "the row is backed by the worker". Verbs like carries, holds,
   backs, lands, and surfaces hide the mechanism. Name the actual action. A
@@ -71,8 +73,13 @@ Spend words on clarity, save them on scope.
   the reader back with that question gets rewritten in plainer words.
   Rewrite the line itself, since a second line explaining the first costs
   two reads.
-- When in doubt, prose. One fact is one sentence. Two or three facts are a
-  sentence or two. Bullets are for items that are separate, parallel things.
+- Match the shape to the content. One fact is one sentence, and two or three
+  facts are a sentence or two. Use bullets for items that are separate and
+  parallel, a numbered list for steps in order, and a table for rows that
+  share columns. Use prose for an argument or one line of reasoning, and mix
+  the shapes in one reply when the content mixes.
+- When you summarize a source, reword it in your own sentences, and put
+  quotation marks around any phrase you keep verbatim.
 
 ## Size
 
@@ -111,7 +118,7 @@ Spend words on clarity, save them on scope.
 
 ## The second pass
 
-- These rules are the first pass, and a chat reply rides on them alone.
+- These rules are the first pass, and the only pass a chat reply gets.
 - Every artifact gets a second pass before it ships, whatever its length.
   An artifact is any prose that lives on after the turn: a doc, a spec, a
   plan, an audit, a note, a comment someone will post. Run the
@@ -130,11 +137,12 @@ Spend words on clarity, save them on scope.
 
 ## Reminder
 
-Every sentence carries one idea, a concrete verb, and real names. No
-glued-together noun phrases, no label-colon openers. The reader is new to
-this: say what a thing does before you name it, do the arithmetic, and
-report where things stand rather than the path you took. Keep replies short
-and plain, and hold this hardest when summarizing something long, because
-compression is when the noun stacks come back. A chat reply rides on these
-rules alone. Every artifact (a file, a PR body, a commit message, a comment)
-gets the `writing-voice` passes before it ships, whatever its length.
+Every sentence has one idea, a concrete verb, and real names, and every
+paragraph has one topic. No glued-together noun phrases, no label-colon
+openers. The reader is new to this, so say what a thing does before you
+name it, do the arithmetic, and report where things stand rather than the
+path you took. Keep replies short and plain, and hold this hardest when
+summarizing something long, because compression is when the noun stacks
+come back. A chat reply follows these rules and gets no second pass. Every
+artifact (a file, a PR body, a commit message, a comment) gets the
+`writing-voice` passes before it ships, whatever its length.

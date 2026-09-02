@@ -3,7 +3,8 @@
 
 Reads one or more files, or stdin when given no paths, and prints every banned
 string with the rule number it breaks, plus an advisory on every sentence over
-30 words (rule 4, overpacked). Quoted and code text is masked before scanning:
+30 words and every paragraph over 120 words (rule 4, overpacked). Quoted and
+code text is masked before scanning:
 fenced blocks, indented blocks, inline code spans, blockquote lines, table
 rows, and URLs. That mirrors the "when the rules don't apply" section of
 RULES.md, where the passes run on your own prose only.
@@ -268,6 +269,12 @@ TABLE_ROW = re.compile(r"^\s*\|")
 
 # Rule 4 advisory: a sentence this long is a re-read risk, not a verdict.
 LONG_SENTENCE_WORDS = 30
+# Rule 4, one level up: a paragraph this long usually changed subject on the
+# way. A heading ends a paragraph and is not counted. A list item starts its
+# own paragraph, so a long list is never read as one block.
+LONG_PARAGRAPH_WORDS = 120
+HEADING = re.compile(r"^\s*#")
+LIST_ITEM = re.compile(r"^\s*(?:[-*+]|\d+[.)])\s+")
 SENTENCE = re.compile(r"[^.!?]+(?:[.!?]+|$)")
 INLINE_CODE = re.compile(r"`[^`\n]*`")
 URL = re.compile(r"<?\bhttps?://\S+>?")
@@ -292,6 +299,39 @@ def mask(text: str) -> str:
             masked = pattern.sub(lambda m: " " * len(m.group(0)), masked)
         out.append(masked)
     return "\n".join(out)
+
+
+def paragraph_hits(masked: str) -> list[tuple[int, int, int, str, str]]:
+    """Report every paragraph over LONG_PARAGRAPH_WORDS, at its first line."""
+    found: list[tuple[int, int, int, str, str]] = []
+    start = 0
+    words: list[str] = []
+
+    def flush() -> None:
+        if start and len(words) > LONG_PARAGRAPH_WORDS:
+            head = " ".join(words[:6])
+            found.append((
+                start,
+                1,
+                4,
+                "overpacked paragraph",
+                f"{len(words)} words: {head}...",
+            ))
+
+    for line_no, line in enumerate(masked.split("\n"), 1):
+        if not line.strip() or HEADING.match(line):
+            flush()
+            start, words = 0, []
+            continue
+        if LIST_ITEM.match(line):
+            flush()
+            start, words = line_no, []
+            line = LIST_ITEM.sub("", line)
+        elif not start:
+            start = line_no
+        words.extend(line.split())
+    flush()
+    return found
 
 
 def scan(text: str, source: str) -> list[str]:
@@ -329,6 +369,7 @@ def scan(text: str, source: str) -> list[str]:
                     f"{len(words)} words: {head}...",
                 ))
 
+    hits.extend(paragraph_hits(masked))
     hits.sort()
     return [
         f"{source}:{line}:{col}  rule {rule:<2} {label}  ({found!r})"

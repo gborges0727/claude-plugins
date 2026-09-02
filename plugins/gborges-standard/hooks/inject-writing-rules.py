@@ -33,6 +33,14 @@ Some machines have no Fable access at all. The "fable" key in
 When the user named Fable but the key is false, the hook rewrites
 subagent_type to gborges-standard:opus-xhigh and lets the spawn through.
 The writing rules still get appended to the rewritten spawn.
+
+A spawn that does go to Fable gets one more paragraph after the rules. At
+xhigh effort Fable can draft a long deliverable in its thinking and then
+write it out again as the reply, which doubles the turn's output.
+Anthropic's Fable 5.1 prompting guide gives a note that stops that, and this
+hook appends it to a Fable spawn's prompt only. The guide's wording names
+the request's max_tokens, which a Claude Code subagent never sees, so that
+sentence is left out.
 """
 
 import json
@@ -84,6 +92,15 @@ SUBSTITUTE_REASON = (
     "gborges-standard:opus-xhigh. Appended the writing rules to the "
     "subagent prompt."
 )
+
+LONG_OUTPUT = """Everything you produce in one reply, including any reasoning or drafting
+before the reply, counts toward one output limit. Composing an entire
+deliverable in full as reasoning and then again as a reply would double the
+length of the turn without improving the result, so don't do that. When the
+brief asks for a long deliverable, such as a multi-section document, a large
+table, or a complete code file, spend the reasoning on understanding the
+request, checking the inputs the answer depends on, and settling the
+structure, and write the deliverable once, in the output."""
 
 CODA = """Before shipping any artifact (a PR body, a commit message, a comment, a
 doc, an audit, a spec, a plan), whatever its length, draft it to a file and
@@ -151,6 +168,7 @@ def main():
 
     reason = "Appended the writing rules to the subagent prompt"
     substitute = False
+    fable_note = False
 
     if tool_input.get("subagent_type") in FABLE_TYPES:
         if not plugin_config.read_mention(event.get("session_id")):
@@ -168,6 +186,9 @@ def main():
         if not plugin_config.load()["fable"]:
             substitute = True
             reason = SUBSTITUTE_REASON
+        else:
+            fable_note = True
+            reason = "Appended the writing rules and the long-output note to the subagent prompt"
 
     prompt = tool_input.get("prompt")
     block = rules_block()
@@ -183,6 +204,8 @@ def main():
     updated = dict(tool_input)
     if injectable:
         updated["prompt"] = f"{prompt.rstrip()}\n\n{block}"
+        if fable_note:
+            updated["prompt"] += f"\n\n{LONG_OUTPUT}"
     if substitute:
         updated["subagent_type"] = FALLBACK_TYPE
 

@@ -23,6 +23,9 @@ REMIND = HOOKS / "remind-writing-rules.py"
 FABLE = "gborges-standard:fable-xhigh"
 OPUS = "gborges-standard:opus-xhigh"
 
+# A phrase from the long-output note that only a Fable spawn receives.
+LONG_OUTPUT = "as reasoning and then again as a reply"
+
 
 def run_hook(script, event, home):
     """Run one hook on one event and return its parsed stdout, or None."""
@@ -91,6 +94,12 @@ class FableMentionRule(HookCase):
         self.assertEqual(block["updatedInput"]["subagent_type"], FABLE)
         self.assertIn("<writing-rules>", block["updatedInput"]["prompt"])
 
+    def test_a_fable_spawn_gets_the_long_output_note_after_the_rules(self):
+        self.submit("Please use @agent-fable-xhigh for this.")
+        prompt = self.spawn(FABLE)["hookSpecificOutput"]["updatedInput"]["prompt"]
+        self.assertIn(LONG_OUTPUT, prompt)
+        self.assertLess(prompt.index("</writing-rules>"), prompt.index(LONG_OUTPUT))
+
     def test_quoted_mention_form_also_unlocks_fable(self):
         self.submit('Hand it to @"fable-xhigh (agent)" now.')
         out = self.spawn(FABLE)
@@ -122,6 +131,7 @@ class FableTurnedOff(HookCase):
         self.assertEqual(block["permissionDecision"], "allow")
         self.assertEqual(block["updatedInput"]["subagent_type"], OPUS)
         self.assertIn("<writing-rules>", block["updatedInput"]["prompt"])
+        self.assertNotIn(LONG_OUTPUT, block["updatedInput"]["prompt"])
         self.assertIn(OPUS, block["permissionDecisionReason"])
 
     def test_an_unmentioned_fable_spawn_is_still_denied_when_fable_is_off(self):
@@ -137,6 +147,7 @@ class OtherSpawns(HookCase):
         self.assertEqual(block["permissionDecision"], "allow")
         self.assertEqual(block["updatedInput"]["subagent_type"], "gborges-standard:opus-medium")
         self.assertIn("<writing-rules>", block["updatedInput"]["prompt"])
+        self.assertNotIn(LONG_OUTPUT, block["updatedInput"]["prompt"])
 
     def test_an_explore_spawn_produces_no_output(self):
         self.assertIsNone(self.spawn("Explore"))

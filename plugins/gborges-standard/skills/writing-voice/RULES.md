@@ -59,7 +59,9 @@ is the worst of both.
 words costs three re-reads. Split it. The test: a sentence you would re-read
 is two sentences. check.py flags sentences over 30 words as advisory
 re-read risks; the count is a smell, not a verdict, and a plain 32-word
-sentence with one idea can stay.
+sentence with one idea can stay. A paragraph has one topic the same way. A
+paragraph that changes subject is two paragraphs, and check.py flags
+paragraphs over 120 words as the same kind of advisory.
 
 **5. State findings as full claims.** A fragment verdict ("The diagnosis
 holds.", "One reframe.", "None.") postures instead of informing. A verdict
@@ -230,22 +232,27 @@ thing is meant. Plain words keep numbers exact: names, times, counts, and
 errors stay as they are. The reply also stands alone. Do the arithmetic and
 give the number. Write the real date and clock time. Say what a file says
 instead of pointing at it: "`coupon.js` treats flat amounts as USD", not
-"see `coupon.js`". Every line then passes the "what does that mean" test.
+"see `coupon.js`". When you summarize a source, reword it in your own
+sentences and put quotation marks around any phrase you keep verbatim, so
+the reader can tell your words from the source's. Every line then passes
+the "what does that mean" test.
 A line that would send the reader back with that question gets rewritten in
 plainer words, in place, since a second line explaining the first costs two
 reads. Carve-out: a name the reader used in their own message is already
 loaded, and repeats plainly. A document that defines a term at first use
 under rule 1 has met this rule for that term.
 
-**16. Report where things stand, and shape by fact count.** The reader
+**16. Report where things stand, and match the shape to the content.** The reader
 wants the state of the work now. The path there (what you looked at first,
 what you ruled out, what failed on the way, which files you opened,
 anything the reader already told you) stays out unless they asked for it. A
 diagnosis is state, not path: what broke and why belongs next to the fix.
-Shape follows the fact count. One fact is one sentence. Two or three facts
-are a sentence or two. Bullets hold items that are separate, parallel
-things, and a numbered list holds steps in order. When in doubt, prose. A
-point you would drop the moment the reader pushed back gets dropped now.
+Match the shape to the content. One fact is one sentence. Two or three
+facts are a sentence or two. Use bullets for items that are separate and
+parallel, a numbered list for steps in order, and a table for rows that
+share columns. Use prose for an argument or one line of reasoning, and mix
+the shapes in one reply when the content mixes. A point you would drop the
+moment the reader pushed back gets dropped now.
 Test results take one line: pass and fail counts, runtime, failures quoted
 exact, the suite named only when it failed. Carve-out: a handoff, an audit,
 or a debugging writeup the reader asked for carries the path, because there

@@ -11,7 +11,7 @@
 # missing or the two numbers differ. After the merge, paste the new rev into
 # each environment's Setup script field when the change cannot wait out the
 # snapshot expiry.
-# rev: 23
+# rev: 24
 
 set -u
 

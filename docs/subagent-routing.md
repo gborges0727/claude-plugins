@@ -4,8 +4,8 @@ How the orchestrating session picks a subagent, and the cost reasoning
 behind the ladder. The rule itself lives in the output style's Subagents
 section, `plugins/gborges-standard/output-styles/plain-english.md`. This
 file holds the why, so the rule can stay short. Prices and published
-numbers below are from Anthropic's API pricing and cost guidance as of
-2026-08-28.
+numbers below are from Anthropic's API pricing, its cost guidance, and its
+Fable 5.1 prompting guide as of 2026-09-01.
 
 ## The four agents
 
@@ -21,11 +21,20 @@ a dispatch in the name it types.
 
 ## Prices
 
-| Model | Input, $ per million tokens | Output, $ per million tokens | Against Opus 5 |
-|---|---|---|---|
-| Sonnet 5 | 2 | 10 | 40% |
-| Opus 5 | 5 | 25 | 100% |
-| Fable 5.1 | 10 | 50 | 200% |
+| Model | Input, $ per million tokens | Cache hit, $ per million tokens | Output, $ per million tokens | Against Opus 5 (input, cache hit, output) |
+|---|---|---|---|---|
+| Sonnet 5 | 2 | 0.20 | 10 | 40%, 40%, 40% |
+| Opus 5 | 5 | 0.50 | 25 | 100%, 100%, 100% |
+| Fable 5.1 | 10 | 0.25 | 50 | 200%, 50%, 200% |
+
+Fable 5.1 prices a cache hit at 2.5% of its input price, where every other
+model uses 10%, so a Fable 5.1 cache hit costs half of an Opus 5 cache hit.
+A subagent that reads many files sends its
+whole context back on every turn, and after the first turn most of that
+input is cache hits, so Fable 5.1 pays less than Opus 5 for those tokens.
+Uncached input and output stay at double. Nobody has measured what share
+of a real dispatch's tokens are cache hits, so 200% is the ceiling on the
+Fable premium and 50% is the floor.
 
 Per-token price is an input to the analysis, not the ranking. The ranking
 is cost per finished task, which counts the retry a cheap failure causes
@@ -96,10 +105,24 @@ at `medium`, not to Sonnet at a higher effort.
 
 ## Why Fable is user-only
 
-Fable costs double Opus per token, and on a coding subset Opus 5 matched
-Fable 5 (91.7% against 91.3%) at about 60% of its cost. The orchestrator
-judging a task "hard enough for Fable" is the guess that spends the most
-money when wrong, so no judgment is allowed. The user types
+Fable costs double Opus on uncached input and on output, and on a coding
+subset Opus 5 matched Fable 5 (91.7% against 91.3%) at about 60% of its
+cost. Those are Fable 5 numbers. Anthropic's Fable 5.1 prompting guide
+says the 5.1 gains over Fable 5 are largest at the higher effort levels,
+that 5.1 at `medium` roughly matches Fable 5 at lower cost, and that 5.1
+at `low` is often competitive with Opus and Sonnet on cost per task while
+scoring higher. None of that is measured on this user's briefs.
+
+The same guide says 5.1 at `low` calls search and retrieval tools less
+often and answers from memory instead. On a code investigation that is a
+wrong conclusion nobody catches, the failure that keeps Sonnet out of that
+work. So a `fable-low` or `fable-medium` rung waits on a measurement
+against `opus-medium` on real briefs, and the rule stands until then.
+
+The orchestrator judging a task "hard enough for Fable" is the guess that
+spends the most money when wrong, so no judgment is allowed. Cheaper cache
+hits do not change that, because the guess is about which task deserves
+the model, not about the per-token price. The user types
 `@agent-fable-xhigh`, and a hook refuses every dispatch that did not follow
 such a message.
 
@@ -146,7 +169,10 @@ can call.
 refuses a `fable-xhigh` dispatch unless the latest user message named the
 agent, with a reason that points the orchestrator at `opus-xhigh`. When
 the setup file says Fable is off, it rewrites the dispatch to `opus-xhigh`
-instead. It then appends the writing rules as before.
+instead. It then appends the writing rules as before, and on a spawn that
+does go to Fable it also appends Anthropic's long-output note, which tells
+Fable at xhigh to write a long deliverable once instead of drafting it in
+thinking and again as the reply.
 
 `hooks/remind-writing-rules.py` runs on every user message. It records
 whether the message named `@agent-fable-xhigh` in a per-session state file
