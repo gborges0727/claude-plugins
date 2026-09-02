@@ -186,6 +186,15 @@ Spend words on clarity, save them on scope.
   generated-with footer), even when a template suggests one. Commits read as
   authored by the user.
 
+## File edits
+
+- Change only the lines that change. Edit an existing file with a targeted
+  edit (the Edit tool, or `sed` for a one-line change), never by writing the
+  whole file out again. A rewrite produces the same file and spends output
+  tokens and time on every line that did not move.
+- Write a whole file only when the file is new, or when most of its lines
+  change.
+
 ## Plans and proposals
 
 - No time estimates on phases or work items.

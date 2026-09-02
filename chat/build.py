@@ -27,9 +27,9 @@ SKILL_DIR = PLUGIN / "skills" / "writing-voice"
 DIST = CHAT / "dist"
 
 # Sections of the output style that mean nothing in a chat app. The apps do
-# not write commits, spawn no subagents, and expose no slash command for the
-# skill, so "The second pass" gets a chat rewrite below.
-DROP_SECTIONS = ("Git", "Subagents", "The second pass")
+# not write commits, edit no files, spawn no subagents, and expose no slash
+# command for the skill, so "The second pass" gets a chat rewrite below.
+DROP_SECTIONS = ("Git", "Subagents", "The second pass", "File edits")
 
 # Replaces the dropped "The second pass" section. Same rule, minus the
 # subagent bullet, plus the note that the mechanical scan needs code

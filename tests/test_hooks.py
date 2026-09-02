@@ -149,6 +149,11 @@ class OtherSpawns(HookCase):
         self.assertIn("<writing-rules>", block["updatedInput"]["prompt"])
         self.assertNotIn(LONG_OUTPUT, block["updatedInput"]["prompt"])
 
+    def test_every_spawn_gets_the_file_edits_rule(self):
+        prompt = self.spawn("gborges-standard:opus-medium")["hookSpecificOutput"]["updatedInput"]["prompt"]
+        self.assertIn("## File edits", prompt)
+        self.assertIn("Change only the lines that change.", prompt)
+
     def test_an_explore_spawn_produces_no_output(self):
         self.assertIsNone(self.spawn("Explore"))
 

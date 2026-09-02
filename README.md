@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 24
+# rev: 25
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -59,7 +59,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 
 | Component | Kind | Notes |
 |---|---|---|
-| `plain-english.md` | Output style | Forced on whenever the plugin is enabled (`force-for-plugin`). Register, git, and plan rules in the system prompt of every session |
+| `plain-english.md` | Output style | Forced on whenever the plugin is enabled (`force-for-plugin`). Register, git, plan, and file-edit rules in the system prompt of every session. The file-edit rule is Anthropic's answer to Fable 5.1 rewriting a whole file for a small change |
 | `strip-attribution.py` | `PreToolUse` hook | Removes AI-attribution footers from GitHub writes. Enforces the style's ban mechanically |
 | `flag-server-attribution.py` | `PostToolUse` hook | Tells the session to delete the footer the GitHub server adds to a new PR body, which the `PreToolUse` hook cannot reach |
 | `inject-writing-rules.py` | `PreToolUse` hook | Appends the style's rules to every subagent prompt, since the output style never reaches a subagent. Refuses a `fable-xhigh` dispatch the user did not summon, and rewrites it to `opus-xhigh` when `~/.claude/gborges-standard.json` says the account cannot run Fable. Appends Anthropic's long-output note to a `fable-xhigh` prompt, so Fable writes a long deliverable once instead of drafting it in thinking and again as the reply |
@@ -165,7 +165,7 @@ The comment and review write tools are left out. The GitHub MCP server offers no
 
 The output style never reaches a spawned subagent, which runs its own system prompt. A CLAUDE.md pointer does not help, because a pointer names a style the subagent cannot load. So a subagent writing a PR body or a commit message ships unstyled prose.
 
-A second `PreToolUse` hook closes the gap. It matches the Agent tool (Task in older versions) and rewrites the spawn call, appending the style's Sentences, Punctuation, and Git sections plus the writing-voice ritual to the subagent's prompt. The block is read from the installed plain-english.md at run time, so the rules keep one source and the hook needs no edit when they change. Explore and Plan spawns are skipped, since only the styled main conversation reads their reports. A prompt already carrying the block is left alone, and on any read failure the hook stays silent rather than breaking the spawn.
+A second `PreToolUse` hook closes the gap. It matches the Agent tool (Task in older versions) and rewrites the spawn call, appending the style's Sentences, The reader is new to this, Punctuation, Git, and File edits sections plus the writing-voice ritual to the subagent's prompt. The block is read from the installed plain-english.md at run time, so the rules keep one source and the hook needs no edit when they change. Explore and Plan spawns are skipped, since only the styled main conversation reads their reports. A prompt already carrying the block is left alone, and on any read failure the hook stays silent rather than breaking the spawn.
 
 A `fable-xhigh` dispatch gets one more paragraph after the rules. At xhigh effort Fable can draft a long deliverable in its thinking and then write it out again as the reply, which doubles the turn's output. Anthropic's Fable 5.1 prompting guide gives a note that stops that, and the hook appends it to a Fable dispatch's prompt only, since no other agent needs it.
 
