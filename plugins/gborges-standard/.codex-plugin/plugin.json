@@ -1,6 +1,6 @@
 {
   "name": "gborges-standard",
-  "version": "1.16.0",
+  "version": "1.17.0",
   "description": "Standard Codex setup used across all of Gabe Borges' repos. Injects the Plain English rules at session start and into every subagent, strips AI-attribution footers from GitHub writes, re-injects the writing rules reminder with every user message, and ships the writing-voice, read-aloud-prep, bear-notes, and codex-delegate skills.",
   "author": {
     "name": "Gabe Borges",
