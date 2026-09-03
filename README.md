@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 27
+# rev: 28
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -69,7 +69,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `bear-notes` | Skill | Writing into Bear without minting junk tags and wikilinks |
 | `codex-delegate` | Skill | Handing a mechanical subtask to the Codex CLI on GPT-5.6 Luna, so ChatGPT-plan quota pays for it instead of Claude tokens. Needs the `codex` MCP server registered |
 | `add-to-git` | Command | Explicit invocation only, never model-triggered |
-| `setup` | Command | Writes `~/.claude/gborges-standard.json`, the per-machine switches for Fable access and Codex delegation. Wraps `scripts/setup.sh`, which does the same with no model turn |
+| `setup` | Command | Writes `~/.claude/gborges-standard.json`, the per-machine switches for Fable access and Codex delegation, and the Codex CLI's own model, subagent, and status line config under `~/.codex`. Wraps `scripts/setup.sh`, which does the same with no model turn |
 | `sonnet-medium` | Agent | Sonnet 5 at medium effort. Edits and runs with a command check in the brief, parallel copies of one such task, and fetching a named doc page |
 | `opus-medium` | Agent | Opus 5 at medium effort. The default, and the floor for anything that reads code to reach a conclusion |
 | `opus-xhigh` | Agent | Opus 5 at xhigh effort. One escalation step for a task that failed below it, and the stand-in for Fable on an account without it |
@@ -99,12 +99,44 @@ hook changes its hash and asks again. Codex installs a snapshot of the
 plugin, so a local edit also needs the `version` in
 `.codex-plugin/plugin.json` raised and `codex plugin add` run again.
 
+[docs/codex-parity.md](docs/codex-parity.md) walks through the whole
+Codex install on a machine, from this plugin to the MCP servers, the linked
+skills, and the model setup, and lists what stays different.
+
 Point the marketplace at a local checkout instead of GitHub to test a change
 before it merges:
 
 ```bash
 codex plugin marketplace add ~/git/claude-plugins
 ```
+
+### The Codex side of the model setup
+
+Codex has no plugin field for agents and does not ship `config.toml`, so
+`scripts/setup.sh --codex-config on` writes that half by hand. It puts four
+agent files in `~/.codex/agents`. Each pairs with one of the plugin's Claude
+agents:
+
+| Codex agent | Model and effort | Mirrors |
+|---|---|---|
+| `luna-xhigh` | `gpt-5.6-luna`, xhigh | `opus-medium`, the default worker |
+| `luna-medium` | `gpt-5.6-luna`, medium | `sonnet-medium`, fully specified edits and runs |
+| `terra-xhigh` | `gpt-5.6-terra`, xhigh | `opus-xhigh`, the one escalation step |
+| `sol-xhigh` | `gpt-5.6-sol`, xhigh | `fable-xhigh`, only when the user names it |
+
+In `~/.codex/config.toml` it sets the orchestrator to `gpt-5.6-sol` at
+medium effort, sets `agents.default_subagent_model` to `gpt-5.6-luna` at
+xhigh so an unnamed spawn lands there, and sets `tui.status_line` to the
+same seven fields the Claude Code status line shows (directory, branch,
+dirty marker, model with effort, context used, 5-hour limit, weekly limit).
+Codex takes a fixed list of field names for its footer and cannot run a
+script, so the per-model colors of `statusline.sh` do not carry over. The
+script replaces only those entries and keeps every other line in the file.
+
+Codex assigns a spawn's model before its `SubagentStart` hook runs, so the
+routing hook cannot rewrite a spawn the way `route-spawns.py` does in Claude
+Code. The `[agents]` default covers the unnamed case, and the agent
+descriptions carry the routing rule for the rest.
 
 ### What Codex loads
 

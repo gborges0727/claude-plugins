@@ -163,6 +163,14 @@ ahead of `sonnet-medium`. A missing file means Fable on and Codex off.
 it with no model turn, which is the form a cloud environment's setup script
 can call.
 
+A third flag, `--codex-config on`, writes the Codex CLI's copy of this
+routing: four agents under `~/.codex/agents` (`luna-xhigh` as the default
+worker, `luna-medium` for fully specified edits, `terra-xhigh` as the
+escalation step, `sol-xhigh` only when the user names it), the `[agents]`
+defaults in `~/.codex/config.toml` that send an unnamed spawn to Luna at
+xhigh, the orchestrator model, and the status line. The README's Codex
+section lists the mapping.
+
 ## The hooks
 
 `hooks/route-spawns.py` runs before every Agent dispatch, including the
