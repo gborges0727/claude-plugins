@@ -19,6 +19,7 @@ from pathlib import Path
 HOOKS = Path(__file__).resolve().parent.parent / "plugins" / "gborges-standard" / "hooks"
 ROUTE = HOOKS / "route-spawns.py"
 REMIND = HOOKS / "remind-writing-rules.py"
+CODEX = HOOKS / "route-codex.py"
 
 FABLE = "gborges-standard:fable-xhigh"
 OPUS = "gborges-standard:opus-xhigh"
@@ -73,6 +74,16 @@ class HookCase(unittest.TestCase):
         if transcript is not None:
             event["transcript_path"] = str(transcript)
         return run_hook(ROUTE, event, self.home)
+
+    def codex(self, model, session_id="s1", config=None):
+        tool_input = {"model": model, "prompt": "Do the work.", "cwd": "/repo"}
+        if config is not None:
+            tool_input["config"] = config
+        return run_hook(
+            CODEX,
+            {"session_id": session_id, "tool_name": "mcp__codex__codex", "tool_input": tool_input},
+            self.home,
+        )
 
     def write_transcript(self, model, name="t.jsonl"):
         """Write a transcript whose newest reply came from the given model."""
@@ -298,6 +309,71 @@ class NoCodexLine(HookCase):
         self.assertEqual(done.returncode, 0, done.stderr)
         self.assertIn("Plain English reminder: ", done.stdout)
         self.assertNotIn("Codex delegation", done.stdout)
+
+
+class CodexCalls(HookCase):
+    def test_astra_without_a_mention_is_denied_and_pointed_at_sol(self):
+        out = self.codex("gpt-6-astra")["hookSpecificOutput"]
+        self.assertEqual(out["permissionDecision"], "deny")
+        self.assertIn("gpt-5.6-sol", out["permissionDecisionReason"])
+
+    def test_astra_after_a_mention_runs_at_xhigh(self):
+        self.submit("consult astra on this one")
+        out = self.codex("gpt-6-astra")["hookSpecificOutput"]
+        self.assertEqual(out["permissionDecision"], "allow")
+        self.assertEqual(out["updatedInput"]["config"]["model_reasoning_effort"], "xhigh")
+
+    def test_a_mention_in_one_session_does_not_unlock_another(self):
+        self.submit("ask Astra", session_id="a")
+        self.assertEqual(
+            self.codex("gpt-6-astra", session_id="b")["hookSpecificOutput"]["permissionDecision"],
+            "deny",
+        )
+
+    def test_a_later_message_without_the_word_locks_astra_again(self):
+        self.submit("consult astra")
+        self.submit("now fix the tests")
+        self.assertEqual(
+            self.codex("gpt-6-astra")["hookSpecificOutput"]["permissionDecision"], "deny"
+        )
+
+    def test_an_astra_mention_does_not_unlock_fable(self):
+        self.submit("consult astra")
+        self.assertEqual(self.spawn(FABLE)["hookSpecificOutput"]["permissionDecision"], "deny")
+
+    def test_a_luna_call_without_an_effort_gets_xhigh(self):
+        out = self.codex("gpt-5.6-luna")["hookSpecificOutput"]
+        self.assertEqual(out["permissionDecision"], "allow")
+        self.assertEqual(out["updatedInput"]["config"], {"model_reasoning_effort": "xhigh"})
+        self.assertEqual(out["updatedInput"]["cwd"], "/repo")
+
+    def test_an_effort_the_call_set_is_kept(self):
+        self.assertIsNone(self.codex("gpt-5.6-sol", config={"model_reasoning_effort": "max"}))
+
+    def test_other_config_keys_survive_the_fill_in(self):
+        out = self.codex("gpt-5.6-terra", config={"sandbox_mode": "read-only"})
+        self.assertEqual(
+            out["hookSpecificOutput"]["updatedInput"]["config"],
+            {"sandbox_mode": "read-only", "model_reasoning_effort": "xhigh"},
+        )
+
+    def test_a_call_with_no_model_is_left_alone(self):
+        self.assertIsNone(
+            run_hook(
+                CODEX,
+                {"session_id": "s1", "tool_name": "mcp__codex__codex", "tool_input": {"prompt": "hi"}},
+                self.home,
+            )
+        )
+
+    def test_another_tool_is_ignored(self):
+        self.assertIsNone(
+            run_hook(
+                CODEX,
+                {"session_id": "s1", "tool_name": "mcp__codex__codex-reply", "tool_input": {"model": "gpt-6-astra"}},
+                self.home,
+            )
+        )
 
 
 if __name__ == "__main__":

@@ -164,10 +164,10 @@ it with no model turn, which is the form a cloud environment's setup script
 can call.
 
 A third flag, `--codex-config on`, writes the Codex CLI's copy of this
-routing: four agents under `~/.codex/agents` (`luna-xhigh` as the default
-worker, `luna-medium` for fully specified edits, `terra-xhigh` as the
-escalation step, `sol-xhigh` only when the user names it), the `[agents]`
-defaults in `~/.codex/config.toml` that send an unnamed spawn to Luna at
+routing: four agents under `~/.codex/agents` (`luna-xhigh` for fully
+specified edits, `terra-xhigh` as the default worker, `sol-xhigh` as the
+escalation step, `astra-xhigh` only when the user names it), the `[agents]`
+defaults in `~/.codex/config.toml` that send an unnamed spawn to Terra at
 xhigh, the orchestrator model, and the status line. The README's Codex
 section lists the mapping.
 
@@ -197,4 +197,12 @@ whether the message named `@agent-fable-xhigh`, and whether it used the
 word fork, in two per-session state files under
 `~/.claude/gborges-standard/state/`.
 
-`tests/test_hooks.py` covers both hooks and runs in CI.
+`hooks/route-codex.py` runs before every `mcp__codex__codex` call, the
+tool the `codex-delegate` skill uses to start a Codex thread. It refuses a
+call on `gpt-6-astra` unless the latest user message named Astra, with a
+reason that points the orchestrator at `gpt-5.6-sol`, and it sets the
+reasoning effort to `xhigh` when the call left it out. The four Codex
+rungs, their prices, and the scores behind them are in
+`docs/model-routing.md`.
+
+`tests/test_hooks.py` covers all three hooks and runs in CI.

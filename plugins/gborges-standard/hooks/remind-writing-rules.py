@@ -36,7 +36,9 @@ On any problem (the style file is missing, the Reminder section is gone,
 the settings file will not read) the hook still exits 0 and the turn
 proceeds. The switch below silences the reminder line only. The mention
 record and the Codex line are written either way, because the two rules
-they feed do not depend on the writing style.
+they feed do not depend on the writing style. A third record of the same
+shape says whether the message named Astra, which route-codex.py reads
+before it lets a Codex call run on that model.
 
 Config:
   WRITING_VOICE_REMIND  1|0  switch for the reminder line (default 1)
@@ -74,6 +76,14 @@ except ImportError:
         def write_fork(session_id, asked):
             return None
 
+        @staticmethod
+        def astra_from_prompt(prompt):
+            return False
+
+        @staticmethod
+        def write_astra(session_id, named):
+            return None
+
 STYLE = Path(__file__).resolve().parent.parent / "output-styles" / "plain-english.md"
 
 SECTION = re.compile(r"^## Reminder\s*\n(.*?)(?=^#|\Z)", re.MULTILINE | re.DOTALL)
@@ -107,6 +117,10 @@ def main():
     plugin_config.write_fork(
         event.get("session_id"),
         plugin_config.fork_from_prompt(event.get("prompt")),
+    )
+    plugin_config.write_astra(
+        event.get("session_id"),
+        plugin_config.astra_from_prompt(event.get("prompt")),
     )
 
     lines = []

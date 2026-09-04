@@ -184,6 +184,10 @@ Spend words on clarity, save them on scope.
   `sonnet-medium`, and Sonnet takes what Codex cannot (work that needs
   Claude Code's own tools, an MCP server, or a plugin skill). A missing file
   means off.
+- The skill's four Codex rungs mirror the four Claude agents: `luna-xhigh`
+  for mechanical work, `terra-xhigh` as the default and for a second-model
+  opinion, `sol-xhigh` as the escalation step, and `astra-xhigh` only when
+  the user's message names Astra. A hook refuses any other Astra call.
 - A session running on Sonnet passes `model: opus` to Explore for code
   investigation.
 

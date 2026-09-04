@@ -1,12 +1,14 @@
 ---
 name: codex-delegate
 description: >-
-  Delegate a coding subtask to the Codex CLI on GPT-5.6 Luna, spending ChatGPT-plan quota instead
-  of Claude tokens. Use only when `~/.claude/gborges-standard.json` says `"codex": true` (a missing file means
-  off). Then prefer this over the sonnet-medium subagent whenever the subtask is mechanical and
-  already fully specified: boilerplate, a repeated edit across many files, tests against an
-  interface you can paste in, or a second-model opinion. Also use when the user says to delegate,
-  hand off, or use Codex, and when continuing a Codex thread already started.
+  Delegate a coding subtask to the Codex CLI on an OpenAI model (GPT-5.6 Luna, Terra, Sol, or
+  GPT-6 Astra), spending ChatGPT-plan quota instead of Claude tokens. Use only when
+  `~/.claude/gborges-standard.json` says `"codex": true` (a missing file means off). Then prefer
+  this over the sonnet-medium subagent whenever the subtask is mechanical and already fully
+  specified: boilerplate, a repeated edit across many files, tests against an interface you can
+  paste in, or a second-model opinion. Also use when the user says to delegate, hand off, or use
+  Codex, when the user names a Codex rung (consult astra, ask sol, send it to terra, luna), and
+  when continuing a Codex thread already started.
 ---
 
 # Codex delegation
@@ -54,20 +56,43 @@ you are still mapping, and any task whose spec you would have to discover while 
 starts blind. It reads none of this conversation, so a prompt that leans on what was said here
 sends Codex off to guess.
 
+## Pick the rung
+
+Four Codex rungs mirror the plugin's four Claude agents. Each is a `model` plus a
+`model_reasoning_effort`, and the name says both.
+
+| Rung | `model` | Effort | Mirrors | Takes |
+|---|---|---|---|---|
+| `luna-xhigh` | `gpt-5.6-luna` | `xhigh` | `sonnet-medium` | An edit or a run whose brief names the exact change and a command that checks it. Parallel copies of one such task. Never a brief past 272K tokens, since Luna's recall past 256K is 41% |
+| `terra-xhigh` | `gpt-5.6-terra` | `xhigh` | `opus-medium` | The default. Any task that reads code to reach a conclusion, and any second-model opinion |
+| `sol-xhigh` | `gpt-5.6-sol` | `xhigh` | `opus-xhigh` | A task that failed once on a lower rung. One long dependent chain. Any brief that must read past 272K tokens |
+| `astra-xhigh` | `gpt-6-astra` | `xhigh` | `fable-xhigh` | Only when the user's latest message names Astra. A hook refuses every other Astra call and points it at Sol |
+
+A failure on one rung is first a reason to reread the brief for a bad spec and resend it to the
+same rung. Escalate one rung, once, when the brief's own check failed or Codex said it could not
+finish, and put the exact failing output in the escalated brief. After a second failure report
+to the user instead of climbing again.
+
+Astra costs the same per token as Fable and drains the ChatGPT allowance faster than Sol, so the
+orchestrator never chooses it. The user does, by naming it ("consult astra", "ask astra xhigh").
+Astra at `max` or `ultra` is never set from here: `ultra` spawns subagents inside the call and
+multiplies what one call spends, and the API tops out at `max` anyway.
+
+`docs/model-routing.md` in this repo holds the prices and scores behind the table.
+
 ## Every call sets these
 
 | Argument | Value | Why |
 |---|---|---|
-| `model` | `gpt-5.6-luna` | Always, unless the user names a different model in this conversation |
-| `config` | `{"model_reasoning_effort": "xhigh"}` | Luna thinks hard for its tier, which is what makes it worth delegating to |
+| `model` | the rung's model | Unpinned, Codex runs the orchestrator model from `~/.codex/config.toml`, which is Sol |
+| `config` | `{"model_reasoning_effort": "xhigh"}` | One shot with no conversation to correct it, so the effort that avoids a retry is the cheap one |
 | `cwd` | absolute path to the repo | Codex resolves a relative path against the MCP server's own working directory, not yours |
 | `sandbox` | `read-only` to investigate, `workspace-write` to edit | The sandbox is the guardrail, since approvals are off |
 | `approval-policy` | `never` | Codex has no terminal to ask in. Any other policy stalls the call until it times out |
 
-Luna is the model for every delegated call. Reach for `gpt-5.6-sol` in one case, when the task
-must read more than Luna's 400K of context or write more than its 128K limit. Luna failing a
-review is a reason to sharpen the prompt and send it back to Luna, not a reason to switch models.
-Switch because the user said to.
+Every model here reads up to 1,050,000 tokens and writes up to 128,000 on the API, and OpenAI
+reprices the whole request (double input, output up by half) once the input passes 272K tokens.
+Keep briefs under that line unless the task needs the room, and then send it to Sol or Astra.
 
 ## Write the prompt as a briefing
 
