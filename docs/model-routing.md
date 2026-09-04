@@ -146,6 +146,31 @@ same pass rate. On three briefs that is not an effort curve, but it says
 medium buys nothing on the kind of brief the default rung gets, so xhigh
 stays.
 
+The same three briefs then ran on Sol through Codex and on Opus 5 through
+the plugin's `opus-medium` and `opus-xhigh` agents. All twelve runs
+passed. Token totals are what each host billed for the three runs, so
+the Codex figures include Codex's own system prompt and the Opus figures
+include Claude Code's plus the writing rules the spawn hook appends. The
+API-equivalent cost takes 80% of tokens at the input price and 20% at
+the output price.
+
+| Model, effort | Tokens, three briefs | Seconds | API-equivalent cost |
+|---|---|---|---|
+| Terra, medium | 95,489 | 113 | $0.38 |
+| Terra, xhigh | 81,699 | 141 | $0.33 |
+| Sol, medium | 95,966 | 148 | $0.69 |
+| Sol, xhigh | 98,292 | 179 | $0.71 |
+| Opus 5, medium | 128,054 | 71 | $1.15 |
+| Opus 5, xhigh | 137,221 | 108 | $1.23 |
+
+Every model finished every brief, so these briefs cannot rank the models
+on accuracy. They rank them on cost and speed for work all of them can
+do: Terra at xhigh costs 29% of Opus at medium, Sol costs 60%, and Opus
+finishes fastest. The Codex costs land on the ChatGPT plan allowance,
+not the API bill. Ranking on the hard tenth of tasks still rests on the
+published scores above, where Opus 5 leads Sol by 15 points on
+Terminal-Bench 4.0.
+
 The delegation never sets max or ultra. Ultra spawns subagents inside the
 call, which multiplies the allowance one call spends, and a Plus plan
 holds only a limited Astra allowance.
