@@ -21,9 +21,9 @@ dispatch in the name it types.
 | Rung | Claude agent | Codex agent | Takes |
 |---|---|---|---|
 | mechanical | `sonnet-medium` | `luna-xhigh` | An edit or a run whose brief names the exact change and a command that checks it. Parallel copies of one such task. Fetching a named doc page |
-| default | `opus-medium` | `terra-xhigh` | Any task that reads code to reach a conclusion (an investigation, a diagnosis, a review, a design choice) |
-| escalation | `opus-xhigh` | `sol-xhigh` | A task that failed once below it. One long dependent chain the orchestrator cannot split. On Codex, also any brief that must read past 272K tokens |
-| summoned | `fable-xhigh` | `astra-xhigh` | Only when the user's own message names the agent |
+| default | `opus-medium` | `sol-xhigh` | Any task that reads code to reach a conclusion (an investigation, a diagnosis, a review, a design choice). On Codex, also any brief that must read past 272K tokens |
+| escalation | `opus-xhigh` | `astra-medium` | A task that failed once below it. One long dependent chain the orchestrator cannot split |
+| summoned | `fable-xhigh` | `astra-xhigh` | Only when the user's own message names the agent. On Codex, any Astra call above medium effort |
 
 On Claude Code, a Codex rung is not a Claude agent. It is a call to the
 `mcp__codex__codex` tool with the rung's model and effort, and the
@@ -55,15 +55,20 @@ GPT-5.6 model and Astra list a 1,050,000-token window and a 128,000-token
 output cap on the API. The Codex CLI catalog reports a 272,000-token
 working window and an 872,000-token maximum for the same models.
 
-Rung for rung, the Codex side is cheaper than the Claude side on every
-token except Astra's cache hit:
+Rung for rung, the Codex side is cheaper than the Claude side on the two
+lower rungs and dearer on the escalation rung:
 
 | Rung | Claude, in / out | Codex, in / out | Codex as a share of Claude |
 |---|---|---|---|
 | mechanical | Sonnet 5, 2 / 10 | Luna, 0.20 / 1.20 | 10% / 12% |
-| default | Opus 5, 5 / 25 | Terra, 2 / 12 | 40% / 48% |
-| escalation | Opus 5, 5 / 25 | Sol, 4 / 20 | 80% / 80% |
+| default | Opus 5, 5 / 25 | Sol, 4 / 20 | 80% / 80% |
+| escalation | Opus 5, 5 / 25 | Astra, 10 / 50 | 200% / 200% |
 | summoned | Fable 5.1, 10 / 50 | Astra, 10 / 50 | 100% / 100% |
+
+The escalation rung pays double per token and gets it back in tokens.
+Artificial Analysis measured Astra at max using a third of Sol's tokens
+on its coding harness, and on this repo's three briefs Astra at medium
+spent 29% fewer tokens than Sol at max.
 
 Astra's cache hit costs 1.00 against Fable's 0.25, so a long
 many-turn Astra session pays four times Fable's rate on the tokens it
@@ -93,26 +98,48 @@ noise.
 | FrontierMath Tier 4 | | | | 97.6 | Fable 5.1 at 87.8, Opus 5 at 73.2 | OpenAI Astra launch |
 | Humanity's Last Exam, with tools | | | | 57.2 | Fable 5.1 at 65.0, Opus 5 at 63.6 | OpenAI Astra launch |
 
+The vendor rows put Terra one to two points under Sol. Independent runs
+on long-horizon work do not:
+
+| Source | Measured | Sol | Terra | Luna | Claude |
+|---|---|---|---|---|---|
+| CodeRabbit, 100+ long-horizon coding tasks, five languages | pass rate | 63.7% | 40.7% | | |
+| same run | output tokens per completed task | 20,968 | 55,594 | | |
+| CodeRabbit, review of production PRs | lift over their baseline | +7.4 points | -8.6 points | | |
+| Arena.ai Agent Arena, crowd-judged agentic sessions | rank | top 2 | 15 | 17 | |
+| Arena.ai Image-to-WebDev | Elo | 1,581 | 1,531 | 1,497 | Opus 5 at max 1,669 |
+| Artificial Analysis Intelligence Index, 2026-09-04 | score | 58.9 | 55.0 | 51.2 | Fable 5.1 65.7, Opus 5 63.0, Sonnet 5 55.3, Astra 61.2 |
+| Artificial Analysis | cost per index task at max | $1.04 | $0.55 | $0.21 | |
+| Sonar, 4,444 Java tasks at medium | pass rate | 82.0% | 80.0% | | |
+| Sonar | code smells per thousand lines | 17.6 | 23.3 | | |
+| BuildFast, 700K-token retrieval | citations | all correct | missed 2 past 500K | stopped citing at 300K | |
+
 What the rows say, one model at a time:
 
-- Luna sits two to four points under Terra on coding and terminal work,
-  and collapses on long context. Its recall past 256K tokens is 41%
-  against Terra's 90%. So Luna takes narrow, fully specified work with a
-  short brief, and nothing that must hold a large codebase in view.
-- Terra trails Sol by one to two points on the coding benchmarks at half
-  Sol's price, and OpenAI's own Codex docs call it "the pragmatic
-  all-rounder". That is the default worker.
-- Sol pulls ahead of Terra where the task is wide or adversarial:
-  computer use (62.6 against 50.2), exploit work (73.5 against 52.9), and
-  research browsing. It also keeps 74% recall between 512K and 1M tokens.
-  That is the escalation step and the long-context step.
+- Luna sits two to four points under Sol on short coding and terminal
+  work, holds on short briefs with a check (six of six on this repo's
+  briefs, and Arena's effort sweep puts Luna at xhigh a hair above Terra
+  at medium), and collapses on long context. Its recall past 256K tokens
+  is 41%. So Luna takes narrow, fully specified work with a short brief,
+  and nothing that must hold a large codebase in view.
+- Terra matches Sol on short tasks and loses by 23 points on long-horizon
+  ones while spending 2.6 times the output tokens. At list prices that is
+  about $0.67 of output per CodeRabbit task against $0.42 for Sol. So on
+  the work the default rung sends, Terra is both less accurate and dearer
+  per finished task, and on the short work it does well Luna costs a
+  quarter as much. Terra has no rung.
+- Sol is the default worker. It ties Opus 5 on Terminal-Bench 2.1 (88.8
+  against 89.1) and on DeepSWE resolves a task for $8.39 against Opus 5's
+  $11.84 at the same rate. Opus 5 leads it on the Intelligence Index (63.0
+  against 58.9), SWE-Bench Pro (79.2 against 64.6), and Terminal-Bench
+  4.0 (52.3 against 37.3), which is why the Claude escalation rung stays
+  on Opus rather than moving to Sol.
 - Astra leads every OpenAI benchmark it appears on and beats Fable 5.1 on
   the agentic coding and math rows, while Fable 5.1 leads on Humanity's
   Last Exam with tools. On Terminal-Bench 4.0 OpenAI estimates Astra's API
   cost per task at 9% under Sol's and 63% under Fable 5.1's, because it
-  spends fewer tokens to finish. At the same list price as Fable, Astra is
-  the summoned rung, and the orchestrator never picks it on its own
-  judgment.
+  spends fewer tokens to finish. At medium it is the Codex escalation
+  rung. Above medium it is the summoned rung.
 
 ## Effort
 
@@ -123,10 +150,23 @@ high and xhigh for multi-step work, max for the hardest single problem
 across internal subagents. The docs add that "most tasks do not need Max
 or Ultra". Ultra exists only inside Codex, and the API tops out at max.
 
-Every Codex rung here runs at xhigh, for two reasons. A delegated call is
-one shot with no conversation to correct it, so the effort that avoids a
-retry is the cheap one. And the Codex catalog itself sets the effort for
-its own multi-agent workers to xhigh on Astra.
+Luna, Sol, and summoned Astra run at xhigh, for two reasons. A delegated
+call is one shot with no conversation to correct it, so the effort that
+avoids a retry is the cheap one. And the Codex catalog itself sets the
+effort for its own multi-agent workers to xhigh on Astra.
+
+The escalation rung runs Astra at medium, not Sol at max. Artificial
+Analysis measured Astra's whole effort range at four index points, 57 at
+low to 61 at max, with the step from xhigh to max adding nothing and
+costing 40% more. Sol's curve is as flat. At medium it beats Fable 5 on
+Agents' Last Exam at a quarter of the cost. So Sol at max is the model
+that just failed, thinking longer, for 30% more.
+
+Astra at medium is a different model. Its lead over Sol on the agentic
+rows (20 points on Terminal-Bench 4.0, 41 points lower hallucination
+rate) is five times its own effort spread. That leaves xhigh, where
+Astra's published scores live, for the user to summon when a medium
+escalation also fails.
 
 One measurement on 2026-09-04 backs that for Terra. Three briefs ran once
 each at medium and at xhigh, in separate scratch worktrees of this repo:
@@ -175,26 +215,34 @@ not the API bill. Ranking on the hard tenth of tasks still rests on the
 published scores above, where Opus 5 leads Sol by 15 points on
 Terminal-Bench 4.0.
 
-The delegation never sets max or ultra. Ultra spawns subagents inside the
-call, which multiplies the allowance one call spends, and a Plus plan
-holds only a limited Astra allowance.
+The orchestrator never sets max or ultra. Ultra spawns subagents inside
+the call, which multiplies the allowance one call spends. Only Pro and
+Business Premium plans draw Astra from the full Codex allowance. Plus
+holds a limited Astra allowance, so on Plus an escalation can hit that
+cap before the 5-hour limit does.
 
 ## Why the ladder changed on 2026-09-04
 
 Before this review the Codex side ran Luna at xhigh as the default worker
 and Luna at medium for mechanical work, with Terra as the escalation and
-Sol as the summoned rung. Three facts moved it:
+Sol as the summoned rung. The review first moved to Luna, Terra, Sol,
+Astra, and then, on the independent runs above, to Luna, Sol, Astra at
+medium, Astra at xhigh. The facts that moved it:
 
-- OpenAI's Codex docs position Luna for "clear, repeatable tasks" and Terra
-  for everyday work, and the long-context row above shows why.
-- The Codex catalog marks Luna `multi_agent_version` v1 while Sol, Terra,
-  and Astra are v2, so a Sol orchestrator in the Codex CLI refuses a
-  spawn that names Luna by model. A custom agent file sometimes gets
-  around that, sometimes not. Terra as the default spawn avoids the
-  question.
-- Astra shipped at Fable's price and above Fable on the agentic rows, so
-  the summoned rung has a model to name, and Sol moves down to the
-  escalation rung where its price (80% of Opus) fits.
+- OpenAI's Codex docs position Luna for "clear, repeatable tasks", and
+  the long-context row above shows why it stays on the mechanical rung.
+- CodeRabbit's long-horizon run and the Arena agentic sessions put Terra
+  far under Sol on exactly the default rung's work, and dearer per
+  finished task. Two Codex users report Terra draining a 5-hour limit in
+  minutes and a weekly Plus allowance in six hours while forgetting
+  instructions. Terra leaves the ladder.
+- The Codex catalog marks Luna `multi_agent_version` v1 while Sol and
+  Astra are v2, so a Sol orchestrator in the Codex CLI refuses a spawn
+  that names Luna by model. Sol as the default spawn avoids the question.
+- Astra shipped at Fable's price and above Fable on the agentic rows. Its
+  effort curve is flat enough that medium already carries most of its
+  lead over Sol, so medium is the escalation the orchestrator may pick
+  and xhigh is what the user summons.
 
 ## Open questions
 
@@ -204,6 +252,14 @@ Sol as the summoned rung. Three facts moved it:
   ten briefs with three runs each would give a curve worth acting on.
 - Sol's price reverts on or after 2026-11-21 unless OpenAI extends it. At
   5 / 30 Sol still sits under Opus.
+- Astra at medium has no published score on the agentic rows. The case
+  for it rests on Astra's four-point effort spread against its 20-point
+  lead at max. Ten hard briefs that Sol at xhigh fails, rerun on Astra at
+  medium and at xhigh, would show whether medium keeps that lead.
+- The Codex CLI's own subagent tool (openai/codex issue 31814) still
+  drops the model field under a Sol orchestrator, so the `luna-xhigh`
+  agent file there needs `hide_spawn_agent_metadata = false` under
+  `[features.multi_agent_v2]` in `~/.codex/config.toml`.
 
 ## Sources
 
@@ -225,3 +281,14 @@ Sol as the summoned rung. Three facts moved it:
 - August Sol cut, https://www.explainx.ai/blog/openai-gpt-5-6-sol-api-price-cut-20-percent-august-2026
 - Anthropic prices, `docs/subagent-routing.md`, checked 2026-09-01
 - The local catalog, `codex debug models`
+- CodeRabbit run, https://www.coderabbit.ai/blog/gpt-5-6-sol-and-terra-benchmark
+- Sonar run, https://www.sonarsource.com/blog/openai-gpt-5-6-sol-and-terra/
+- Arena.ai agent and WebDev ranks, https://x.com/arena/status/2081848778324320354
+  and https://x.com/arena/status/2083596490539511856
+- Artificial Analysis index snapshot, https://benchlm.ai/benchmarks/artificialanalysis
+- Artificial Analysis on Astra, https://artificialanalysis.ai/articles/benchmarking-gpt-6-astra
+- BuildFast hands-on, https://www.buildfastwithai.com/blogs/gpt-5-6-sol-terra-luna-review-2026
+- Codex quota reports, https://github.com/openai/codex/issues/32606 and
+  https://community.openai.com/t/gpt-5-6-sol-vs-terra-what-are-you-seeing-in-real-development-during-these-first-days/1386726
+- Codex subagent model field, https://github.com/openai/codex/issues/31814
+- Opus 5 against Sol, https://www.datacamp.com/blog/claude-opus-5-vs-gpt-5-6-sol

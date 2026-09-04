@@ -185,9 +185,10 @@ Spend words on clarity, save them on scope.
   Claude Code's own tools, an MCP server, or a plugin skill). A missing file
   means off.
 - The skill's four Codex rungs mirror the four Claude agents: `luna-xhigh`
-  for mechanical work, `terra-xhigh` as the default and for a second-model
-  opinion, `sol-xhigh` as the escalation step, and `astra-xhigh` only when
-  the user's message names Astra. A hook refuses any other Astra call.
+  for mechanical work, `sol-xhigh` as the default and for a second-model
+  opinion, `astra-medium` as the escalation step, and `astra-xhigh` only
+  when the user's message names Astra. A hook refuses any Astra call above
+  medium that the user did not ask for.
 - A session running on Sonnet passes `model: opus` to Explore for code
   investigation.
 

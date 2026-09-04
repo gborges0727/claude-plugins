@@ -1,25 +1,29 @@
 #!/usr/bin/env python3
-"""Decide which OpenAI model a Codex delegation may run on.
+"""Decide which OpenAI model and effort a Codex delegation may run at.
 
 Runs as a PreToolUse hook on the mcp__codex__codex tool, the call that
 starts a Codex thread from Claude Code. The codex-delegate skill tells the
-main agent which model to name in that call, and this hook enforces the
-one rule that costs the most when broken.
+main agent which model and effort to name in that call, and this hook
+enforces the one rule that costs the most when broken.
 
-GPT-6 Astra costs what Fable costs per token and drains the ChatGPT
-allowance faster than Sol, so it runs only when the user asked for it by
-name in their latest message. remind-writing-rules.py records whether that
-message used the word "astra", and this hook reads the record. An Astra
-call with no such record comes back denied, and the reason tells the main
-agent to send the same brief to Sol instead. That is the same shape as the
-Fable rule in route-spawns.py.
+GPT-6 Astra costs 2.5 times what Sol costs per token. The skill's
+escalation rung runs Astra at medium effort, and that runs on the
+orchestrator's own judgment. Anything above medium (high, xhigh, max, or
+ultra) runs only when the user asked for it by name in their latest
+message. remind-writing-rules.py records whether that message used the
+word "astra", and this hook reads the record. An Astra call above medium
+with no such record comes back denied, and the reason tells the main
+agent to send the same brief to Astra at medium. That is the same shape
+as the Fable rule in route-spawns.py, with the effort as the line.
 
-The hook also fills in the reasoning effort when the call left it out.
-Codex takes the effort from the config argument, and a call without one
-runs at the model's own default, which is low on Sol. Every rung in the
-skill's table runs at xhigh, so a missing effort becomes xhigh. An effort
-the call did set is left alone, so the user can ask for max by name and
-get it.
+The hook also fills in the effort when the call left it out. Codex takes
+the effort from the config argument, and a call without one runs at the
+model's own default, which is low on Sol. Every rung but the escalation
+runs at xhigh, so a missing effort becomes xhigh on Luna and Sol, and on
+Astra when the user named it. On an Astra call the user did not name, a
+missing effort becomes medium, the escalation rung's setting. An effort
+the call did set is left alone, so a summoned Astra call at max stays at
+max.
 
 A call that names no model at all is left alone too. Codex then runs the
 orchestrator model from ~/.codex/config.toml, and the skill tells the main
@@ -36,7 +40,7 @@ try:
     import plugin_config
 except ImportError:
     # Fail safe when the sibling module is missing. Astra reads as
-    # unmentioned and is refused, and every other call runs as before.
+    # unmentioned, so it runs at medium and nothing higher.
     class plugin_config:  # noqa: N801
         @staticmethod
         def read_astra(session_id):
@@ -51,9 +55,16 @@ EFFORT_KEY = "model_reasoning_effort"
 
 DEFAULT_EFFORT = "xhigh"
 
+# The escalation rung, and the most an unsummoned Astra call may run at.
+ASTRA_CAP = "medium"
+
+# Efforts Astra may run at without the user naming it, lowest first.
+WITHIN_CAP = ("none", "low", "medium")
+
 DENY_REASON = (
-    "GPT-6 Astra runs only when the user's own message names Astra. This "
-    "message did not, so send the same brief to gpt-5.6-sol instead."
+    "GPT-6 Astra runs above medium effort only when the user's own message "
+    "names Astra. This message did not, so send the same brief to "
+    "gpt-6-astra at medium, the escalation rung, or to gpt-5.6-sol."
 )
 
 
@@ -72,7 +83,14 @@ def main():
     if not isinstance(model, str) or not model:
         return
 
-    if model in ASTRA_MODELS and not plugin_config.read_astra(event.get("session_id")):
+    config = tool_input.get("config")
+    if not isinstance(config, dict):
+        config = {}
+    effort = config.get(EFFORT_KEY)
+
+    summoned = model in ASTRA_MODELS and plugin_config.read_astra(event.get("session_id"))
+
+    if model in ASTRA_MODELS and not summoned and effort and effort not in WITHIN_CAP:
         json.dump(
             {
                 "hookSpecificOutput": {
@@ -85,20 +103,18 @@ def main():
         )
         return
 
-    config = tool_input.get("config")
-    if not isinstance(config, dict):
-        config = {}
-    if config.get(EFFORT_KEY):
+    if effort:
         return
 
+    fill = ASTRA_CAP if model in ASTRA_MODELS and not summoned else DEFAULT_EFFORT
     updated = dict(tool_input)
-    updated["config"] = dict(config, **{EFFORT_KEY: DEFAULT_EFFORT})
+    updated["config"] = dict(config, **{EFFORT_KEY: fill})
     json.dump(
         {
             "hookSpecificOutput": {
                 "hookEventName": "PreToolUse",
                 "permissionDecision": "allow",
-                "permissionDecisionReason": f"Set {EFFORT_KEY} to {DEFAULT_EFFORT} on the Codex call.",
+                "permissionDecisionReason": f"Set {EFFORT_KEY} to {fill} on the Codex call.",
                 "updatedInput": updated,
             }
         },

@@ -120,7 +120,7 @@ When nothing changed, confirm each still matches and say so.
 | `plugins/gborges-standard/scripts/setup.sh` | The four `write_agent` calls, the `[agents]` default, and its `assert` |
 | `tests/test_setup.py` | The `AGENTS` dict and the default-model asserts |
 | `plugins/gborges-standard/hooks/route-spawns.py` | `FABLE_TYPES`, `FALLBACK_TYPE`, `DEFAULT_TYPE` for the Claude summoned, escalation, and default rungs |
-| `plugins/gborges-standard/hooks/route-codex.py` | `ASTRA_MODELS` and the deny reason's fallback model for the Codex summoned rung |
+| `plugins/gborges-standard/hooks/route-codex.py` | `ASTRA_MODELS`, `ASTRA_CAP` (the escalation rung's effort, the most an unsummoned call may run at), and the deny reason |
 | `plugins/gborges-standard/hooks/plugin_config.py` | The mention words for the summoned models |
 | `README.md` | The component table rows for the agents and `codex-delegate`, and the Codex table |
 | `docs/codex-parity.md` | The Codex agent table and the model slug check |

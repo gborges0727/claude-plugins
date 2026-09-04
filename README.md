@@ -67,8 +67,8 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `writing-voice` | Skill | Two-pass ritual for every artifact (a file, a PR body, a commit message, a comment), whatever its length. The style alone shapes chat replies |
 | `read-aloud-prep` | Skill | Rewriting documents so a TTS voice reads them cleanly |
 | `bear-notes` | Skill | Writing into Bear without minting junk tags and wikilinks |
-| `route-codex.py` | `PreToolUse` hook | Guards the `mcp__codex__codex` call the `codex-delegate` skill makes. Refuses GPT-6 Astra unless the user's latest message named Astra, and fills in `xhigh` when the call set no reasoning effort |
-| `codex-delegate` | Skill | Handing a subtask to the Codex CLI on one of four rungs (Luna, Terra, Sol, or the user-summoned Astra), so ChatGPT-plan quota pays for it instead of Claude tokens. Needs the `codex` MCP server registered |
+| `route-codex.py` | `PreToolUse` hook | Guards the `mcp__codex__codex` call the `codex-delegate` skill makes. Lets GPT-6 Astra run at medium on its own, refuses it above medium unless the user's latest message named Astra, and fills in the effort when the call set none |
+| `codex-delegate` | Skill | Handing a subtask to the Codex CLI on one of four rungs (Luna, Sol, Astra at medium, or the user-summoned Astra at xhigh), so ChatGPT-plan quota pays for it instead of Claude tokens. Needs the `codex` MCP server registered |
 | `model-routing-review` | Skill | Explicit invocation only. Re-derives the delegation ladder from today's catalog, prices, and scores, rewrites [docs/model-routing.md](docs/model-routing.md), and lists every file the ladder change touches |
 | `add-to-git` | Command | Explicit invocation only, never model-triggered |
 | `setup` | Command | Writes `~/.claude/gborges-standard.json`, the per-machine switches for Fable access and Codex delegation, and the Codex CLI's own model, subagent, and status line config under `~/.codex`. Wraps `scripts/setup.sh`, which does the same with no model turn |
@@ -122,12 +122,12 @@ agents:
 | Codex agent | Model and effort | Mirrors |
 |---|---|---|
 | `luna-xhigh` | `gpt-5.6-luna`, xhigh | `sonnet-medium`, fully specified edits and runs |
-| `terra-xhigh` | `gpt-5.6-terra`, xhigh | `opus-medium`, the default worker |
-| `sol-xhigh` | `gpt-5.6-sol`, xhigh | `opus-xhigh`, the one escalation step |
+| `sol-xhigh` | `gpt-5.6-sol`, xhigh | `opus-medium`, the default worker |
+| `astra-medium` | `gpt-6-astra`, medium | `opus-xhigh`, the one escalation step |
 | `astra-xhigh` | `gpt-6-astra`, xhigh | `fable-xhigh`, only when the user names it |
 
 In `~/.codex/config.toml` it sets the orchestrator to `gpt-5.6-sol` at
-medium effort, sets `agents.default_subagent_model` to `gpt-5.6-terra` at
+medium effort, sets `agents.default_subagent_model` to `gpt-5.6-sol` at
 xhigh so an unnamed spawn lands there, and sets `tui.status_line` to the
 same seven fields the Claude Code status line shows (directory, branch,
 dirty marker, model with effort, context used, 5-hour limit, weekly limit).

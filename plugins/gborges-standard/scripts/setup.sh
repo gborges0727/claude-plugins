@@ -10,7 +10,7 @@
 # A third flag, --codex-config, writes the Codex CLI's own model setup into
 # ~/.codex: four agent files under ~/.codex/agents that mirror the plugin's
 # four Claude subagents, the [agents] defaults that send every spawn to
-# GPT-5.6 Terra at xhigh effort, the orchestrator model, and the footer
+# GPT-5.6 Sol at xhigh effort, the orchestrator model, and the footer
 # status line. It defaults to on when a codex binary is on PATH.
 #
 # Run it with all flags and it writes the files without asking anything.
@@ -162,14 +162,17 @@ printf 'Wrote %s: %s\n' "$config_file" "$(tr -d '\n' < "$config_file")"
 # The Codex side. Codex has no plugin field for agents or for config.toml,
 # so this is the one place they get written. Each agent mirrors one Claude
 # subagent: luna-xhigh takes fully specified edits like sonnet-medium,
-# terra-xhigh is the default worker like opus-medium, sol-xhigh is the one
+# sol-xhigh is the default worker like opus-medium, astra-medium is the one
 # escalation step like opus-xhigh, and astra-xhigh runs only when the user
-# names it, like fable-xhigh. Terra is the default rather than Luna because
-# OpenAI positions Luna for clear repeatable work and Terra as the
-# all-rounder, Luna's long-context recall drops to 41% past 256K tokens, and
-# Codex's catalog marks Luna multi_agent_version v1 while Sol, Terra, and
-# Astra are v2, so a Sol orchestrator's spawn cannot land on Luna by model
-# name.
+# names it, like fable-xhigh. Terra is out. On CodeRabbit's long-horizon
+# coding run Terra passed 40.7% of tasks against Sol's 63.7% while spending
+# 2.6 times the output tokens, so it costs more per finished task than Sol
+# on the work the default rung sends. Astra at medium is the escalation
+# because the model step is what moves accuracy: Astra leads Sol by 20
+# points on Terminal-Bench 4.0, while Sol at max buys almost nothing over
+# Sol at xhigh. Sol is also the default rung Codex can actually spawn, since
+# Codex's catalog marks Luna multi_agent_version v1 while Sol and Astra are
+# v2, so a Sol orchestrator's spawn cannot land on Luna by model name.
 codex_dir="${HOME}/.codex"
 agents_dir="${codex_dir}/agents"
 codex_config_file="${codex_dir}/config.toml"
@@ -192,20 +195,21 @@ write_agent luna-xhigh gpt-5.6-luna xhigh \
   "GPT-5.6 Luna at xhigh effort. Use for an edit or a run whose brief names the exact change and a command that checks it, for parallel copies of one such task across files, and for fetching a named doc page outside the codebase. Never for reading code to reach a conclusion, and never for a brief whose files run past 272K tokens." \
   "You are a worker handling one fully specified unit of work from the orchestrating session. Run the check the brief names before you report. If the check fails or you cannot finish, say so plainly and quote the failing output instead of working around it."
 
-write_agent terra-xhigh gpt-5.6-terra xhigh \
-  "GPT-5.6 Terra at xhigh effort. The default for delegated work, and the floor for any task that reads code to reach a conclusion (an investigation, a diagnosis, a review, a design choice)." \
+write_agent sol-xhigh gpt-5.6-sol xhigh \
+  "GPT-5.6 Sol at xhigh effort. The default for delegated work, and the floor for any task that reads code to reach a conclusion (an investigation, a diagnosis, a review, a design choice)." \
   "You are a general-purpose worker handling a delegated unit of work from the orchestrating session. When the brief names a check, run it before you report. If the check fails or you cannot finish, say so plainly and quote the failing output."
 
-write_agent sol-xhigh gpt-5.6-sol xhigh \
-  "GPT-5.6 Sol at xhigh effort. Use for a task that already failed once on terra-xhigh or luna-xhigh, for a task that is one long dependent chain the orchestrator cannot split into parallel pieces, and for a brief that must read past 272K tokens of context." \
+write_agent astra-medium gpt-6-astra medium \
+  "GPT-6 Astra at medium effort. Use for a task that already failed once on sol-xhigh or luna-xhigh, and for a task that is one long dependent chain the orchestrator cannot split into parallel pieces." \
   "You are a worker taking a hard unit of work from the orchestrating session. The brief may carry the exact output of a failed earlier attempt. Start from that output, not from the earlier approach. When the brief names a check, run it before you report, and quote the failing output if it still fails."
 
 write_agent astra-xhigh gpt-6-astra xhigh \
-  "GPT-6 Astra at xhigh effort. Runs only when the user's own message names astra-xhigh. Every other dispatch goes to sol-xhigh instead." \
+  "GPT-6 Astra at xhigh effort. Runs only when the user's own message names astra-xhigh. Every other dispatch goes to astra-medium instead." \
   "You are the strongest worker available, summoned by the user for one hard unit of work. Take the whole task to the end. When the brief names a check, run it before you report, and quote the failing output if it still fails."
 
-# The luna-medium name was retired, so a file left by an earlier run goes.
-rm -f "${agents_dir}/luna-medium.toml"
+# The luna-medium and terra-xhigh names were retired, so files left by an
+# earlier run go.
+rm -f "${agents_dir}/luna-medium.toml" "${agents_dir}/terra-xhigh.toml"
 
 # Replace the managed entries in config.toml and keep everything else:
 # the top-level model and effort lines, the [agents] table, and the [tui]
@@ -256,9 +260,9 @@ managed_top = (
     'model_reasoning_effort = "medium"\n'
 )
 managed_tables = (
-    "# Written by gborges-standard setup.sh: spawns default to Terra xhigh unless they name an agent in ~/.codex/agents.\n"
+    "# Written by gborges-standard setup.sh: spawns default to Sol xhigh unless they name an agent in ~/.codex/agents.\n"
     "[agents]\n"
-    'default_subagent_model = "gpt-5.6-terra"\n'
+    'default_subagent_model = "gpt-5.6-sol"\n'
     'default_subagent_reasoning_effort = "xhigh"\n'
     "\n"
     "# Written by gborges-standard setup.sh: the Claude Code status line fields, in the same order.\n"
@@ -270,7 +274,7 @@ out = managed_top + ("\n" + body + "\n" if body else "") + "\n" + managed_tables
 
 parsed = tomllib.loads(out)
 assert parsed["model"] == "gpt-5.6-sol"
-assert parsed["agents"]["default_subagent_model"] == "gpt-5.6-terra"
+assert parsed["agents"]["default_subagent_model"] == "gpt-5.6-sol"
 assert len(parsed["tui"]["status_line"]) == 7
 
 tmp = path + ".tmp"

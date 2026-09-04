@@ -312,30 +312,41 @@ class NoCodexLine(HookCase):
 
 
 class CodexCalls(HookCase):
-    def test_astra_without_a_mention_is_denied_and_pointed_at_sol(self):
+    def test_astra_without_a_mention_and_no_effort_runs_at_medium(self):
         out = self.codex("gpt-6-astra")["hookSpecificOutput"]
-        self.assertEqual(out["permissionDecision"], "deny")
-        self.assertIn("gpt-5.6-sol", out["permissionDecisionReason"])
+        self.assertEqual(out["permissionDecision"], "allow")
+        self.assertEqual(out["updatedInput"]["config"]["model_reasoning_effort"], "medium")
 
-    def test_astra_after_a_mention_runs_at_xhigh(self):
+    def test_astra_at_medium_without_a_mention_passes_untouched(self):
+        self.assertIsNone(self.codex("gpt-6-astra", config={"model_reasoning_effort": "medium"}))
+        self.assertIsNone(self.codex("gpt-6-astra", config={"model_reasoning_effort": "low"}))
+
+    def test_astra_above_medium_without_a_mention_is_denied(self):
+        for effort in ("high", "xhigh", "max", "ultra"):
+            out = self.codex("gpt-6-astra", config={"model_reasoning_effort": effort})["hookSpecificOutput"]
+            self.assertEqual(out["permissionDecision"], "deny", effort)
+            self.assertIn("medium", out["permissionDecisionReason"])
+
+    def test_astra_after_a_mention_runs_at_xhigh_by_default(self):
         self.submit("consult astra on this one")
         out = self.codex("gpt-6-astra")["hookSpecificOutput"]
         self.assertEqual(out["permissionDecision"], "allow")
         self.assertEqual(out["updatedInput"]["config"]["model_reasoning_effort"], "xhigh")
 
+    def test_astra_after_a_mention_keeps_max(self):
+        self.submit("ask astra at max")
+        self.assertIsNone(self.codex("gpt-6-astra", config={"model_reasoning_effort": "max"}))
+
     def test_a_mention_in_one_session_does_not_unlock_another(self):
         self.submit("ask Astra", session_id="a")
-        self.assertEqual(
-            self.codex("gpt-6-astra", session_id="b")["hookSpecificOutput"]["permissionDecision"],
-            "deny",
-        )
+        out = self.codex("gpt-6-astra", session_id="b", config={"model_reasoning_effort": "xhigh"})
+        self.assertEqual(out["hookSpecificOutput"]["permissionDecision"], "deny")
 
-    def test_a_later_message_without_the_word_locks_astra_again(self):
+    def test_a_later_message_without_the_word_caps_astra_again(self):
         self.submit("consult astra")
         self.submit("now fix the tests")
-        self.assertEqual(
-            self.codex("gpt-6-astra")["hookSpecificOutput"]["permissionDecision"], "deny"
-        )
+        out = self.codex("gpt-6-astra", config={"model_reasoning_effort": "xhigh"})
+        self.assertEqual(out["hookSpecificOutput"]["permissionDecision"], "deny")
 
     def test_an_astra_mention_does_not_unlock_fable(self):
         self.submit("consult astra")
@@ -347,11 +358,11 @@ class CodexCalls(HookCase):
         self.assertEqual(out["updatedInput"]["config"], {"model_reasoning_effort": "xhigh"})
         self.assertEqual(out["updatedInput"]["cwd"], "/repo")
 
-    def test_an_effort_the_call_set_is_kept(self):
+    def test_an_effort_the_call_set_is_kept_on_sol(self):
         self.assertIsNone(self.codex("gpt-5.6-sol", config={"model_reasoning_effort": "max"}))
 
     def test_other_config_keys_survive_the_fill_in(self):
-        out = self.codex("gpt-5.6-terra", config={"sandbox_mode": "read-only"})
+        out = self.codex("gpt-5.6-sol", config={"sandbox_mode": "read-only"})
         self.assertEqual(
             out["hookSpecificOutput"]["updatedInput"]["config"],
             {"sandbox_mode": "read-only", "model_reasoning_effort": "xhigh"},

@@ -165,9 +165,9 @@ can call.
 
 A third flag, `--codex-config on`, writes the Codex CLI's copy of this
 routing: four agents under `~/.codex/agents` (`luna-xhigh` for fully
-specified edits, `terra-xhigh` as the default worker, `sol-xhigh` as the
+specified edits, `sol-xhigh` as the default worker, `astra-medium` as the
 escalation step, `astra-xhigh` only when the user names it), the `[agents]`
-defaults in `~/.codex/config.toml` that send an unnamed spawn to Terra at
+defaults in `~/.codex/config.toml` that send an unnamed spawn to Sol at
 xhigh, the orchestrator model, and the status line. The README's Codex
 section lists the mapping.
 
@@ -198,10 +198,12 @@ word fork, in two per-session state files under
 `~/.claude/gborges-standard/state/`.
 
 `hooks/route-codex.py` runs before every `mcp__codex__codex` call, the
-tool the `codex-delegate` skill uses to start a Codex thread. It refuses a
-call on `gpt-6-astra` unless the latest user message named Astra, with a
-reason that points the orchestrator at `gpt-5.6-sol`, and it sets the
-reasoning effort to `xhigh` when the call left it out. The four Codex
+tool the `codex-delegate` skill uses to start a Codex thread. It lets a
+call on `gpt-6-astra` run at medium, the escalation rung, on the
+orchestrator's own judgment. Above medium it refuses the call unless the
+latest user message named Astra, with a reason that points the
+orchestrator at Astra at medium. When a call sets no effort it fills in
+`xhigh`, or `medium` on an unsummoned Astra call. The four Codex
 rungs, their prices, and the scores behind them are in
 `docs/model-routing.md`.
 
