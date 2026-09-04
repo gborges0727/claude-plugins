@@ -146,9 +146,9 @@ same pass rate. On three briefs that is not an effort curve, but it says
 medium buys nothing on the kind of brief the default rung gets, so xhigh
 stays.
 
-The same three briefs then ran on Luna and Sol through Codex and on Opus
-5 through the plugin's `opus-medium` and `opus-xhigh` agents. All
-eighteen runs passed. Token totals are what each host billed for the three runs, so
+The same three briefs then ran on Luna, Sol, Sol at max, and Astra at
+medium through Codex, and on Opus 5 through the plugin's `opus-medium`
+and `opus-xhigh` agents. All twenty-four runs passed. Token totals are what each host billed for the three runs, so
 the Codex figures include Codex's own system prompt and the Opus figures
 include Claude Code's plus the writing rules the spawn hook appends. The
 API-equivalent cost takes 80% of tokens at the input price and 20% at
@@ -162,6 +162,8 @@ the output price.
 | Terra, xhigh | 81,699 | 141 | $0.33 |
 | Sol, medium | 95,966 | 148 | $0.69 |
 | Sol, xhigh | 98,292 | 179 | $0.71 |
+| Sol, max | 126,622 | 235 | $0.91 |
+| Astra, medium | 89,632 | 112 | $1.61 |
 | Opus 5, medium | 128,054 | 71 | $1.15 |
 | Opus 5, xhigh | 137,221 | 108 | $1.23 |
 
