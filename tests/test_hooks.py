@@ -387,5 +387,68 @@ class CodexCalls(HookCase):
         )
 
 
+class CodexExecCommands(HookCase):
+    """The same rules applied to a Bash command that runs `codex exec`."""
+
+    def bash(self, command, session_id="s1"):
+        return run_hook(
+            CODEX,
+            {"session_id": session_id, "tool_name": "Bash", "tool_input": {"command": command}},
+            self.home,
+        )
+
+    def test_a_luna_command_without_an_effort_gets_the_flag_after_exec(self):
+        out = self.bash("codex exec -m gpt-5.6-luna -C /repo --json 'do it' > out.jsonl")["hookSpecificOutput"]
+        self.assertEqual(out["permissionDecision"], "allow")
+        self.assertEqual(
+            out["updatedInput"]["command"],
+            "codex exec -c model_reasoning_effort=xhigh -m gpt-5.6-luna -C /repo --json 'do it' > out.jsonl",
+        )
+
+    def test_an_effort_the_command_set_is_kept(self):
+        self.assertIsNone(self.bash("codex exec -m gpt-5.6-sol -c model_reasoning_effort=max 'do it'"))
+        self.assertIsNone(self.bash('codex exec -m gpt-5.6-sol -c model_reasoning_effort="max" - < brief.md'))
+        self.assertIsNone(self.bash("codex exec --model=gpt-5.6-sol --config model_reasoning_effort=low 'x'"))
+
+    def test_astra_above_medium_without_a_mention_is_denied(self):
+        out = self.bash("codex exec -m gpt-6-astra -c model_reasoning_effort=xhigh 'do it'")["hookSpecificOutput"]
+        self.assertEqual(out["permissionDecision"], "deny")
+        self.assertIn("medium", out["permissionDecisionReason"])
+
+    def test_astra_without_a_mention_and_no_effort_runs_at_medium(self):
+        out = self.bash("codex exec -m gpt-6-astra 'do it'")["hookSpecificOutput"]
+        self.assertEqual(out["permissionDecision"], "allow")
+        self.assertIn("codex exec -c model_reasoning_effort=medium -m gpt-6-astra", out["updatedInput"]["command"])
+
+    def test_astra_after_a_mention_runs_at_xhigh(self):
+        self.submit("consult astra")
+        out = self.bash("codex exec -m gpt-6-astra 'do it'")["hookSpecificOutput"]
+        self.assertIn("model_reasoning_effort=xhigh", out["updatedInput"]["command"])
+        self.assertIsNone(self.bash("codex exec -m gpt-6-astra -c model_reasoning_effort=max 'do it'"))
+
+    def test_the_model_may_come_from_a_config_flag(self):
+        out = self.bash('codex exec -c model="gpt-6-astra" -c model_reasoning_effort=xhigh x')
+        self.assertEqual(out["hookSpecificOutput"]["permissionDecision"], "deny")
+
+    def test_a_resume_command_gets_the_same_treatment(self):
+        out = self.bash("codex exec resume 01a0-thread -m gpt-5.6-luna - < next.md")["hookSpecificOutput"]
+        self.assertEqual(out["updatedInput"]["command"], "codex exec -c model_reasoning_effort=xhigh resume 01a0-thread -m gpt-5.6-luna - < next.md")
+
+    def test_a_command_in_a_chain_only_reads_its_own_flags(self):
+        out = self.bash("cd /repo && codex exec -m gpt-5.6-luna 'x' && echo -c model_reasoning_effort=max")
+        self.assertIn("codex exec -c model_reasoning_effort=xhigh -m gpt-5.6-luna", out["hookSpecificOutput"]["updatedInput"]["command"])
+
+    def test_a_command_with_no_model_is_left_alone(self):
+        self.assertIsNone(self.bash("codex exec 'do it'"))
+
+    def test_a_command_the_shell_cannot_split_is_left_alone(self):
+        self.assertIsNone(self.bash("codex exec -m gpt-6-astra -c model_reasoning_effort=xhigh 'unterminated"))
+
+    def test_other_bash_commands_are_ignored(self):
+        self.assertIsNone(self.bash("codex mcp list"))
+        self.assertIsNone(self.bash("git status"))
+        self.assertIsNone(self.bash("echo codex exec"))
+
+
 if __name__ == "__main__":
     unittest.main()

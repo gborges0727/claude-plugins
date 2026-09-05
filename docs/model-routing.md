@@ -25,10 +25,11 @@ dispatch in the name it types.
 | escalation | `opus-xhigh` | `astra-medium` | A task that failed once below it. One long dependent chain the orchestrator cannot split |
 | summoned | `fable-xhigh` | `astra-xhigh` | Only when the user's own message names the agent. On Codex, any Astra call above medium effort |
 
-On Claude Code, a Codex rung is not a Claude agent. It is a call to the
-`mcp__codex__codex` tool with the rung's model and effort, and the
-`codex-delegate` skill makes that call. In the Codex CLI, the same four
-rungs are agent files under `~/.codex/agents` that `setup.sh` writes.
+On Claude Code, a Codex rung is not a Claude agent. It is a `codex exec`
+command with the rung's model and effort, run in the background through
+the Bash tool, and the `codex-delegate` skill writes that command. In the
+Codex CLI, the same four rungs are agent files under `~/.codex/agents`
+that `setup.sh` writes.
 
 ## Which host takes a task
 

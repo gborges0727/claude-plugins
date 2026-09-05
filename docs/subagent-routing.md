@@ -197,14 +197,16 @@ whether the message named `@agent-fable-xhigh`, and whether it used the
 word fork, in two per-session state files under
 `~/.claude/gborges-standard/state/`.
 
-`hooks/route-codex.py` runs before every `mcp__codex__codex` call, the
-tool the `codex-delegate` skill uses to start a Codex thread. It lets a
-call on `gpt-6-astra` run at medium, the escalation rung, on the
-orchestrator's own judgment. Above medium it refuses the call unless the
-latest user message named Astra, with a reason that points the
-orchestrator at Astra at medium. When a call sets no effort it fills in
-`xhigh`, or `medium` on an unsummoned Astra call. The four Codex
-rungs, their prices, and the scores behind them are in
-`docs/model-routing.md`.
+`hooks/route-codex.py` runs before every Codex delegation. That is a
+Bash call whose command runs `codex exec`, the way the `codex-delegate`
+skill starts a lane, or an `mcp__codex__codex` call. It lets a run on
+`gpt-6-astra` go at medium, the escalation rung, on the orchestrator's
+own judgment. Above medium it refuses the run unless the latest user
+message named Astra, with a reason that points the orchestrator at Astra
+at medium. When a run sets no effort it fills in `xhigh`, or `medium` on
+an unsummoned Astra run. On a command the fill-in inserts `-c
+model_reasoning_effort=...` right after `codex exec`. Every other Bash
+command passes untouched. The four Codex rungs, their prices, and the
+scores behind them are in `docs/model-routing.md`.
 
 `tests/test_hooks.py` covers all three hooks and runs in CI.

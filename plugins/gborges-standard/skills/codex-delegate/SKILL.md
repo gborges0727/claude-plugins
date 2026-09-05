@@ -13,35 +13,29 @@ description: >-
 
 # Codex delegation
 
-Delegation runs on two tools that a registered Codex MCP server provides:
+A delegation is one `codex exec` command run through the Bash tool with `run_in_background`
+set. The command starts a Codex thread, runs it to the end, and writes Codex's final message to
+a file. Claude Code notifies you when the process exits. Nothing in this session waits on it.
 
-- `mcp__codex__codex` starts a thread. It returns Codex's final text and a `threadId`.
-- `mcp__codex__codex-reply` continues that thread. It takes `threadId` and `prompt`.
+Do not delegate through the `mcp__codex__codex` tool. Claude Code runs MCP tool calls one at a
+time and a Codex call returns only when the whole task is done, so a fan-out of five lanes
+through MCP starts the fifth lane eight minutes after the first. The MCP tool remains fine for
+one short question where you would wait for the answer anyway.
 
-## Check the tools exist first
+## Check the binary exists first
 
 This bundle also installs into Codex, so a session running this skill may already be Codex. When
 you are Codex, skip the skill and do the work yourself. Handing a Codex subtask to Codex buys
 nothing and spends the allowance twice.
 
-Look for `mcp__codex__codex` in your available tools before planning any of what follows. A cloud
-VM and a fresh machine both run this bundle without a Codex install, so the tools are often
-absent.
-
-When they are absent, do the work in this session and say once, in a sentence, that Codex was not
-reachable. Offer the registration command only if the user asks how to get it:
-
-```
-claude mcp add --transport stdio --scope user codex -- codex mcp-server
-```
-
-That command needs the Codex CLI installed and `codex login` already run, so it is the user's
-step, not yours. A session that adds the server mid-conversation still sees no tools until it
-restarts.
+Run `command -v codex` before planning any of what follows. A cloud VM and a fresh machine both
+run this bundle without a Codex install, so the binary is often absent. When it is, do the work
+in this session and say once, in a sentence, that Codex was not reachable. Installing and
+signing in (`codex login`) is the user's step, not yours.
 
 ## The allowance you are spending
 
-Codex signs in through the ChatGPT account, not an API key, so a delegated call spends the same
+Codex signs in through the ChatGPT account, not an API key, so a delegated run spends the same
 five-hour allowance as the Codex web app and the IDE extension. Delegating a whole afternoon of
 work can drain the allowance the user also wants for their own Codex sessions.
 
@@ -53,7 +47,7 @@ from what was said here? Does a command check the result?
 
 Hand Codex any brief that answers yes to both: renaming a symbol across forty files, writing
 tests against an interface you paste in, porting one pattern to every call site, filling in
-boilerplate the shape of which you already decided, or finding why a named test fails. Pick the
+boilerplate whose shape you already decided, or finding why a named test fails. Pick the
 rung that mirrors the Claude agent the task would have taken.
 
 Keep in this session anything that needs the conversation (design decisions, work in a codebase
@@ -64,15 +58,15 @@ conclusion with no check is the failure nothing catches.
 
 ## Pick the rung
 
-Four Codex rungs mirror the plugin's four Claude agents. Each is a `model` plus a
-`model_reasoning_effort`, and the name says both.
+Four Codex rungs mirror the plugin's four Claude agents. Each is a model plus an effort, and the
+name says both.
 
-| Rung | `model` | Effort | Mirrors | Takes |
+| Rung | `-m` | Effort | Mirrors | Takes |
 |---|---|---|---|---|
 | `luna-xhigh` | `gpt-5.6-luna` | `xhigh` | `sonnet-medium` | An edit or a run whose brief names the exact change and a command that checks it. Parallel copies of one such task. Never a brief past 272K tokens, since Luna's recall past 256K is 41% |
 | `sol-xhigh` | `gpt-5.6-sol` | `xhigh` | `opus-medium` | The default. Any task that reads code to reach a result a command can check, any second-model opinion, and any brief that must read past 272K tokens |
 | `astra-medium` | `gpt-6-astra` | `medium` | `opus-xhigh` | A task that failed once on a lower rung. One long dependent chain. The orchestrator picks this on its own |
-| `astra-xhigh` | `gpt-6-astra` | `xhigh` | `fable-xhigh` | Only when the user's latest message names Astra. A hook refuses any Astra call above medium the user did not ask for |
+| `astra-xhigh` | `gpt-6-astra` | `xhigh` | `fable-xhigh` | Only when the user's latest message names Astra. A hook refuses any Astra run above medium the user did not ask for |
 
 Terra has no rung. On long-horizon coding it passes 23 points fewer tasks than Sol while
 spending 2.6 times the output tokens, so it costs more per finished task than Sol on the work
@@ -87,56 +81,80 @@ the same as Sol at xhigh. After a second failure report to the user instead of c
 Astra costs 2.5 times Sol per token and per unit of ChatGPT allowance. At medium it is the
 escalation rung and needs no permission. Above medium (high, xhigh, max, ultra) it runs only
 when the user named Astra in their latest message ("consult astra", "ask astra at max"). The
-hook fills in medium on an unnamed Astra call that set no effort, and xhigh on a named one.
-`ultra` spawns subagents inside the call and multiplies what one call spends, so leave it to the
+hook fills in medium on an unnamed Astra run that set no effort, and xhigh on a named one.
+`ultra` spawns subagents inside the run and multiplies what one run spends, so leave it to the
 user to ask for.
 
 `docs/model-routing.md` in this repo holds the prices and scores behind the table.
 
-## Every call sets these
+## The command
 
-| Argument | Value | Why |
-|---|---|---|
-| `model` | the rung's model | Unpinned, Codex runs the orchestrator model from `~/.codex/config.toml`, which is Sol |
-| `config` | `{"model_reasoning_effort": "xhigh"}`, or `"medium"` on the escalation rung | One shot with no conversation to correct it, so the effort that avoids a retry is the cheap one |
-| `cwd` | absolute path to the repo | Codex resolves a relative path against the MCP server's own working directory, not yours |
-| `sandbox` | `read-only` to investigate, `workspace-write` to edit | The sandbox is the guardrail, since approvals are off |
-| `approval-policy` | `never` | Codex has no terminal to ask in. Any other policy stalls the call until it times out |
+Write the brief to a file in the scratchpad first, then run this with `run_in_background` set:
 
-Every model here reads up to 1,050,000 tokens and writes up to 128,000 on the API, and OpenAI
-reprices the whole request (double input, output up by half) once the input passes 272K tokens.
-Keep briefs under that line unless the task needs the room, and then send it to Sol.
+```sh
+codex exec -m gpt-5.6-luna -c model_reasoning_effort=xhigh \
+  -C /absolute/path/to/repo -s workspace-write -c approval_policy=never \
+  -c mcp_servers.playwright.enabled=false -c mcp_servers.chrome-devtools.enabled=false \
+  --json -o <scratch>/<lane>.md - < <scratch>/<lane>.brief.md > <scratch>/<lane>.jsonl 2>&1
+```
 
-## Write the prompt as a briefing
+| Part | Why |
+|---|---|
+| `-m` and `-c model_reasoning_effort=` | The rung. Unpinned, Codex runs the orchestrator model from `~/.codex/config.toml` at its own default effort, which is low on Sol. The hook fills in the effort when the command omits it |
+| `-C /absolute/path` | Codex resolves a relative path against its own working directory, not yours |
+| `-s read-only` to investigate, `-s workspace-write` to edit | The sandbox is the guardrail, since approvals are off |
+| `-c approval_policy=never` | Codex has no terminal to ask in. Any other policy stalls the run |
+| the two `mcp_servers...enabled=false` flags | Each Codex thread otherwise starts its own Playwright and Chrome DevTools servers, each with a headless Chrome, and they outlive the thread. Drop the flags only for a brief that needs a browser |
+| `--json` | Prints one event per line to stdout. The first line holds the `thread_id` a follow-up needs |
+| `-o <lane>.md` | Codex writes its final message here. Read this file, not the JSON stream |
+| `- < <lane>.brief.md` | The prompt comes from the file, so no shell quoting touches it. `codex exec` reads stdin either way, so always redirect it |
+| `> <lane>.jsonl 2>&1` | Keeps the event stream out of the tool result and on disk for a failed run |
 
-State the task, the files, the constraints, and the definition of done, the way you would brief a
-contractor who has the repo and nothing else. Paste the interface, the example, the error text.
-
-Codex's reply lands in this context whole, so a chatty delegate costs Claude tokens on the way
-back. End every prompt with a return contract:
-
-> Return under 15 lines: every file you changed and what changed in it, then anything you could
-> not finish. No transcript, no narration, no code blocks unless the diff itself is the answer.
-
-## Verify before you build on it
-
-Codex's summary is a claim, not a result. Run `git status` and read the diff of every file it
-names, plus any file it changed without naming. The step is done when you have read the diff of
-every changed file and run whatever the repo uses to check it, tests or typecheck or lint. Report
-what the diff actually shows, not what the summary said.
-
-## Fanning out
-
-Several `mcp__codex__codex` calls in one message run at once. Split the work so no two workers
-touch the same file, or give each one its own git worktree. Parallel workers editing one file
-overwrite each other, and neither summary mentions it.
-
-## When Codex refuses to start
-
-Codex only runs inside a git repository or a directory marked trusted. The MCP tools expose no
-flag to skip that check, so add the directory to `~/.codex/config.toml`:
+`codex exec` refuses to run outside a git repository unless `--skip-git-repo-check` is set. A
+directory Codex has not seen before may also need a trust entry in `~/.codex/config.toml`:
 
 ```toml
 [projects."/absolute/path"]
 trust_level = "trusted"
 ```
+
+## Write the brief
+
+State the task, the files, the constraints, and the definition of done, the way you would brief a
+contractor who has the repo and nothing else. Paste the interface, the example, the error text.
+
+Codex's final message enters this context when you read it, so a chatty delegate costs Claude
+tokens on the way back. End every brief with a return contract:
+
+> Return under 15 lines: every file you changed and what changed in it, then anything you could
+> not finish. No transcript, no narration, no code blocks unless the diff itself is the answer.
+
+## Fanning out
+
+Every lane is its own background Bash call, so issue all of them in one message and they start
+within seconds of each other. Give each lane its own `.brief.md`, `.md`, and `.jsonl` file.
+Split the work so no two lanes touch the same file, or give each lane its own git worktree.
+Parallel lanes editing one file overwrite each other, and neither summary mentions it.
+
+Stopping a lane with `TaskStop` kills its `codex exec` process, which ends the Codex run and
+stops its spending. Anything the lane wrote to the worktree before the stop is still there.
+
+## Follow-ups
+
+The first line of a lane's `.jsonl` file names its thread:
+
+```json
+{"type":"thread.started","thread_id":"01a0..."}
+```
+
+Continue that thread with `codex exec resume <thread_id> - < <scratch>/<lane>.next.md`, with
+the same `-m`, `-c`, `-C`, `-s`, `--json`, and `-o` flags and again in the background. Codex
+keeps the thread's history, so the follow-up needs only the new instruction.
+
+## Verify before you build on it
+
+Codex's final message is a claim, not a result. Run `git status` and read the diff of every file
+it names, plus any file it changed without naming. The step is done when you have read the diff
+of every changed file and run whatever the repo uses to check it, tests or typecheck or lint.
+Report what the diff actually shows, not what the message said. A lane whose `.md` file is
+missing or empty ended early. Its `.jsonl` file holds the error.

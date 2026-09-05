@@ -186,8 +186,8 @@ Spend words on clarity, save them on scope.
   result goes to the `codex-delegate` skill first, on the Codex rung that
   mirrors the Claude rung the task would have taken. A brief that leans on
   what was said here, or whose result is a conclusion nobody downstream
-  checks, stays on the Claude agent. So do all briefs when the Codex tools
-  are absent from this session.
+  checks, stays on the Claude agent. So do all briefs when the `codex`
+  binary is absent from this machine.
 - The skill's four Codex rungs mirror the four Claude agents: `luna-xhigh`
   for `sonnet-medium`'s work, `sol-xhigh` for `opus-medium`'s work and for
   a second-model opinion, `astra-medium` for `opus-xhigh`'s, and

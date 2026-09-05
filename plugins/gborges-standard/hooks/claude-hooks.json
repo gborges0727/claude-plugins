@@ -20,7 +20,7 @@
         ]
       },
       {
-        "matcher": "^mcp__codex__codex$",
+        "matcher": "^(mcp__codex__codex|Bash)$",
         "hooks": [
           {
             "type": "command",
