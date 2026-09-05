@@ -38,7 +38,9 @@ proceeds. The switch below silences the reminder line only. The mention
 record and the Codex line are written either way, because the two rules
 they feed do not depend on the writing style. A third record of the same
 shape says whether the message named Astra, which route-codex.py reads
-before it lets a Codex call run on that model.
+before it lets a Codex call run on that model. A message that invokes the
+pair-debate skill counts as naming both Fable and Astra, because that
+skill always runs the two of them at xhigh.
 
 Config:
   WRITING_VOICE_REMIND  1|0  switch for the reminder line (default 1)
@@ -81,6 +83,10 @@ except ImportError:
             return False
 
         @staticmethod
+        def pair_debate_from_prompt(prompt):
+            return False
+
+        @staticmethod
         def write_astra(session_id, named):
             return None
 
@@ -110,9 +116,10 @@ def main():
     if not isinstance(event, dict):
         event = {}
 
+    debate = plugin_config.pair_debate_from_prompt(event.get("prompt"))
     plugin_config.write_mention(
         event.get("session_id"),
-        plugin_config.mention_from_prompt(event.get("prompt")),
+        debate or plugin_config.mention_from_prompt(event.get("prompt")),
     )
     plugin_config.write_fork(
         event.get("session_id"),
@@ -120,7 +127,7 @@ def main():
     )
     plugin_config.write_astra(
         event.get("session_id"),
-        plugin_config.astra_from_prompt(event.get("prompt")),
+        debate or plugin_config.astra_from_prompt(event.get("prompt")),
     )
 
     lines = []
