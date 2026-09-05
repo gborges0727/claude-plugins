@@ -19,9 +19,9 @@ SCRIPT = Path(__file__).resolve().parent.parent / "plugins" / "gborges-standard"
 
 AGENTS = {
     "luna-xhigh": ("gpt-5.6-luna", "xhigh"),
-    "luna-medium": ("gpt-5.6-luna", "medium"),
-    "terra-xhigh": ("gpt-5.6-terra", "xhigh"),
     "sol-xhigh": ("gpt-5.6-sol", "xhigh"),
+    "astra-medium": ("gpt-6-astra", "medium"),
+    "astra-xhigh": ("gpt-6-astra", "xhigh"),
 }
 
 EXISTING_CONFIG = """model = "gpt-5.5"
@@ -79,11 +79,21 @@ class SetupWrites(unittest.TestCase):
         parsed = self.config()
         self.assertEqual(parsed["model"], "gpt-5.6-sol")
         self.assertEqual(parsed["model_reasoning_effort"], "medium")
-        self.assertEqual(parsed["agents"]["default_subagent_model"], "gpt-5.6-luna")
+        self.assertEqual(parsed["agents"]["default_subagent_model"], "gpt-5.6-sol")
         self.assertEqual(parsed["agents"]["default_subagent_reasoning_effort"], "xhigh")
         self.assertEqual(parsed["tui"]["status_line"][0], "current-dir")
         self.assertEqual(len(parsed["tui"]["status_line"]), 7)
         self.assertTrue(parsed["tui"]["status_line_use_colors"])
+
+    def test_the_retired_agent_files_are_removed(self):
+        agents_dir = self.home / ".codex" / "agents"
+        agents_dir.mkdir(parents=True)
+        (agents_dir / "luna-medium.toml").write_text('name = "luna-medium"\n')
+        (agents_dir / "terra-xhigh.toml").write_text('name = "terra-xhigh"\n')
+        result = run_setup(self.home, "--fable", "on", "--codex", "off", "--codex-config", "on")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse((agents_dir / "luna-medium.toml").exists())
+        self.assertFalse((agents_dir / "terra-xhigh.toml").exists())
 
     def test_codex_config_off_writes_nothing_under_codex(self):
         result = run_setup(self.home, "--fable", "on", "--codex", "off", "--codex-config", "off")
@@ -98,7 +108,7 @@ class SetupWrites(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         parsed = self.config()
         self.assertEqual(parsed["model"], "gpt-5.6-sol")
-        self.assertEqual(parsed["agents"]["default_subagent_model"], "gpt-5.6-luna")
+        self.assertEqual(parsed["agents"]["default_subagent_model"], "gpt-5.6-sol")
         self.assertEqual(parsed["agents"]["old"]["description"], "an agent table the script must keep")
         self.assertEqual(parsed["projects"]["/tmp/repo"]["trust_level"], "trusted")
         self.assertEqual(parsed["mcp_servers"]["bear"]["args"], ["mcp-server"])

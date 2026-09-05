@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 28
+# rev: 29
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -63,11 +63,13 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `strip-attribution.py` | `PreToolUse` hook | Removes AI-attribution footers from GitHub writes. Enforces the style's ban mechanically |
 | `flag-server-attribution.py` | `PostToolUse` hook | Tells the session to delete the footer the GitHub server adds to a new PR body, which the `PreToolUse` hook cannot reach |
 | `route-spawns.py` | `PreToolUse` hook | Decides which agent every spawn runs on, then appends the style's rules to its prompt, since the output style never reaches a subagent. Rewrites an unpinned type (`general-purpose`, `claude`, `default-agent`, or none) to `opus-medium`. Refuses a `fork` on a Fable session, since a fork copies the whole transcript onto the session's model, unless the user's latest message asked for one. Refuses a `fable-xhigh` dispatch the user did not summon, and rewrites it to `opus-xhigh` when `~/.claude/gborges-standard.json` says the account cannot run Fable. Appends Anthropic's long-output note to a `fable-xhigh` prompt, so Fable writes a long deliverable once instead of drafting it in thinking and again as the reply |
-| `remind-writing-rules.py` | `UserPromptSubmit` hook | Returns the style's Reminder paragraph as context with every user message, so the rules sit next to the reply being written. Records whether the message named `@agent-fable-xhigh` |
+| `remind-writing-rules.py` | `UserPromptSubmit` hook | Returns the style's Reminder paragraph as context with every user message, so the rules sit next to the reply being written. Records whether the message named `@agent-fable-xhigh`, used the word fork, or named Astra |
 | `writing-voice` | Skill | Two-pass ritual for every artifact (a file, a PR body, a commit message, a comment), whatever its length. The style alone shapes chat replies |
 | `read-aloud-prep` | Skill | Rewriting documents so a TTS voice reads them cleanly |
 | `bear-notes` | Skill | Writing into Bear without minting junk tags and wikilinks |
-| `codex-delegate` | Skill | Handing a mechanical subtask to the Codex CLI on GPT-5.6 Luna, so ChatGPT-plan quota pays for it instead of Claude tokens. Needs the `codex` MCP server registered |
+| `route-codex.py` | `PreToolUse` hook | Guards the `mcp__codex__codex` call the `codex-delegate` skill makes. Lets GPT-6 Astra run at medium on its own, refuses it above medium unless the user's latest message named Astra, and fills in the effort when the call set none |
+| `codex-delegate` | Skill | Handing a subtask to the Codex CLI on one of four rungs (Luna, Sol, Astra at medium, or the user-summoned Astra at xhigh), so ChatGPT-plan quota pays for it instead of Claude tokens. Needs the `codex` MCP server registered |
+| `model-routing-review` | Skill | Explicit invocation only. Re-derives the delegation ladder from today's catalog, prices, and scores, rewrites [docs/model-routing.md](docs/model-routing.md), and lists every file the ladder change touches |
 | `add-to-git` | Command | Explicit invocation only, never model-triggered |
 | `setup` | Command | Writes `~/.claude/gborges-standard.json`, the per-machine switches for Fable access and Codex delegation, and the Codex CLI's own model, subagent, and status line config under `~/.codex`. Wraps `scripts/setup.sh`, which does the same with no model turn |
 | `sonnet-medium` | Agent | Sonnet 5 at medium effort. Edits and runs with a command check in the brief, parallel copies of one such task, and fetching a named doc page |
@@ -119,13 +121,13 @@ agents:
 
 | Codex agent | Model and effort | Mirrors |
 |---|---|---|
-| `luna-xhigh` | `gpt-5.6-luna`, xhigh | `opus-medium`, the default worker |
-| `luna-medium` | `gpt-5.6-luna`, medium | `sonnet-medium`, fully specified edits and runs |
-| `terra-xhigh` | `gpt-5.6-terra`, xhigh | `opus-xhigh`, the one escalation step |
-| `sol-xhigh` | `gpt-5.6-sol`, xhigh | `fable-xhigh`, only when the user names it |
+| `luna-xhigh` | `gpt-5.6-luna`, xhigh | `sonnet-medium`, fully specified edits and runs |
+| `sol-xhigh` | `gpt-5.6-sol`, xhigh | `opus-medium`, the default worker |
+| `astra-medium` | `gpt-6-astra`, medium | `opus-xhigh`, the one escalation step |
+| `astra-xhigh` | `gpt-6-astra`, xhigh | `fable-xhigh`, only when the user names it |
 
 In `~/.codex/config.toml` it sets the orchestrator to `gpt-5.6-sol` at
-medium effort, sets `agents.default_subagent_model` to `gpt-5.6-luna` at
+medium effort, sets `agents.default_subagent_model` to `gpt-5.6-sol` at
 xhigh so an unnamed spawn lands there, and sets `tui.status_line` to the
 same seven fields the Claude Code status line shows (directory, branch,
 dirty marker, model with effort, context used, 5-hour limit, weekly limit).
@@ -149,11 +151,12 @@ own, and a file at it would fire twice.
 
 | Component | Codex | Notes |
 |---|---|---|
-| The four skills | Yes | `SKILL.md` loads unchanged on both hosts |
+| The five skills | Yes | `SKILL.md` loads unchanged on both hosts |
 | `plain-english.md` | Yes, through a hook | Codex has no output styles. `codex-session-style.py` returns the style body as `SessionStart` context |
 | `strip-attribution.py` | Yes | Codex passes the same `tool_name` and `tool_input` fields and accepts the same `updatedInput` reply |
 | `flag-server-attribution.py` | Yes | Same `PostToolUse` contract |
 | `remind-writing-rules.py` | Yes | Same `UserPromptSubmit` contract |
+| `route-codex.py` | No | Guards a Claude Code MCP tool. Codex reaches its own models directly |
 | `route-spawns.py` | Yes, on a different event | Codex spawns subagents through a tool no `Agent` matcher catches, and fires `SubagentStart`. `--subagent-start` answers that event with the same rules block as context |
 | `add-to-git` | No | A Claude command. Codex loads skills, not commands |
 | The four agents | No | Claude Code agents. `codex-session-style.py` drops the style's Subagents section so Codex never gets sent to a name it cannot resolve |

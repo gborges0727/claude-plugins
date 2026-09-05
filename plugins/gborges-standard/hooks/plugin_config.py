@@ -133,3 +133,23 @@ def write_fork(session_id, asked):
 def read_fork(session_id):
     """Report whether this session's latest message asked for a fork."""
     return _read_record(session_id, "fork-request")
+
+
+ASTRA_WORD = re.compile(r"\bastra\b", re.IGNORECASE)
+
+
+def astra_from_prompt(prompt):
+    """Say whether this message text names the Astra model."""
+    if not isinstance(prompt, str):
+        return False
+    return ASTRA_WORD.search(prompt) is not None
+
+
+def write_astra(session_id, named):
+    """Record for this session whether the latest message named Astra."""
+    _write_record(session_id, named, "astra-mention")
+
+
+def read_astra(session_id):
+    """Report whether this session's latest message named Astra."""
+    return _read_record(session_id, "astra-mention")

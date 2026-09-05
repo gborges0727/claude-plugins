@@ -9,7 +9,7 @@ below ran on the home desktop that day.
 
 | Piece | The one copy | How Codex reads it |
 |---|---|---|
-| Writing rules, hooks, four skills | this repo's `plugins/gborges-standard` | the `gborges` marketplace, installed with `codex plugin add` |
+| Writing rules, hooks, five skills | this repo's `plugins/gborges-standard` | the `gborges` marketplace, installed with `codex plugin add` |
 | Machine notes (SSH, colima, GitHub, Taildrop, 1Password) | `~/.claude/CLAUDE.md` | `~/.codex/AGENTS.md` is a symlink to it |
 | Model routing and status line | `scripts/setup.sh --codex-config on` | it writes `~/.codex/config.toml` and `~/.codex/agents` |
 | Per-machine switches (Fable, Codex delegation) | `~/.claude/gborges-standard.json` | the Codex hooks read the same file |
@@ -155,13 +155,13 @@ agents:
 
 | Codex agent | Model and effort | Mirrors |
 |---|---|---|
-| `luna-xhigh` | `gpt-5.6-luna`, xhigh | `opus-medium`, the default worker |
-| `luna-medium` | `gpt-5.6-luna`, medium | `sonnet-medium`, fully specified edits and runs |
-| `terra-xhigh` | `gpt-5.6-terra`, xhigh | `opus-xhigh`, the one escalation step |
-| `sol-xhigh` | `gpt-5.6-sol`, xhigh | `fable-xhigh`, only when the user names it |
+| `luna-xhigh` | `gpt-5.6-luna`, xhigh | `sonnet-medium`, fully specified edits and runs |
+| `sol-xhigh` | `gpt-5.6-sol`, xhigh | `opus-medium`, the default worker |
+| `astra-medium` | `gpt-6-astra`, medium | `opus-xhigh`, the one escalation step |
+| `astra-xhigh` | `gpt-6-astra`, xhigh | `fable-xhigh`, only when the user names it |
 
 In `~/.codex/config.toml` it sets the orchestrator to `gpt-5.6-sol` at
-medium effort, and sets `agents.default_subagent_model` to `gpt-5.6-luna`
+medium effort, and sets `agents.default_subagent_model` to `gpt-5.6-sol`
 at xhigh so an unnamed spawn lands there. Codex resolves a spawn's model
 as the explicit spawn value, then this default, then the parent's model.
 
@@ -222,7 +222,7 @@ Codex carries five plugins Claude Code does not: `github`, `superpowers`,
 | MCP servers | `codex mcp list` | `bear`, `railway`, `schwab` enabled, `cloudflare` disabled |
 | instructions | `codex debug prompt-input \| grep -c colima` | 1 or more |
 | skills | `ls ~/.agents/skills \| wc -l` | 29 |
-| model slugs | `codex debug models` | `gpt-5.6-sol`, `gpt-5.6-terra`, `gpt-5.6-luna` present |
+| model slugs | `codex debug models` | `gpt-5.6-sol`, `gpt-5.6-luna`, `gpt-6-astra` present |
 | config parses | `codex doctor` | every row a check mark |
 | agents and footer | a Codex session, `/agents` and the footer | four agents listed, seven fields shown |
 
