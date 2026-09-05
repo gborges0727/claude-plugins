@@ -30,6 +30,30 @@ On Claude Code, a Codex rung is not a Claude agent. It is a call to the
 `codex-delegate` skill makes that call. In the Codex CLI, the same four
 rungs are agent files under `~/.codex/agents` that `setup.sh` writes.
 
+## Which host takes a task
+
+Codex on a machine set up per `docs/codex-parity.md` has the same tools,
+MCP servers, and skills as the Claude Code session. The one thing a
+delegated Codex call lacks is the conversation. So when the setup file
+says Codex is on, two questions pick the host:
+
+1. Does the brief stand alone from the conversation? A brief that leans
+   on what was said in the session stays on Claude.
+2. Does a command check the result? A test run, a build, or a diff that
+   applies catches a failure at no cost in judgment. A task whose result
+   is a conclusion nobody downstream checks stays on Claude, where Opus 5
+   holds the better accuracy record (63.0 against Sol's 58.9 on the
+   Intelligence Index, 79.2 against 64.6 on SWE-Bench Pro).
+
+Two yeses send the task to the Codex rung that mirrors the Claude rung it
+would have taken. A failure escalates inside the host that ran the task,
+so the escalated brief keeps the same tools and the same failure output.
+
+The Codex side spends ChatGPT plan allowance, which also feeds the user's
+own Codex sessions, and Codex exposes no command that reports how much
+is left. When the allowance runs out, the call fails and the task goes to
+the Claude rung with the same brief.
+
 ## Prices
 
 Standard API prices in dollars per million tokens. Codex delegations from

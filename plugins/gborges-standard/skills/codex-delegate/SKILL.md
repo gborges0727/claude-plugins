@@ -4,11 +4,11 @@ description: >-
   Delegate a coding subtask to the Codex CLI on an OpenAI model (GPT-5.6 Luna, GPT-5.6 Sol, or
   GPT-6 Astra), spending ChatGPT-plan quota instead of Claude tokens. Use only when
   `~/.claude/gborges-standard.json` says `"codex": true` (a missing file means off). Then prefer
-  this over the sonnet-medium subagent whenever the subtask is mechanical and already fully
-  specified: boilerplate, a repeated edit across many files, tests against an interface you can
-  paste in, or a second-model opinion. Also use when the user says to delegate, hand off, or use
-  Codex, when the user names a Codex rung (consult astra, ask sol, send it to luna), and
-  when continuing a Codex thread already started.
+  this over a Claude subagent whenever the brief stands alone from the conversation and a command
+  checks the result: boilerplate, a repeated edit across files, tests against a pasted interface,
+  a bug a named test confirms, or a second-model opinion. Also use when the user says to delegate
+  or use Codex, names a Codex rung (consult astra, ask sol, send it to luna), or continues a
+  Codex thread.
 ---
 
 # Codex delegation
@@ -47,14 +47,20 @@ work can drain the allowance the user also wants for their own Codex sessions.
 
 ## What to delegate
 
-Hand Codex work that is wide, mechanical, and fully specifiable in one prompt: renaming a symbol
-across forty files, writing tests against an interface you paste in, porting one pattern to every
-call site, filling in boilerplate the shape of which you already decided.
+Codex on this machine has the same tools, MCP servers, and skills as this session. The one thing
+it lacks is this conversation. So the host question is two questions. Does the brief stand alone
+from what was said here? Does a command check the result?
 
-Keep in this session anything that needs the conversation: design decisions, work in a codebase
-you are still mapping, and any task whose spec you would have to discover while doing it. Codex
-starts blind. It reads none of this conversation, so a prompt that leans on what was said here
-sends Codex off to guess.
+Hand Codex any brief that answers yes to both: renaming a symbol across forty files, writing
+tests against an interface you paste in, porting one pattern to every call site, filling in
+boilerplate the shape of which you already decided, or finding why a named test fails. Pick the
+rung that mirrors the Claude agent the task would have taken.
+
+Keep in this session anything that needs the conversation (design decisions, work in a codebase
+you are still mapping, any task whose spec you would have to discover while doing it) and any
+task whose result is a conclusion nobody downstream checks. Codex starts blind to this
+conversation, so a prompt that leans on what was said here sends Codex off to guess, and a wrong
+conclusion with no check is the failure nothing catches.
 
 ## Pick the rung
 
@@ -64,7 +70,7 @@ Four Codex rungs mirror the plugin's four Claude agents. Each is a `model` plus 
 | Rung | `model` | Effort | Mirrors | Takes |
 |---|---|---|---|---|
 | `luna-xhigh` | `gpt-5.6-luna` | `xhigh` | `sonnet-medium` | An edit or a run whose brief names the exact change and a command that checks it. Parallel copies of one such task. Never a brief past 272K tokens, since Luna's recall past 256K is 41% |
-| `sol-xhigh` | `gpt-5.6-sol` | `xhigh` | `opus-medium` | The default. Any task that reads code to reach a conclusion, any second-model opinion, and any brief that must read past 272K tokens |
+| `sol-xhigh` | `gpt-5.6-sol` | `xhigh` | `opus-medium` | The default. Any task that reads code to reach a result a command can check, any second-model opinion, and any brief that must read past 272K tokens |
 | `astra-medium` | `gpt-6-astra` | `medium` | `opus-xhigh` | A task that failed once on a lower rung. One long dependent chain. The orchestrator picks this on its own |
 | `astra-xhigh` | `gpt-6-astra` | `xhigh` | `fable-xhigh` | Only when the user's latest message names Astra. A hook refuses any Astra call above medium the user did not ask for |
 
