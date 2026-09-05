@@ -148,7 +148,9 @@ The first line of a lane's `.jsonl` file names its thread:
 ```
 
 Continue that thread with `codex exec resume <thread_id> - < <scratch>/<lane>.next.md`, with
-the same `-m`, `-c`, `-C`, `-s`, `--json`, and `-o` flags and again in the background. Codex
+the same `-m`, `-c`, `--json`, and `-o` flags and again in the background. `resume` has no
+`-C` or `-s` flag. The thread remembers its directory, and `-c sandbox_mode=workspace-write`
+sets the sandbox. Codex
 keeps the thread's history, so the follow-up needs only the new instruction.
 
 ## Verify before you build on it

@@ -145,6 +145,19 @@ def astra_from_prompt(prompt):
     return ASTRA_WORD.search(prompt) is not None
 
 
+# An invocation of the pair-debate skill, typed as /pair-debate or with the
+# plugin prefix. The skill always runs Fable and Astra at xhigh, so invoking
+# it is the user's naming of both.
+PAIR_DEBATE = re.compile(r"(^|\s)/(gborges-standard:)?pair-debate\b")
+
+
+def pair_debate_from_prompt(prompt):
+    """Say whether this message text invokes the pair-debate skill."""
+    if not isinstance(prompt, str):
+        return False
+    return PAIR_DEBATE.search(prompt) is not None
+
+
 def write_astra(session_id, named):
     """Record for this session whether the latest message named Astra."""
     _write_record(session_id, named, "astra-mention")

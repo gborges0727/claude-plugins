@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 31
+# rev: 32
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -63,13 +63,14 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `strip-attribution.py` | `PreToolUse` hook | Removes AI-attribution footers from GitHub writes. Enforces the style's ban mechanically |
 | `flag-server-attribution.py` | `PostToolUse` hook | Tells the session to delete the footer the GitHub server adds to a new PR body, which the `PreToolUse` hook cannot reach |
 | `route-spawns.py` | `PreToolUse` hook | Decides which agent every spawn runs on, then appends the style's rules to its prompt, since the output style never reaches a subagent. Rewrites an unpinned type (`general-purpose`, `claude`, `default-agent`, or none) to `opus-medium`. Refuses a `fork` on a Fable session, since a fork copies the whole transcript onto the session's model, unless the user's latest message asked for one. Refuses a `fable-xhigh` dispatch the user did not summon, and rewrites it to `opus-xhigh` when `~/.claude/gborges-standard.json` says the account cannot run Fable. Appends Anthropic's long-output note to a `fable-xhigh` prompt, so Fable writes a long deliverable once instead of drafting it in thinking and again as the reply |
-| `remind-writing-rules.py` | `UserPromptSubmit` hook | Returns the style's Reminder paragraph as context with every user message, so the rules sit next to the reply being written. Records whether the message named `@agent-fable-xhigh`, used the word fork, or named Astra |
+| `remind-writing-rules.py` | `UserPromptSubmit` hook | Returns the style's Reminder paragraph as context with every user message, so the rules sit next to the reply being written. Records whether the message named `@agent-fable-xhigh`, used the word fork, or named Astra. An invocation of `pair-debate` records both Fable and Astra |
 | `writing-voice` | Skill | Two-pass ritual for every artifact (a file, a PR body, a commit message, a comment), whatever its length. The style alone shapes chat replies |
 | `read-aloud-prep` | Skill | Rewriting documents so a TTS voice reads them cleanly |
 | `bear-notes` | Skill | Writing into Bear without minting junk tags and wikilinks |
 | `route-codex.py` | `PreToolUse` hook | Guards every Codex delegation, both a `codex exec` command in a Bash call and an `mcp__codex__codex` call. Lets GPT-6 Astra run at medium on its own, refuses it above medium unless the user's latest message named Astra, and fills in the effort when the call set none |
 | `codex-delegate` | Skill | Handing a subtask to the Codex CLI on one of four rungs (Luna, Sol, Astra at medium, or the user-summoned Astra at xhigh), so ChatGPT-plan quota pays for it instead of Claude tokens. Each lane is a `codex exec` command run in the background, so a fan-out starts every lane at once. Needs the `codex` binary on PATH and signed in |
 | `model-routing-review` | Skill | Explicit invocation only. Re-derives the delegation ladder from today's catalog, prices, and scores, rewrites [docs/model-routing.md](docs/model-routing.md), and lists every file the ladder change touches |
+| `pair-debate` | Skill | Explicit invocation only. Puts Fable 5.1 and GPT-6 Astra, both at xhigh, in a room to work one hard problem as peers. `scripts/debate.py` runs the conversation in the background: blind drafts, an argued definition of done the user approves, then alternating turns in one shared worktree until both agree. The session reports events and reruns the agreed check at the end |
 | `add-to-git` | Command | Explicit invocation only, never model-triggered |
 | `setup` | Command | Writes `~/.claude/gborges-standard.json`, the per-machine switches for Fable access and Codex delegation, and the Codex CLI's own model, subagent, and status line config under `~/.codex`. Wraps `scripts/setup.sh`, which does the same with no model turn |
 | `sonnet-medium` | Agent | Sonnet 5 at medium effort. Edits and runs with a command check in the brief, parallel copies of one such task, and fetching a named doc page |
