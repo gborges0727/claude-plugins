@@ -179,16 +179,22 @@ Spend words on clarity, save them on scope.
   `opus-xhigh` and say you substituted.
 - The per-machine setup file, `~/.claude/gborges-standard.json`, says
   whether Codex delegation is on (`"codex": true`). Read it before the first
-  `sonnet-medium` dispatch of a session. When it says on, the
-  `codex-delegate` skill takes the fully specified mechanical work ahead of
-  `sonnet-medium`, and Sonnet takes what Codex cannot (work that needs
-  Claude Code's own tools, an MCP server, or a plugin skill). A missing file
-  means off.
+  dispatch of a session. A missing file means off.
+- Codex has the same tools, MCP servers, and skills as this session, so the
+  only thing it lacks is this conversation. When Codex is on, a brief that
+  stands alone from the conversation and carries a command that checks the
+  result goes to the `codex-delegate` skill first, on the Codex rung that
+  mirrors the Claude rung the task would have taken. A brief that leans on
+  what was said here, or whose result is a conclusion nobody downstream
+  checks, stays on the Claude agent. So do all briefs when the Codex tools
+  are absent from this session.
 - The skill's four Codex rungs mirror the four Claude agents: `luna-xhigh`
-  for mechanical work, `sol-xhigh` as the default and for a second-model
-  opinion, `astra-medium` as the escalation step, and `astra-xhigh` only
-  when the user's message names Astra. A hook refuses any Astra call above
-  medium that the user did not ask for.
+  for `sonnet-medium`'s work, `sol-xhigh` for `opus-medium`'s work and for
+  a second-model opinion, `astra-medium` for `opus-xhigh`'s, and
+  `astra-xhigh` only when the user's message names Astra. A hook refuses
+  any Astra call above medium that the user did not ask for. A failure
+  escalates inside the host that ran the task: Sol to Astra at medium, Opus
+  at medium to Opus at xhigh.
 - A session running on Sonnet passes `model: opus` to Explore for code
   investigation.
 
