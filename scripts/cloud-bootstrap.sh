@@ -11,7 +11,7 @@
 # missing or the two numbers differ. After the merge, paste the new rev into
 # each environment's Setup script field when the change cannot wait out the
 # snapshot expiry.
-# rev: 32
+# rev: 33
 
 set -u
 
@@ -30,6 +30,37 @@ claude plugin install gborges-standard@gborges --scope user || true
 # commented out unless it earns its keep, because the routing rule already
 # re-sends the brief to opus-xhigh when fable-xhigh fails with a model error.
 # bash "$(ls -d ~/.claude/plugins/cache/gborges/gborges-standard/*/ | tail -1)scripts/setup.sh" --fable off --codex off
+
+# Claude Code reads the 'attribution' key from the VM's user settings when
+# it builds the prompt. Unset, the prompt tells the model to add a
+# Co-Authored-By trailer to every commit, a 'Generated with Claude Code'
+# line to every PR body, and a claude.ai session link to both. Empty text
+# and a false link stop the instruction at the source, which the plugin's
+# hooks cannot do: they only catch the GitHub MCP tools, and a commit or a
+# 'gh pr create' run through Bash passes them by. setup.sh --attribution
+# off writes the same key. The write is inline here so it does not depend
+# on the plugin's cache path. Other keys in the file stay as they were.
+python3 - <<'PY' || true
+import json
+import os
+
+path = os.path.expanduser("~/.claude/settings.json")
+data = {}
+try:
+    with open(path) as handle:
+        loaded = json.load(handle)
+    if isinstance(loaded, dict):
+        data = loaded
+except (OSError, ValueError):
+    data = {}
+
+data["attribution"] = {"commit": "", "pr": "", "sessionUrl": False}
+
+os.makedirs(os.path.dirname(path), exist_ok=True)
+with open(path, "w") as handle:
+    handle.write(json.dumps(data, indent=2) + "\n")
+print("Wrote " + path + ": attribution off")
+PY
 
 # Surface the result in the setup log. A dependency that fails to resolve
 # leaves the bundle at 'failed to load' and is otherwise silent.

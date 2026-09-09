@@ -13,6 +13,15 @@
 # GPT-5.6 Sol at xhigh effort, the orchestrator model, and the footer
 # status line. It defaults to on when a codex binary is on PATH.
 #
+# A fourth flag, --attribution, sets the 'attribution' key in
+# ~/.claude/settings.json. Claude Code reads that key when it builds the
+# prompt. Unset, the prompt tells the model to add a Co-Authored-By trailer
+# to every commit, a 'Generated with Claude Code' line to every PR body, and
+# a claude.ai session link to both in cloud sessions. 'off', the default,
+# writes empty strings for the commit and PR text and false for the link, so
+# the instruction never reaches the model. 'on' deletes the key, so Claude
+# Code's own default applies again.
+#
 # Run it with all flags and it writes the files without asking anything.
 # Leave a flag out and it asks, or falls back to the default when nothing
 # is there to answer.
@@ -23,24 +32,30 @@ usage() {
   cat <<'EOF'
 Write ~/.claude/gborges-standard.json, the config the gborges-standard hooks read.
 
-Usage: setup.sh [--fable on|off] [--codex on|off] [--codex-config on|off]
+Usage: setup.sh [--fable on|off] [--codex on|off] [--codex-config on|off] [--attribution on|off]
 
   --fable on|off         This account can run the Claude Fable 5.1 model. Default on.
   --codex on|off         The Codex CLI is available for delegated work. Default off.
   --codex-config on|off  Write the Codex CLI's model, subagent, and status line
                          config under ~/.codex. Default on when codex is on PATH.
+  --attribution on|off   Let Claude Code add its AI-attribution trailer to commits
+                         and its footer to PR bodies. Default off, which writes the
+                         'attribution' key in ~/.claude/settings.json with empty
+                         text and no session link. On deletes the key.
   -h, --help             Print this text.
 
 A flag you leave out is asked for when a terminal is attached. Otherwise the
 default applies and the script says so on stderr. Keys already in the file
-other than 'fable' and 'codex' are kept. In ~/.codex/config.toml only the
-model, model_reasoning_effort, [agents], and [tui] entries are replaced.
+other than 'fable' and 'codex' are kept. In ~/.claude/settings.json only the
+'attribution' key changes. In ~/.codex/config.toml only the model,
+model_reasoning_effort, [agents], and [tui] entries are replaced.
 EOF
 }
 
 fable=""
 codex=""
 codex_config=""
+attribution=""
 
 parse_onoff() {
   case "$2" in
@@ -79,6 +94,15 @@ while [ $# -gt 0 ]; do
         exit 2
       fi
       codex_config=$(parse_onoff --codex-config "$2") || exit 2
+      shift 2
+      ;;
+    --attribution)
+      if [ $# -lt 2 ]; then
+        printf 'setup.sh: --attribution needs a value\n' >&2
+        usage >&2
+        exit 2
+      fi
+      attribution=$(parse_onoff --attribution "$2") || exit 2
       shift 2
       ;;
     -h|--help)
@@ -125,11 +149,49 @@ if [ -z "$codex_config" ]; then
   if command -v codex >/dev/null 2>&1; then codex_default=on; else codex_default=off; fi
   codex_config=$(ask codex-config "$codex_default" 'Write the Codex CLI model and status line config? (on/off)') || exit 2
 fi
+if [ -z "$attribution" ]; then
+  attribution=$(ask attribution off 'Let Claude Code add AI attribution to commits and PR bodies? (on/off)') || exit 2
+fi
 
 config_dir="${HOME}/.claude"
 config_file="${config_dir}/gborges-standard.json"
+settings_file="${config_dir}/settings.json"
 
 mkdir -p "$config_dir" || exit 1
+
+# Claude Code reads the 'attribution' key from settings.json when it builds
+# the prompt, so this is the one write that stops the trailer at the source
+# instead of stripping it after the model has written it. Off writes empty
+# text for both places and turns the session link off. On deletes the key
+# and leaves Claude Code's default in charge. Every other key in the file
+# stays as it was. A file that is missing or is not an object starts over
+# as an empty object.
+ATTRIBUTION="$attribution" SETTINGS_FILE="$settings_file" python3 - <<'PY' || exit 1
+import json
+import os
+
+path = os.environ["SETTINGS_FILE"]
+data = {}
+try:
+    with open(path) as handle:
+        loaded = json.load(handle)
+    if isinstance(loaded, dict):
+        data = loaded
+except (OSError, ValueError):
+    data = {}
+
+if os.environ["ATTRIBUTION"] == "on":
+    data.pop("attribution", None)
+else:
+    data["attribution"] = {"commit": "", "pr": "", "sessionUrl": False}
+
+tmp = path + ".tmp"
+with open(tmp, "w") as handle:
+    handle.write(json.dumps(data, indent=2) + "\n")
+os.replace(tmp, path)
+PY
+
+printf 'Wrote %s: attribution %s\n' "$settings_file" "$attribution"
 
 # Read what the file already holds, replace the two keys, write it back.
 # Anything else in the file survives. A file that is missing or is not an
