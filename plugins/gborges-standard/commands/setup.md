@@ -1,5 +1,5 @@
 ---
-description: Ask which models this machine can reach, write the answers to ~/.claude/gborges-standard.json, and write the Codex CLI's model and status line config.
+description: Ask which models this machine can reach and whether Claude Code may add AI attribution, write the answers to ~/.claude/gborges-standard.json and ~/.claude/settings.json, and write the Codex CLI's model and status line config.
 disable-model-invocation: true
 ---
 
@@ -7,7 +7,7 @@ disable-model-invocation: true
 
 ## Step 1: Ask
 
-Call AskUserQuestion once with all three questions in the one call.
+Call AskUserQuestion once with all four questions in the one call.
 
 Ask whether this account can run the Claude Fable 5.1 model. Offer "Yes" (the
 account has Fable, so the fable-xhigh subagent runs as written) and "No" (the
@@ -23,12 +23,19 @@ orchestrator model, and the status line into `~/.codex/config.toml`) and "No"
 (nothing under `~/.codex` changes). Yes is the default when `codex` is on
 PATH, otherwise No.
 
+Ask whether Claude Code may add AI attribution to commits and PR bodies.
+Offer "No" (the script writes the `attribution` key in
+`~/.claude/settings.json` with empty commit and PR text and the session link
+off, so the prompt never asks for a trailer) and "Yes" (the script deletes
+the key, so Claude Code adds its default Co-Authored-By trailer and
+"Generated with Claude Code" footer). No is the default.
+
 ## Step 2: Write the files
 
-Turn the three answers into `on` or `off` and run:
+Turn the four answers into `on` or `off` and run:
 
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}/scripts/setup.sh" --fable <on|off> --codex <on|off> --codex-config <on|off>
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/setup.sh" --fable <on|off> --codex <on|off> --codex-config <on|off> --attribution <on|off>
 ```
 
 ## Step 3: Report

@@ -1,10 +1,11 @@
 """Runs scripts/setup.sh against a temporary home and checks what it writes.
 
-The script writes ~/.claude/gborges-standard.json for the hooks and, with
---codex-config on, four agent files under ~/.codex/agents plus the managed
-entries in ~/.codex/config.toml. These tests cover both writers, the
-preservation of entries the script does not own, and a second run landing
-on the same result.
+The script writes ~/.claude/gborges-standard.json for the hooks, the
+'attribution' key in ~/.claude/settings.json, and, with --codex-config on,
+four agent files under ~/.codex/agents plus the managed entries in
+~/.codex/config.toml. These tests cover all three writers, the preservation
+of entries the script does not own, and a second run landing on the same
+result.
 """
 
 import json
@@ -63,6 +64,48 @@ class SetupWrites(unittest.TestCase):
 
     def config(self):
         return tomllib.loads((self.home / ".codex" / "config.toml").read_text())
+
+    def settings(self):
+        return json.loads((self.home / ".claude" / "settings.json").read_text())
+
+    def test_attribution_off_by_default_writes_the_empty_key(self):
+        result = run_setup(self.home, "--fable", "on", "--codex", "off", "--codex-config", "off")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("using attribution=off", result.stderr)
+        self.assertEqual(
+            self.settings()["attribution"],
+            {"commit": "", "pr": "", "sessionUrl": False},
+        )
+
+    def test_attribution_keeps_the_other_settings_keys(self):
+        claude_dir = self.home / ".claude"
+        claude_dir.mkdir()
+        (claude_dir / "settings.json").write_text(
+            '{"model": "opus", "permissions": {"allow": ["Bash(ls *)"]}, '
+            '"attribution": {"commit": "Made by a robot"}}\n'
+        )
+        flags = ("--fable", "on", "--codex", "off", "--codex-config", "off")
+        result = run_setup(self.home, *flags, "--attribution", "off")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        settings = self.settings()
+        self.assertEqual(settings["model"], "opus")
+        self.assertEqual(settings["permissions"], {"allow": ["Bash(ls *)"]})
+        self.assertEqual(settings["attribution"], {"commit": "", "pr": "", "sessionUrl": False})
+
+    def test_attribution_on_deletes_the_key(self):
+        flags = ("--fable", "on", "--codex", "off", "--codex-config", "off")
+        run_setup(self.home, *flags, "--attribution", "off")
+        result = run_setup(self.home, *flags, "--attribution", "on")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn("attribution", self.settings())
+
+    def test_attribution_starts_over_when_settings_is_not_json(self):
+        claude_dir = self.home / ".claude"
+        claude_dir.mkdir()
+        (claude_dir / "settings.json").write_text("not json\n")
+        result = run_setup(self.home, "--fable", "on", "--codex", "off", "--codex-config", "off")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(list(self.settings()), ["attribution"])
 
     def test_writes_hook_config_and_codex_files(self):
         result = run_setup(self.home, "--fable", "off", "--codex", "on", "--codex-config", "on")
