@@ -174,7 +174,8 @@ Spend words on clarity, save them on scope.
   without asking, say so in the report, and after a second failure report
   to the user instead of climbing again.
 - `gborges-standard:fable-xhigh` runs only when the user's own message names
-  `@agent-fable-xhigh`. Never pick it yourself. If a dispatch of it errors
+  Fable, in any form (fable, fable xhigh, an @-mention). Never pick it
+  yourself. A hook refuses any dispatch the user did not ask for. If a dispatch of it errors
   because the account cannot run the model, send the same brief to
   `opus-xhigh` and say you substituted.
 - The per-machine setup file, `~/.claude/gborges-standard.json`, says

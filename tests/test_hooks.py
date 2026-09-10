@@ -134,6 +134,21 @@ class FableMentionRule(HookCase):
         out = self.spawn(FABLE)
         self.assertEqual(out["hookSpecificOutput"]["permissionDecision"], "allow")
 
+    def test_the_bare_word_fable_unlocks_fable(self):
+        self.submit("Send this one to fable xhigh, it's a hard one.")
+        out = self.spawn(FABLE)
+        self.assertEqual(out["hookSpecificOutput"]["permissionDecision"], "allow")
+
+    def test_the_word_fable_in_any_case_unlocks_fable(self):
+        self.submit("Have Fable do it.")
+        out = self.spawn(FABLE)
+        self.assertEqual(out["hookSpecificOutput"]["permissionDecision"], "allow")
+
+    def test_a_word_that_only_contains_fable_does_not_unlock_it(self):
+        self.submit("Read the fables folder and summarize it.")
+        out = self.spawn(FABLE)
+        self.assertEqual(out["hookSpecificOutput"]["permissionDecision"], "deny")
+
     def test_a_mention_in_one_session_does_not_unlock_another(self):
         self.submit("Use @agent-fable-xhigh.", session_id="s1")
         out = self.spawn(FABLE, session_id="s2")

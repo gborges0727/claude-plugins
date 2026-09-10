@@ -13,8 +13,8 @@ text that is not JSON, JSON that is not an object, and a missing or
 non-boolean key all fall back to fable = True and codex = False. Hooks read
 this on every event, so a broken file must never stop a spawn or a turn.
 
-The same folder also tracks whether the user's latest message named the
-Fable agent. mention_from_prompt() decides that from the message text,
+The same folder also tracks whether the user's latest message named
+Fable. mention_from_prompt() decides that from the message text,
 write_mention() records the answer for one session, and read_mention()
 reports it back. The record is one file per session under
 ~/.claude/gborges-standard/state, holding the single character 1 or 0. The
@@ -39,14 +39,12 @@ STATE = ".claude/gborges-standard/state"
 
 DEFAULTS = {"fable": True, "codex": False}
 
-# The three ways a user can name the Fable agent in a message. The first is
-# what Claude Code inserts for an @-mention of an agent. The other two are
-# what a person types by hand.
-MENTIONS = (
-    "@agent-fable-xhigh",
-    '@"fable-xhigh (agent)"',
-    "@gborges-standard:fable-xhigh",
-)
+# Any mention of Fable counts, the same way any mention of Astra unlocks
+# Astra. The rule exists to stop the model from picking Fable on its own,
+# not to make the user type the agent's full @-mention. The word match
+# catches "fable", "fable xhigh", "fable-xhigh", and the @-mention forms
+# Claude Code inserts, since each of those contains the word.
+FABLE_WORD = re.compile(r"\bfable\b", re.IGNORECASE)
 
 
 def load():
@@ -69,10 +67,10 @@ def load():
 
 
 def mention_from_prompt(prompt):
-    """Say whether this message text names the Fable agent."""
+    """Say whether this message text names Fable."""
     if not isinstance(prompt, str):
         return False
-    return any(form in prompt for form in MENTIONS)
+    return FABLE_WORD.search(prompt) is not None
 
 
 FORK_WORD = re.compile(r"\bfork\b", re.IGNORECASE)
