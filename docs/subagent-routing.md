@@ -14,7 +14,7 @@ Fable 5.1 prompting guide as of 2026-09-01.
 | `sonnet-medium` | Sonnet 5 | medium | An edit or a run whose brief names the exact change and a command that checks it. Parallel copies of one such task across files. Fetching a named doc page outside the codebase |
 | `opus-medium` | Opus 5 | medium | The default. The floor for any task that reads code to reach a conclusion |
 | `opus-xhigh` | Opus 5 | xhigh | A task that failed once below it. A task that is one dependent chain the orchestrator cannot split. The stand-in for Fable on an account without it |
-| `fable-xhigh` | Fable 5.1 | xhigh | Only when the user's message names `@agent-fable-xhigh` |
+| `fable-xhigh` | Fable 5.1 | xhigh | Only when the user's message names Fable |
 
 Each name states its model and effort so the orchestrator sees the cost of
 a dispatch in the name it types.
@@ -122,9 +122,12 @@ against `opus-medium` on real briefs, and the rule stands until then.
 The orchestrator judging a task "hard enough for Fable" is the guess that
 spends the most money when wrong, so no judgment is allowed. Cheaper cache
 hits do not change that, because the guess is about which task deserves
-the model, not about the per-token price. The user types
-`@agent-fable-xhigh`, and a hook refuses every dispatch that did not follow
-such a message.
+the model, not about the per-token price. The user names Fable in their
+message, in any form (fable, fable xhigh, an @-mention), and a hook refuses
+every dispatch that did not follow such a message. The rule stops the
+orchestrator from choosing Fable. It does not make the user type the full
+agent name, so the same word match that unlocks Astra on Codex unlocks
+Fable here.
 
 ## What the dispatch history says
 
@@ -193,7 +196,7 @@ Anthropic's long-output note, which tells Fable at xhigh to write a long
 deliverable once instead of drafting it in thinking and again as the reply.
 
 `hooks/remind-writing-rules.py` runs on every user message. It records
-whether the message named `@agent-fable-xhigh`, and whether it used the
+whether the message named Fable, and whether it used the
 word fork, in two per-session state files under
 `~/.claude/gborges-standard/state/`.
 

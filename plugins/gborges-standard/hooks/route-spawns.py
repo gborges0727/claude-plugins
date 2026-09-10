@@ -63,8 +63,10 @@ unknown, and unknown lets the fork through, because refusing on a guess
 would break forks on every host whose transcript format differs.
 
 The same hook also decides who may run the Fable agent. Fable is the
-expensive model, so gborges-standard:fable-xhigh runs only when the user
-asked for it by name in their latest message. remind-writing-rules.py
+expensive model, so gborges-standard:fable-xhigh runs only when the user's
+latest message used the word Fable. Any mention counts, the same way any
+mention of Astra unlocks Astra in route-codex.py. The rule stops the main
+agent from picking Fable on its own, not the user from asking casually. remind-writing-rules.py
 records that answer per session, and this hook reads the record. A Fable
 spawn with no such record comes back denied, and the reason tells the main
 agent to send the same brief to gborges-standard:opus-xhigh instead.
@@ -206,8 +208,8 @@ REPIN_REASON = (
 )
 
 DENY_REASON = (
-    "The Fable agent runs only when the user's own message names "
-    "@agent-fable-xhigh. This message did not, so send the same brief to "
+    "The Fable agent runs only when the user's own message names Fable. "
+    "This message did not, so send the same brief to "
     "gborges-standard:opus-xhigh instead."
 )
 

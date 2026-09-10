@@ -23,7 +23,7 @@ dispatch in the name it types.
 | mechanical | `sonnet-medium` | `luna-xhigh` | An edit or a run whose brief names the exact change and a command that checks it. Parallel copies of one such task. Fetching a named doc page |
 | default | `opus-medium` | `sol-xhigh` | Any task that reads code to reach a conclusion (an investigation, a diagnosis, a review, a design choice). On Codex, also any brief that must read past 272K tokens |
 | escalation | `opus-xhigh` | `astra-medium` | A task that failed once below it. One long dependent chain the orchestrator cannot split |
-| summoned | `fable-xhigh` | `astra-xhigh` | Only when the user's own message names the agent. On Codex, any Astra call above medium effort |
+| summoned | `fable-xhigh` | `astra-xhigh` | Only when the user's own message names the model, in any form. On Codex, any Astra call above medium effort |
 
 On Claude Code, a Codex rung is not a Claude agent. It is a `codex exec`
 command with the rung's model and effort, run in the background through

@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 33
+# rev: 34
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -63,7 +63,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `strip-attribution.py` | `PreToolUse` hook | Removes AI-attribution footers from GitHub writes. Enforces the style's ban mechanically |
 | `flag-server-attribution.py` | `PostToolUse` hook | Tells the session to delete the footer the GitHub server adds to a new PR body, which the `PreToolUse` hook cannot reach |
 | `route-spawns.py` | `PreToolUse` hook | Decides which agent every spawn runs on, then appends the style's rules to its prompt, since the output style never reaches a subagent. Rewrites an unpinned type (`general-purpose`, `claude`, `default-agent`, or none) to `opus-medium`. Refuses a `fork` on a Fable session, since a fork copies the whole transcript onto the session's model, unless the user's latest message asked for one. Refuses a `fable-xhigh` dispatch the user did not summon, and rewrites it to `opus-xhigh` when `~/.claude/gborges-standard.json` says the account cannot run Fable. Appends Anthropic's long-output note to a `fable-xhigh` prompt, so Fable writes a long deliverable once instead of drafting it in thinking and again as the reply |
-| `remind-writing-rules.py` | `UserPromptSubmit` hook | Returns the style's Reminder paragraph as context with every user message, so the rules sit next to the reply being written. Records whether the message named `@agent-fable-xhigh`, used the word fork, or named Astra. An invocation of `pair-debate` records both Fable and Astra |
+| `remind-writing-rules.py` | `UserPromptSubmit` hook | Returns the style's Reminder paragraph as context with every user message, so the rules sit next to the reply being written. Records whether the message named Fable, used the word fork, or named Astra. An invocation of `pair-debate` records both Fable and Astra |
 | `writing-voice` | Skill | Two-pass ritual for every artifact (a file, a PR body, a commit message, a comment), whatever its length. The style alone shapes chat replies |
 | `read-aloud-prep` | Skill | Rewriting documents so a TTS voice reads them cleanly |
 | `bear-notes` | Skill | Writing into Bear without minting junk tags and wikilinks |
@@ -76,7 +76,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `sonnet-medium` | Agent | Sonnet 5 at medium effort. Edits and runs with a command check in the brief, parallel copies of one such task, and fetching a named doc page |
 | `opus-medium` | Agent | Opus 5 at medium effort. The default, and the floor for anything that reads code to reach a conclusion |
 | `opus-xhigh` | Agent | Opus 5 at xhigh effort. One escalation step for a task that failed below it, and the stand-in for Fable on an account without it |
-| `fable-xhigh` | Agent | Fable 5.1 at xhigh effort. Runs only when the user's message names `@agent-fable-xhigh`. See [docs/subagent-routing.md](docs/subagent-routing.md) for the routing rule and the cost reasoning |
+| `fable-xhigh` | Agent | Fable 5.1 at xhigh effort. Runs only when the user's message names Fable. See [docs/subagent-routing.md](docs/subagent-routing.md) for the routing rule and the cost reasoning |
 | `frontend-design` | Dependency | From `claude-plugins-official` |
 | `mattpocock-skills` | Dependency | From `claude-plugins-official` |
 | `context7` | Dependency | From `claude-plugins-official` |
@@ -231,9 +231,8 @@ The definitions alone change nothing, because Claude reaches for
 rule. `opus-medium` is the default and the floor for any task that reads
 code to reach a conclusion. `sonnet-medium` takes work a command can check.
 `opus-xhigh` is one escalation step, taken once, after a failed check.
-`fable-xhigh` runs only when the user's own message names
-`@agent-fable-xhigh`, and `route-spawns.py` refuses every other
-dispatch of it. [docs/subagent-routing.md](docs/subagent-routing.md) holds
+`fable-xhigh` runs only when the user's own message names Fable, in any
+form, and `route-spawns.py` refuses every other dispatch of it. [docs/subagent-routing.md](docs/subagent-routing.md) holds
 the cost reasoning.
 
 `/gborges-standard:setup` writes `~/.claude/gborges-standard.json`, two
