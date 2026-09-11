@@ -35,3 +35,31 @@ jobs:
             echo "The rev did not move. main holds ${base_rev}, so set both files to $((base_rev + 1)) or higher."
             exit 1
           fi
+
+      - name: Require a plugin version bump when the plugin changed
+        run: |
+          set -u
+          claude=plugins/gborges-standard/.claude-plugin/plugin.json
+          codex=plugins/gborges-standard/.codex-plugin/plugin.json
+          version_of() { python3 -c 'import json,sys; print(json.load(sys.stdin)["version"])'; }
+
+          if git diff --quiet "origin/${GITHUB_BASE_REF}...HEAD" -- plugins/gborges-standard; then
+            echo 'No file under plugins/gborges-standard changed, so the version may stay.'
+            exit 0
+          fi
+
+          pr_claude=$(version_of < "${claude}")
+          pr_codex=$(version_of < "${codex}")
+          base=$(git show "origin/${GITHUB_BASE_REF}:${claude}" | version_of)
+
+          echo "main version: ${base}, PR claude manifest: ${pr_claude}, PR codex manifest: ${pr_codex}"
+
+          if [ "${pr_claude}" != "${pr_codex}" ]; then
+            echo 'The two plugin manifests carry different versions. Set both to the same value.'
+            exit 1
+          fi
+          highest=$(printf '%s\n%s\n' "${base}" "${pr_claude}" | sort -V | tail -1)
+          if [ "${pr_claude}" = "${base}" ] || [ "${highest}" != "${pr_claude}" ]; then
+            echo "The plugin version did not move. main holds ${base}, and the installer copies nothing until the number rises, so raise both manifests."
+            exit 1
+          fi
