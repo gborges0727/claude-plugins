@@ -1,5 +1,24 @@
 # claude-plugins
 
+## Bump the plugin version on every change
+
+Every PR that touches anything under `plugins/gborges-standard/` raises the
+`version` field in both plugin manifests and keeps them equal:
+
+- `plugins/gborges-standard/.claude-plugin/plugin.json`
+- `plugins/gborges-standard/.codex-plugin/plugin.json`
+
+The installer on each machine compares the installed version with the
+marketplace version and copies the plugin into its cache only when the number
+is higher. A PR that changes a hook, a skill, an agent, or a style but leaves
+the version alone never reaches any machine: `/plugin` reports "already at
+the latest version" and `/reload-plugins` re-reads the stale cache. PR #39
+loosened the Fable mention rule on 2026-09-10 and shipped nowhere for a day
+for exactly this reason.
+
+The `rev` bump below is separate and covers the cloud bootstrap snippet. A
+plugin change bumps both.
+
 ## Bump the rev on every PR
 
 Every PR raises the `rev` number in two places and keeps them equal:
