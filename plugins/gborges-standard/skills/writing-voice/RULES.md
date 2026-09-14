@@ -123,7 +123,8 @@ restatement marker ("in other words", "put differently", "in one
 sentence") announces that the next sentence repeats the last one, so cut
 both the marker and the repeat. An aphoristic closer restates the claim as
 a motto after it has already been made: "that distinction matters", "that
-is the boundary", "green is the gate, not a suggestion". Delete it. The
+is the boundary", "green is the gate, not a suggestion", "the file is the
+signal". Delete it. The
 claim before it already did the work. The question form is the same failure as "The upshot:", with
 a question mark doing the deferring. Ask a question only when the reader has
 to answer it. Number a list only in the list itself. Attaching a reason does

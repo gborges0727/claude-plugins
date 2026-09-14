@@ -102,6 +102,7 @@ PATTERNS: list[tuple[int, str, str]] = [
     (7, r"that(?:'s| is) the (?:boundary|actual constraint|real constraint|whole point|gate|line)\.", "that is the boundary"),
     (7, r"\b(?:is|as) (?:the|a) (?:gate|hard stop|hard boundary|hard constraint|hard gate), not a\b", "X is the gate, not a Y"),
     (7, r"\bnot a suggestion\.", "not a suggestion"),
+    (7, r"\bis the signal\b", "X is the signal"),
     # Rule 11 continued, validation and candor framing.
     (11, r"\bfair (?:hit|point|push|pushback|enough)\b", "fair hit"),
     (11, r"\bgood catch\b", "good catch"),

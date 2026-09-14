@@ -9,7 +9,7 @@ below ran on the home desktop that day.
 
 | Piece | The one copy | How Codex reads it |
 |---|---|---|
-| Writing rules, hooks, five skills | this repo's `plugins/gborges-standard` | the `gborges` marketplace, installed with `codex plugin add` |
+| Writing rules, hooks, skills | this repo's `plugins/gborges-standard` | the `gborges` marketplace, installed with `codex plugin add` |
 | Machine notes (SSH, colima, GitHub, Taildrop, 1Password) | `~/.claude/CLAUDE.md` | `~/.codex/AGENTS.md` is a symlink to it |
 | Model routing and status line | `scripts/setup.sh --codex-config on` | it writes `~/.codex/config.toml` and `~/.codex/agents` |
 | Per-machine switches (Fable, Codex delegation) | `~/.claude/gborges-standard.json` | the Codex hooks read the same file |
@@ -124,24 +124,11 @@ ln -s ~/.claude/plugins/marketplaces/swiftui-agent-skill/swiftui-pro swiftui-pro
 Those three point at git checkouts that Claude Code updates in place, so
 the links never break.
 
-The mattpocock plugin is different. Claude Code fetches it into a
-versioned cache folder, and its manifest loads 25 of the 35 skill folders
-it ships. This loop links the same 25:
-
-```sh
-m=~/.claude/plugins/cache/claude-plugins-official/mattpocock-skills/1.2.3
-cd ~/.agents/skills
-for s in $(python3 -c "import json;print(' '.join(json.load(open('$m/.claude-plugin/plugin.json'))['skills']))"); do
-  ln -s "$m/$s" "$(basename $s)"
-done
-```
-
-Those 25 links break when Claude Code moves the plugin past 1.2.3, because
-the cache path carries the version. Re-run the loop with the new version
-when `ls -la ~/.agents/skills | grep mattpocock` shows dangling links.
-
-`use-railway` was already in `~/.agents/skills`, so the folder ends at 29
-skills.
+The skills that used to come from the mattpocock plugin now ship inside
+`gborges-standard`, so the Codex plugin install above covers them. A
+machine that still has links named after those skills in `~/.agents/skills`
+should delete them, or Codex lists two of each. `use-railway` was already
+in `~/.agents/skills`, so the folder ends at four skills.
 
 ## Write the model setup and status line
 

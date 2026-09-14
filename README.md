@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 35
+# rev: 36
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -71,17 +71,35 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `codex-delegate` | Skill | Handing a subtask to the Codex CLI on one of four rungs (Luna, Sol, Astra at medium, or the user-summoned Astra at xhigh), so ChatGPT-plan quota pays for it instead of Claude tokens. Each lane is a `codex exec` command run in the background, so a fan-out starts every lane at once. Needs the `codex` binary on PATH and signed in |
 | `model-routing-review` | Skill | Explicit invocation only. Re-derives the delegation ladder from today's catalog, prices, and scores, rewrites [docs/model-routing.md](docs/model-routing.md), and lists every file the ladder change touches |
 | `pair-debate` | Skill | Explicit invocation only. Puts Fable 5.1 and GPT-6 Astra, both at xhigh, in a room to work one hard problem as peers. `scripts/debate.py` runs the conversation in the background: blind drafts, an argued definition of done the user approves, then alternating turns in one shared worktree until both agree. The session reports events and reruns the agreed check at the end |
+| `grill` | Skill | Explicit invocation only. Interviews the user in rounds, every askable question at once with a recommended answer, until no decision is open. Runs `domain-modeling` alongside when the repo has a `CONTEXT.md` |
+| `build` | Skill | Explicit invocation only. Builds what the conversation (or a named spec or issue) asked for, one failing test then the smallest passing code, then a review by `opus-medium` against the ask and the repo's own review instructions. Commits only when told. A spec with tickets fans out one worktree per ticket |
+| `spec` | Skill | Explicit invocation only. Writes the conversation up as a spec under `docs/specs/`, and splits it into end-to-end tickets only when the work will not fit one session |
+| `routine` | Skill | Explicit invocation only. Grills the user into a spec for one recurring routine (trigger, check-in, brief), under `docs/routines/` |
+| `wayfinder` | Skill | Explicit invocation only. For work too big for one session: a map file of open questions under `docs/specs/<slug>/`, answered one session at a time |
+| `handoff` | Skill | Explicit invocation only. Writes the conversation up for a fresh session under `docs/handoff/`, or into Bear, and starts the session when asked |
+| `research` | Skill | Sends a background agent (`opus-medium`, or Codex Sol when Codex is on) to answer a question from primary sources into a cited file under `docs/research/` |
+| `wait-what` | Skill | Explicit invocation only. Says the last message again in plain English, context first |
+| `teach` | Skill | Explicit invocation only. Teaches a topic over many sessions from files in the current directory. Lessons publish as Claude artifacts |
+| `writing-for-agents` | Skill | How to structure a skill, a `CLAUDE.md`, or any document an agent reads: what stays in the main file, what goes behind a pointer, and how each step says when it is done |
+| `domain-modeling` | Skill | Keeps `CONTEXT.md` and `docs/adr/` sharp during a design discussion |
+| `diagnosing-bugs` | Skill | A method for hard bugs: build a fast check that fails on this bug first, then shrink, list suspects, probe, fix with a regression test, clean up |
+| `resolving-merge-conflicts` | Skill | Resolves an in-progress merge or rebase by reading why each side changed and keeping both intents |
+| `reference/output-locations.md` | Reference | The one rule for where the document-writing skills put their files, read from the repo's `.claude/gborges-standard.json` with `docs/` as the default |
 | `add-to-git` | Command | Explicit invocation only, never model-triggered |
+| `setup-repo` | Command | Writes `.claude/gborges-standard.json` at a repo's root, the per-repo `docs` folder and `tracker` choice the document-writing skills read. Wraps `scripts/setup-repo.sh` |
 | `setup` | Command | Writes `~/.claude/gborges-standard.json`, the per-machine switches for Fable access and Codex delegation, the `attribution` key in `~/.claude/settings.json` that stops Claude Code asking for AI attribution, and the Codex CLI's own model, subagent, and status line config under `~/.codex`. Wraps `scripts/setup.sh`, which does the same with no model turn |
 | `sonnet-medium` | Agent | Sonnet 5 at medium effort. Edits and runs with a command check in the brief, parallel copies of one such task, and fetching a named doc page |
 | `opus-medium` | Agent | Opus 5 at medium effort. The default, and the floor for anything that reads code to reach a conclusion |
 | `opus-xhigh` | Agent | Opus 5 at xhigh effort. One escalation step for a task that failed below it, and the stand-in for Fable on an account without it |
 | `fable-xhigh` | Agent | Fable 5.1 at xhigh effort. Runs only when the user's message names Fable. See [docs/subagent-routing.md](docs/subagent-routing.md) for the routing rule and the cost reasoning |
 | `frontend-design` | Dependency | From `claude-plugins-official` |
-| `mattpocock-skills` | Dependency | From `claude-plugins-official` |
 | `context7` | Dependency | From `claude-plugins-official` |
 
 Dependencies resolve to the same identifiers a user-scope install uses, so a machine that already has them does not get a second copy.
+
+### Skills adapted from Matt Pocock
+
+Thirteen of the skills (`grill`, `build`, `spec`, `routine`, `wayfinder`, `handoff`, `research`, `wait-what`, `teach`, `writing-for-agents`, `domain-modeling`, `diagnosing-bugs`, and `resolving-merge-conflicts`) started as skills in [mattpocock/skills](https://github.com/mattpocock/skills), MIT licensed, copyright Matt Pocock. They were rewritten here in plain English, merged where two did one job, and cut loose from any issue tracker. The commit they were taken from is recorded in `.claude/skills/upstream-check/UPSTREAM.md`, and the `upstream-check` skill in this repo lists what has changed there since.
 
 ## Codex
 
@@ -152,7 +170,7 @@ own, and a file at it would fire twice.
 
 | Component | Codex | Notes |
 |---|---|---|
-| The five skills | Yes | `SKILL.md` loads unchanged on both hosts |
+| The skills | Yes | `SKILL.md` loads unchanged on both hosts |
 | `plain-english.md` | Yes, through a hook | Codex has no output styles. `codex-session-style.py` returns the style body as `SessionStart` context |
 | `strip-attribution.py` | Yes | Codex passes the same `tool_name` and `tool_input` fields and accepts the same `updatedInput` reply |
 | `flag-server-attribution.py` | Yes | Same `PostToolUse` contract |
@@ -161,7 +179,7 @@ own, and a file at it would fire twice.
 | `route-spawns.py` | Yes, on a different event | Codex spawns subagents through a tool no `Agent` matcher catches, and fires `SubagentStart`. `--subagent-start` answers that event with the same rules block as context |
 | `add-to-git` | No | A Claude command. Codex loads skills, not commands |
 | The four agents | No | Claude Code agents. `codex-session-style.py` drops the style's Subagents section so Codex never gets sent to a name it cannot resolve |
-| The three dependencies | No | `frontend-design`, `mattpocock-skills`, and `context7` live in a Claude marketplace that Codex cannot install from |
+| The two dependencies | No | `frontend-design` and `context7` live in a Claude marketplace that Codex cannot install from |
 
 The style arrives as about 6,300 characters of session context, which is the
 one real cost of the Codex path. `WRITING_VOICE_STYLE=0` turns it off, and
