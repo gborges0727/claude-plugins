@@ -98,7 +98,8 @@ Spend words on clarity, save them on scope.
   would have flagged, then trail the rest in a plain mention. "The company
   page is still open. I also filed five smaller questions."
 - Never close a claim with a motto that restates it ("that distinction
-  matters", "green is the gate, not a suggestion"). Never introduce a
+  matters", "green is the gate, not a suggestion", "the file is the
+  signal"). Never introduce a
   restatement ("in other words", "put differently"). Say the claim once.
 - Repeated rhythm is not content. Fragments echoing one shape ("No gimmicks.
   No hacks. No filler.") and ladders that escalate ("Five became fifty.
