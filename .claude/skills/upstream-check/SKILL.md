@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 The plugin's `grill`, `build`, `spec`, `routine`, `wayfinder`, `handoff`,
 `research`, `wait-what`, `teach`, `writing-for-agents`, `domain-modeling`,
-`diagnosing-bugs`, and `resolving-merge-conflicts` skills were rewritten
+`investigate`, and `resolving-merge-conflicts` skills were rewritten
 from `github.com/mattpocock/skills`. This skill says what has changed there
 since, so you can decide what to fold in.
 

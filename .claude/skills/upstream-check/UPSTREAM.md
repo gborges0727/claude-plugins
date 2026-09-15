@@ -17,7 +17,7 @@ on 2026-09-14.
 | `productivity/teach` | `teach` |
 | `productivity/writing-for-agents` | `writing-for-agents` |
 | `engineering/domain-modeling` | `domain-modeling` |
-| `engineering/diagnosing-bugs` | `diagnosing-bugs` |
+| `engineering/diagnosing-bugs` | `investigate` (stops at the cause, no fix) |
 | `engineering/resolving-merge-conflicts` | `resolving-merge-conflicts` |
 
 Not ported: `code-review` (its check of the diff against the ask lives in
