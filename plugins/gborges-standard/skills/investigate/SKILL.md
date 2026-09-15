@@ -1,11 +1,15 @@
 ---
-name: diagnosing-bugs
-description: Find the cause of a hard bug or a slow path by first building a fast check that fails on this bug, then testing hypotheses against it. Use when the user says diagnose or debug, or reports something broken, throwing, failing, or slow.
+name: investigate
+description: Find the cause of a hard bug or a slow path and report it without fixing it. Builds a fast check that fails on the bug first, then tests hypotheses against it. Use when the user says investigate, diagnose, or debug, or hands over a bug ticket and wants the root cause.
 ---
 
-# Diagnosing bugs
+# Investigate
 
-A method for a hard bug. Skip a phase only when you can say why.
+A method for finding the cause of a hard bug. It ends with a report, not a
+fix. Skip a phase only when you can say why.
+
+The ask is the conversation, or the ticket the user named. An issue number
+or URL means that issue, with its comments.
 
 Read `CONTEXT.md` when the repo has one, so you know the names of the parts
 you are looking at, and read the decision records under `docs/adr/` for the
@@ -102,8 +106,8 @@ wrong output, the timing) so you can later confirm the fix addressed it.
 Then shrink the scenario to the smallest one that still fails. Remove
 inputs, callers, config, data, and steps one at a time, rerunning the check
 after each cut, and keep only what the failure needs. A small scenario
-leaves fewer parts to suspect in Phase 3 and becomes the regression test in
-Phase 5. Done when removing any one remaining part makes the check pass.
+leaves fewer parts to suspect in Phase 3 and is what the report hands to
+whoever writes the fix. Done when removing any one remaining part makes the check pass.
 
 ## Phase 3: List the suspects
 
@@ -133,34 +137,31 @@ For a performance regression, logs are the wrong tool. Measure a baseline
 first (a timing harness, `performance.now()`, a profiler, a query plan),
 then bisect. Measure before you change anything.
 
-## Phase 5: Fix, with a regression test first
+## Phase 5: Report
 
-Write the regression test before the fix, when there is a place to put it
-that reaches the real bug. The test must reproduce the pattern the bug
-occurs in at its real call site. When the only place a test can go is too
-shallow (one caller when the bug needs several, a unit test that cannot
-rebuild the chain that triggers it), a test there gives false confidence.
+Stop once one hypothesis has held up under its probe. Do not fix the bug.
+Whoever fixes it starts from this report, so it carries everything they
+need and nothing they must redo.
 
-When no such place exists, that is a finding. Write it down. The code's
-shape is stopping the bug from being pinned, and the cleanup phase should
-note it.
+Before writing it, remove every `[DEBUG-...]` line (grep the prefix) and
+delete every throwaway harness, or leave it in a folder marked as debug
+and say where. Leave the working tree as you found it, apart from the
+check when it is a test file worth keeping.
 
-When such a place exists:
+The report says, in this order:
 
-1. Turn the shrunk scenario into a failing test there.
-2. Watch it fail.
-3. Apply the fix.
-4. Watch it pass.
-5. Rerun the Phase 1 check against the original, unshrunk scenario.
+1. The cause, in one or two sentences, with the file and function.
+2. The evidence. Which probe confirmed it, what it showed, and which other
+   hypotheses failed their probes and how.
+3. The reproducing command from Phase 1, quoted exact, with its redacted
+   output.
+4. The shrunk scenario from Phase 2, so a fix can be tested against the
+   smallest case.
+5. Where a regression test could go. Name the public function or endpoint
+   a test would call. When no place reaches the real bug (one caller when
+   the bug needs several, a unit test that cannot rebuild the chain that
+   triggers it), say so, since that is a finding about the code's shape.
+6. What a fix would touch, as a sketch, without writing it.
 
-## Phase 6: Clean up
-
-Before saying it is done:
-
-- [ ] the Phase 1 check passes on the original scenario
-- [ ] the regression test passes, or the note says why there is none
-- [ ] every `[DEBUG-...]` line is gone (grep the prefix)
-- [ ] every throwaway harness is deleted or moved somewhere marked as
-      debug
-- [ ] the hypothesis that turned out right is stated in the commit or PR
-      message, so the next person learns it
+When the ask was an issue, post the report as a comment on that issue as
+well, through `gh`, and say that you did.
