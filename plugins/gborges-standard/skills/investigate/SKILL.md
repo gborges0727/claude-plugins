@@ -5,8 +5,8 @@ description: Find the cause of a hard bug or a slow path and report it without f
 
 # Investigate
 
-A method for finding the cause of a hard bug. It ends with a report, not a
-fix. Skip a phase only when you can say why.
+A method for finding the cause of a hard bug. It ends with a report in
+chat, not a fix and not a comment on the ticket. Skip a phase only when you can say why.
 
 The ask is the conversation, or the ticket the user named. An issue number
 or URL means that issue, with its comments.
@@ -163,5 +163,7 @@ The report says, in this order:
    triggers it), say so, since that is a finding about the code's shape.
 6. What a fix would touch, as a sketch, without writing it.
 
-When the ask was an issue, post the report as a comment on that issue as
-well, through `gh`, and say that you did.
+The report goes in the chat reply and nowhere else. Do not post it to the
+issue, the ticket, a PR, a note, or a file, and do not draft a comment for
+any of those. Once the user has read it, they may ask for it to be posted
+somewhere, and only then does it go there.

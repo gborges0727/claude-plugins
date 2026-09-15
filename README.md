@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 37
+# rev: 38
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -82,7 +82,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `teach` | Skill | Explicit invocation only. Teaches a topic over many sessions from files in the current directory. Lessons publish as Claude artifacts |
 | `writing-for-agents` | Skill | How to structure a skill, a `CLAUDE.md`, or any document an agent reads: what stays in the main file, what goes behind a pointer, and how each step says when it is done |
 | `domain-modeling` | Skill | Keeps `CONTEXT.md` and `docs/adr/` sharp during a design discussion |
-| `investigate` | Skill | Finds the cause of a hard bug and reports it without fixing it: build a fast check that fails on the bug first, then shrink, list suspects, probe, and write up the cause with its evidence |
+| `investigate` | Skill | Finds the cause of a hard bug and reports it without fixing it: build a fast check that fails on the bug first, then shrink, list suspects, probe, and write up the cause with its evidence in chat, posted nowhere unless asked |
 | `resolving-merge-conflicts` | Skill | Resolves an in-progress merge or rebase by reading why each side changed and keeping both intents |
 | `reference/output-locations.md` | Reference | The one rule for where the document-writing skills put their files, read from the repo's `.claude/gborges-standard.json` with `docs/` as the default |
 | `add-to-git` | Command | Explicit invocation only, never model-triggered |
