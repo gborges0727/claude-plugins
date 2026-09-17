@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 38
+# rev: 39
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -72,7 +72,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `model-routing-review` | Skill | Explicit invocation only. Re-derives the delegation ladder from today's catalog, prices, and scores, rewrites [docs/model-routing.md](docs/model-routing.md), and lists every file the ladder change touches |
 | `pair-debate` | Skill | Explicit invocation only. Puts Fable 5.1 and GPT-6 Astra, both at xhigh, in a room to work one hard problem as peers. `scripts/debate.py` runs the conversation in the background: blind drafts, an argued definition of done the user approves, then alternating turns in one shared worktree until both agree. The session reports events and reruns the agreed check at the end |
 | `grill` | Skill | Explicit invocation only. Interviews the user in rounds, every askable question at once with a recommended answer, until no decision is open. Runs `domain-modeling` alongside when the repo has a `CONTEXT.md` |
-| `build` | Skill | Explicit invocation only. Builds what the conversation (or a named spec or issue) asked for, one failing test then the smallest passing code, then a review by `opus-medium` against the ask and the repo's own review instructions. Commits only when told. A spec with tickets fans out one worktree per ticket |
+| `build` | Skill | Explicit invocation only. Builds what the conversation (or a named spec or issue) asked for, one failing test then the smallest passing code, then a review by `opus-medium` against the ask and the repo's own review instructions. A spec file or an issue goes to one `opus-medium` subagent for the test loop, and a build discussed in the conversation stays in the session. Every build runs in its own git worktree on a `build/<slug>` branch. The skill commits there, removes the worktree, and merges only when told. A spec with tickets fans out one worktree per ticket |
 | `spec` | Skill | Explicit invocation only. Writes the conversation up as a spec under `docs/specs/`, and splits it into end-to-end tickets only when the work will not fit one session |
 | `routine` | Skill | Explicit invocation only. Grills the user into a spec for one recurring routine (trigger, check-in, brief), under `docs/routines/` |
 | `wayfinder` | Skill | Explicit invocation only. For work too big for one session: a map file of open questions under `docs/specs/<slug>/`, answered one session at a time |
@@ -82,7 +82,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `teach` | Skill | Explicit invocation only. Teaches a topic over many sessions from files in the current directory. Lessons publish as Claude artifacts |
 | `writing-for-agents` | Skill | How to structure a skill, a `CLAUDE.md`, or any document an agent reads: what stays in the main file, what goes behind a pointer, and how each step says when it is done |
 | `domain-modeling` | Skill | Keeps `CONTEXT.md` and `docs/adr/` sharp during a design discussion |
-| `investigate` | Skill | Finds the cause of a hard bug and reports it without fixing it: build a fast check that fails on the bug first, then shrink, list suspects, probe, and write up the cause with its evidence in chat, posted nowhere unless asked |
+| `investigate` | Skill | Finds the cause of a hard bug and reports it without fixing it. The session briefs an `opus-medium` subagent, which runs the method. It builds a fast check that fails on the bug first, then shrinks the case, lists suspects, probes them, and sends back the cause with its evidence. The session reruns the reproducing command and reports in chat, posted nowhere unless asked |
 | `resolving-merge-conflicts` | Skill | Resolves an in-progress merge or rebase by reading why each side changed and keeping both intents |
 | `reference/output-locations.md` | Reference | The one rule for where the document-writing skills put their files, read from the repo's `.claude/gborges-standard.json` with `docs/` as the default |
 | `add-to-git` | Command | Explicit invocation only, never model-triggered |

@@ -11,6 +11,53 @@ chat, not a fix and not a comment on the ticket. Skip a phase only when you can 
 The ask is the conversation, or the ticket the user named. An issue number
 or URL means that issue, with its comments.
 
+## Who does it
+
+The session that loads this skill runs none of the phases. It writes a
+brief, sends it to a subagent, and writes the chat report from what comes
+back. The phases produce command output, probe results, and logs, and this
+session needs only the report.
+
+Send the brief to `gborges-standard:opus-medium`. When
+`~/.claude/gborges-standard.json` says `"codex": true`, send it through the
+`codex-delegate` skill on the `sol-xhigh` rung instead.
+
+## The brief
+
+The subagent sees none of the conversation and cannot reach the user. The
+brief carries:
+
+- the ask, in the user's words, or the issue number or URL
+- everything the user said that bears on the bug: what they tried, what
+  changed recently, where it happens
+- the repo's path
+- the path to this file, which is `SKILL.md` in the base directory printed
+  when this skill loaded, with the instruction to follow it from "The
+  method" to the end
+- what to send back: the six items of the Phase 5 report, or, when no
+  check could be built, what it tried and what it needs from the user
+
+## When it returns
+
+Run the report's reproducing command once and confirm it fails with the
+symptom the report quotes. Run `git status` and confirm the working tree
+holds only what the report says it left. Then give the user the report in
+the chat reply, in the Phase 5 order.
+
+When the subagent could not build a check, ask the user for what it needs.
+Send the answer to the same subagent so it continues from where it
+stopped.
+
+The report goes in the chat reply and nowhere else. Do not post it to the
+issue, the ticket, a PR, a note, or a file, and do not draft a comment for
+any of those. Once the user has read it, they may ask for it to be posted
+somewhere, and only then does it go there.
+
+## The method
+
+Everything from here down addresses the subagent that runs the
+investigation.
+
 Read `CONTEXT.md` when the repo has one, so you know the names of the parts
 you are looking at, and read the decision records under `docs/adr/` for the
 area.
@@ -22,7 +69,7 @@ every secret with `<REDACTED>` before showing anything. Build the check
 around environment variables so the credential stays in the environment
 and out of what you show. A captured request carries auth headers, so
 quote only the lines that matter. When the redacted output is not enough
-to diagnose the bug, say so and ask the user.
+to diagnose the bug, say so in what you send back.
 
 ## Phase 1: Build the check
 
@@ -75,11 +122,11 @@ cannot, so keep raising the rate.
 
 ### When no check can be built
 
-Stop and say so. List what you tried. Ask the user for access to the
-environment where it happens, or a redacted capture (a HAR file, a log
-dump, a core dump, a screen recording with timestamps), or permission to
-add temporary logging in production. Do not move on to hypotheses without
-a check.
+Stop and send back what you have. List what you tried. Say which of these
+would let you build one: access to the environment where it happens, a
+redacted capture (a HAR file, a log dump, a core dump, a screen recording
+with timestamps), or permission to add temporary logging in production. Do
+not move on to hypotheses without a check.
 
 ### Done when
 
@@ -118,9 +165,9 @@ Each one must make a prediction: "If X is the cause, then changing Y makes
 the bug go away" or "makes it worse". A hypothesis with no prediction is a
 hunch. Sharpen it or drop it.
 
-Show the ranked list to the user before testing. They often know something
-that reorders it at once ("we deployed a change to number 3 yesterday").
-Do not wait for them. Continue with your ranking if they are away.
+Rank the list with what the brief says changed recently ("we deployed a
+change to number 3 yesterday" moves number 3 to the top). Keep the ranked
+list as you wrote it before testing, since the report quotes it.
 
 ## Phase 4: Probe
 
@@ -163,7 +210,6 @@ The report says, in this order:
    triggers it), say so, since that is a finding about the code's shape.
 6. What a fix would touch, as a sketch, without writing it.
 
-The report goes in the chat reply and nowhere else. Do not post it to the
-issue, the ticket, a PR, a note, or a file, and do not draft a comment for
-any of those. Once the user has read it, they may ask for it to be posted
-somewhere, and only then does it go there.
+Send the report back as your final message and nowhere else. Do not post
+it to the issue, the ticket, a PR, a note, or a file, and do not draft a
+comment for any of those.
