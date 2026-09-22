@@ -238,7 +238,7 @@ class ForkSpawns(HookCase):
         self.assertNotIn("updatedInput", block)
 
     def test_a_fork_on_an_opus_session_passes_untouched(self):
-        transcript = self.write_transcript("claude-opus-5")
+        transcript = self.write_transcript("claude-opus-5-5")
         self.assertIsNone(self.spawn("fork", transcript=transcript))
 
     def test_the_newest_reply_decides_the_model(self):

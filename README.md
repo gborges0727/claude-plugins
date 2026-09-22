@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 39
+# rev: 40
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -89,8 +89,8 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `setup-repo` | Command | Writes `.claude/gborges-standard.json` at a repo's root, the per-repo `docs` folder and `tracker` choice the document-writing skills read. Wraps `scripts/setup-repo.sh` |
 | `setup` | Command | Writes `~/.claude/gborges-standard.json`, the per-machine switches for Fable access and Codex delegation, the `attribution` key in `~/.claude/settings.json` that stops Claude Code asking for AI attribution, and the Codex CLI's own model, subagent, and status line config under `~/.codex`. Wraps `scripts/setup.sh`, which does the same with no model turn |
 | `sonnet-medium` | Agent | Sonnet 5 at medium effort. Edits and runs with a command check in the brief, parallel copies of one such task, and fetching a named doc page |
-| `opus-medium` | Agent | Opus 5 at medium effort. The default, and the floor for anything that reads code to reach a conclusion |
-| `opus-xhigh` | Agent | Opus 5 at xhigh effort. One escalation step for a task that failed below it, and the stand-in for Fable on an account without it |
+| `opus-medium` | Agent | Opus 5.5 at medium effort. The default, and the floor for anything that reads code to reach a conclusion |
+| `opus-xhigh` | Agent | Opus 5.5 at xhigh effort. One escalation step for a task that failed below it, and the stand-in for Fable on an account without it |
 | `fable-xhigh` | Agent | Fable 5.1 at xhigh effort. Runs only when the user's message names Fable. See [docs/subagent-routing.md](docs/subagent-routing.md) for the routing rule and the cost reasoning |
 | `frontend-design` | Dependency | From `claude-plugins-official` |
 | `context7` | Dependency | From `claude-plugins-official` |

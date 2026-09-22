@@ -10,7 +10,9 @@ The `model-routing-review` skill rebuilds this file when either vendor
 ships a model or moves a price. Every number carries its date and source
 so the next review can tell what moved.
 
-Last reviewed 2026-09-04 against Codex CLI 0.153.3.
+Last reviewed 2026-09-22 against Codex CLI 0.153.3. The Claude side
+moved to Opus 5.5 that day, and the OpenAI side was last checked on
+2026-09-04.
 
 ## The two ladders
 
@@ -42,9 +44,11 @@ says Codex is on, two questions pick the host:
    on what was said in the session stays on Claude.
 2. Does a command check the result? A test run, a build, or a diff that
    applies catches a failure at no cost in judgment. A task whose result
-   is a conclusion nobody downstream checks stays on Claude, where Opus 5
-   holds the better accuracy record (63.0 against Sol's 58.9 on the
-   Intelligence Index, 79.2 against 64.6 on SWE-Bench Pro).
+   is a conclusion nobody downstream checks stays on Claude, where Opus
+   holds the better accuracy record. The published Opus rows are Opus 5's
+   (63.0 against Sol's 58.9 on the Intelligence Index, 79.2 against 64.6
+   on SWE-Bench Pro), and Anthropic's testing puts Opus 5.5 at `medium`
+   at or above Opus 5 at `high`.
 
 Two yeses send the task to the Codex rung that mirrors the Claude rung it
 would have taken. A failure escalates inside the host that ran the task,
@@ -71,7 +75,8 @@ the API price is the plan burn rate too.
 | GPT-5.6 Sol | 4 | 0.40 | 20 | 8 / 0.80 / 30 | 2026-08-21 cut, promised through 2026-11-21, then 5 / 0.50 / 30 |
 | GPT-6 Astra | 10 | 1 | 50 | 20 / 2 / 75 | 2026-08 launch, checked 2026-09-04 |
 | Claude Sonnet 5 | 2 | 0.20 | 10 | n/a | checked 2026-09-01 |
-| Claude Opus 5 | 5 | 0.50 | 25 | n/a | checked 2026-09-01 |
+| Claude Opus 5.5 | 4 | 0.20 | 20 | n/a | launched 2026-09-22 |
+| Claude Opus 5 | 5 | 0.50 | 25 | n/a | checked 2026-09-01, off the ladder since 2026-09-22 |
 | Claude Fable 5.1 | 10 | 0.25 | 50 | n/a | checked 2026-09-01 |
 
 The OpenAI long-context row applies to the whole request once its input
@@ -80,24 +85,31 @@ GPT-5.6 model and Astra list a 1,050,000-token window and a 128,000-token
 output cap on the API. The Codex CLI catalog reports a 272,000-token
 working window and an 872,000-token maximum for the same models.
 
-Rung for rung, the Codex side is cheaper than the Claude side on the two
-lower rungs and dearer on the escalation rung:
+Rung for rung, the Codex side is cheaper than the Claude side on the
+mechanical rung, level on the default rung, and dearer on the escalation
+rung:
 
 | Rung | Claude, in / out | Codex, in / out | Codex as a share of Claude |
 |---|---|---|---|
 | mechanical | Sonnet 5, 2 / 10 | Luna, 0.20 / 1.20 | 10% / 12% |
-| default | Opus 5, 5 / 25 | Sol, 4 / 20 | 80% / 80% |
-| escalation | Opus 5, 5 / 25 | Astra, 10 / 50 | 200% / 200% |
+| default | Opus 5.5, 4 / 20 | Sol, 4 / 20 | 100% / 100% |
+| escalation | Opus 5.5, 4 / 20 | Astra, 10 / 50 | 250% / 250% |
 | summoned | Fable 5.1, 10 / 50 | Astra, 10 / 50 | 100% / 100% |
 
-The escalation rung pays double per token and gets it back in tokens.
+Opus 5.5 took the default rung at Sol's exact list price, and Sol's price
+is a cut that OpenAI promised only through 2026-11-21. So the 20% price
+edge Sol held over Opus 5 on the default rung is gone, and the choice
+between the two hosts rests on the two questions above alone.
+
+The escalation rung pays two and a half times per token and gets some
+of it back in tokens.
 Artificial Analysis measured Astra at max using a third of Sol's tokens
 on its coding harness, and on this repo's three briefs Astra at medium
 spent 29% fewer tokens than Sol at max.
 
-Astra's cache hit costs 1.00 against Fable's 0.25, so a long
-many-turn Astra session pays four times Fable's rate on the tokens it
-resends. Per-token price is an input to the ranking, not the ranking. The
+Astra's cache hit costs 1.00 against Fable's 0.25 and Opus 5.5's 0.20,
+so a long many-turn Astra session pays four times Fable's rate and five
+times Opus 5.5's on the tokens it resends. Per-token price is an input to the ranking, not the ranking. The
 ranking is cost per finished task, which counts the retry a cheap failure
 causes and the orchestrator tokens spent writing the brief again.
 
@@ -106,7 +118,10 @@ causes and the orchestrator tokens spent writing the brief again.
 All OpenAI numbers ran at the model's maximum effort unless noted. Scores
 compare safely only when the benchmark, the harness, and the effort match,
 and the vendor tables mix all three, so treat a gap under three points as
-noise.
+noise. Every Claude row below is from before 2026-09-22. No independent
+Opus 5.5 score had been published on that date, so the Opus 5 rows stay as
+the Claude side's record, and Anthropic's own Opus 5.5 claims sit in the
+"Why the ladder changed on 2026-09-22" section.
 
 | Benchmark | Luna | Terra | Sol | Astra | Claude | Source |
 |---|---|---|---|---|---|---|
@@ -158,7 +173,8 @@ What the rows say, one model at a time:
   $11.84 at the same rate. Opus 5 leads it on the Intelligence Index (63.0
   against 58.9), SWE-Bench Pro (79.2 against 64.6), and Terminal-Bench
   4.0 (52.3 against 37.3), which is why the Claude escalation rung stays
-  on Opus rather than moving to Sol.
+  on Opus rather than moving to Sol. Opus 5.5 succeeds Opus 5 on both
+  Claude rungs at Sol's price, so that record now costs no premium.
 - Astra leads every OpenAI benchmark it appears on and beats Fable 5.1 on
   the agentic coding and math rows, while Fable 5.1 leads on Humanity's
   Last Exam with tools. On Terminal-Bench 4.0 OpenAI estimates Astra's API
@@ -213,7 +229,7 @@ stays.
 
 The same three briefs then ran on Luna, Sol, Sol at max, and Astra at
 medium through Codex, and on Opus 5 through the plugin's `opus-medium`
-and `opus-xhigh` agents. All twenty-four runs passed. Token totals are what each host billed for the three runs, so
+and `opus-xhigh` agents, which pinned Opus 5 until 2026-09-22. All twenty-four runs passed. Token totals are what each host billed for the three runs, so
 the Codex figures include Codex's own system prompt and the Opus figures
 include Claude Code's plus the writing rules the spawn hook appends. The
 API-equivalent cost takes 80% of tokens at the input price and 20% at
@@ -234,17 +250,55 @@ the output price.
 
 Every model finished every brief, so these briefs cannot rank the models
 on accuracy. They rank them on cost and speed for work all of them can
-do: Luna costs 3% of Opus at medium, Terra at xhigh costs 29%, Sol costs
-60%, and Opus finishes fastest. The Codex costs land on the ChatGPT plan allowance,
-not the API bill. Ranking on the hard tenth of tasks still rests on the
-published scores above, where Opus 5 leads Sol by 15 points on
-Terminal-Bench 4.0.
+do: Luna costs 3% of Opus 5 at medium, Terra at xhigh costs 29%, Sol costs
+60%, and Opus finishes fastest.
+
+At Opus 5.5's prices the same token counts
+would cost $0.92 at medium and $0.98 at xhigh, so Sol's share rises to
+75%, and Anthropic reports Opus 5.5 finishing agentic coding tasks in
+about half the tokens, which would cut those figures again. The Codex
+costs land on the ChatGPT plan allowance, not the API bill. Ranking on the
+hard tenth of tasks still rests on the published scores above, where Opus
+5 leads Sol by 15 points on Terminal-Bench 4.0.
 
 The orchestrator never sets max or ultra. Ultra spawns subagents inside
 the call, which multiplies the allowance one call spends. Only Pro and
 Business Premium plans draw Astra from the full Codex allowance. Plus
 holds a limited Astra allowance, so on Plus an escalation can hit that
 cap before the 5-hour limit does.
+
+## Why the ladder changed on 2026-09-22
+
+Anthropic shipped Opus 5.5 (`claude-opus-5-5`) on 2026-09-22 as the
+successor to Opus 5, and it took both Claude rungs Opus 5 held, at the
+same efforts. Rule 1 of the review decides it, because the vendor's named
+successor takes the rung. Rule 3 agrees on its own, since the price fell
+and the vendor's numbers rose. The facts:
+
+- Price. Opus 5.5 lists at 4 / 0.20 / 20 (input, cache hit, output)
+  against Opus 5's 5 / 0.50 / 25, so 20% less on input and output and 60%
+  less on cache hits. Fast mode is 8 / 40. Batch is 2 / 10.
+- Effort. The API default is `medium` where Opus 5 defaulted to `high`,
+  and the plugin's agents set the effort explicitly, so the change
+  reaches neither rung. Anthropic's testing has Opus 5.5 at `medium`
+  matching or beating Opus 5 at `high` on multistep coding in a real
+  codebase, in fewer steps and with about half the tokens, and `low`
+  close behind on several coding evaluations. At a given effort it thinks
+  more per turn than Opus 5, most of all at `xhigh` and `max`, so
+  `opus-xhigh` turns run longer.
+- Behavior. Thinking cannot be turned off, forced tool choice returns an
+  error, thinking blocks are bound to the model and the conversation, and
+  computer use runs only through the 2026-08-01 toolset. Claude Code
+  keeps the conversation prefix intact, so none of those reach a spawned
+  agent. The agent files pin `claude-opus-5-5` by id rather than the
+  `opus` alias, so a machine on an older Claude Code build that still
+  resolves the alias to Opus 5 runs the same model as every other.
+- Scores. No independent Opus 5.5 row was published on 2026-09-22. The
+  claims above are Anthropic's migration guide's, run in its own harness.
+
+The OpenAI side did not move. Sol at 4 / 20 now matches Opus 5.5's
+price exactly, so the default rung's host is picked by the two questions
+above and not by price.
 
 ## Why the ladder changed on 2026-09-04
 
@@ -271,12 +325,18 @@ medium, Astra at xhigh. The facts that moved it:
 
 ## Open questions
 
+- Opus 5.5 has no independent score on any row of the table above and no
+  point-by-point effort curve. Anthropic's claim that `medium` beats Opus
+  5 at `high` in half the tokens is the whole case for keeping `medium`.
+  The three briefs above, rerun on Opus 5.5 at `medium` and at `xhigh`,
+  would give the first measured token counts on this repo's work.
 - No effort curve is published for any GPT-5.6 model or for Astra. The
-  Claude side runs Opus at medium because Anthropic published that curve.
+  Claude side ran Opus 5 at medium because Anthropic published that curve,
+  and Opus 5.5 keeps it on the vendor's word.
   The three-brief Terra measurement above is one run per cell. A repeat on
   ten briefs with three runs each would give a curve worth acting on.
 - Sol's price reverts on or after 2026-11-21 unless OpenAI extends it. At
-  5 / 30 Sol still sits under Opus.
+  5 / 30 Sol would then cost more than Opus 5.5's 4 / 20 on both counts.
 - Astra at medium has no published score on the agentic rows. The case
   for it rests on Astra's four-point effort spread against its 20-point
   lead at max. Ten hard briefs that Sol at xhigh fails, rerun on Astra at
@@ -304,7 +364,10 @@ medium, Astra at xhigh. The facts that moved it:
   read the same way
 - July price cut, https://community.openai.com/t/announcing-a-major-price-drop-for-5-6-terra-and-luna-and-fast-mode-for-5-6-sol/1388484
 - August Sol cut, https://www.explainx.ai/blog/openai-gpt-5-6-sol-api-price-cut-20-percent-august-2026
-- Anthropic prices, `docs/subagent-routing.md`, checked 2026-09-01
+- Anthropic prices, `docs/subagent-routing.md`, checked 2026-09-22
+- Opus 5.5 prices, effort default, and the `medium` against `high`
+  claims, Anthropic's Opus 5.5 migration guide as shipped in Claude
+  Code's `claude-api` skill, read 2026-09-22
 - The local catalog, `codex debug models`
 - CodeRabbit run, https://www.coderabbit.ai/blog/gpt-5-6-sol-and-terra-benchmark
 - Sonar run, https://www.sonarsource.com/blog/openai-gpt-5-6-sol-and-terra/
