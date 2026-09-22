@@ -4,16 +4,17 @@ How the orchestrating session picks a subagent, and the cost reasoning
 behind the ladder. The rule itself lives in the output style's Subagents
 section, `plugins/gborges-standard/output-styles/plain-english.md`. This
 file holds the why, so the rule can stay short. Prices and published
-numbers below are from Anthropic's API pricing, its cost guidance, and its
-Fable 5.1 prompting guide as of 2026-09-01.
+numbers below are from Anthropic's API pricing, its cost guidance, its
+Fable 5.1 prompting guide, and its Opus 5.5 migration guide as of
+2026-09-22.
 
 ## The four agents
 
 | Agent | Model | Effort | Takes |
 |---|---|---|---|
 | `sonnet-medium` | Sonnet 5 | medium | An edit or a run whose brief names the exact change and a command that checks it. Parallel copies of one such task across files. Fetching a named doc page outside the codebase |
-| `opus-medium` | Opus 5 | medium | The default. The floor for any task that reads code to reach a conclusion |
-| `opus-xhigh` | Opus 5 | xhigh | A task that failed once below it. A task that is one dependent chain the orchestrator cannot split. The stand-in for Fable on an account without it |
+| `opus-medium` | Opus 5.5 | medium | The default. The floor for any task that reads code to reach a conclusion |
+| `opus-xhigh` | Opus 5.5 | xhigh | A task that failed once below it. A task that is one dependent chain the orchestrator cannot split. The stand-in for Fable on an account without it |
 | `fable-xhigh` | Fable 5.1 | xhigh | Only when the user's message names Fable |
 
 Each name states its model and effort so the orchestrator sees the cost of
@@ -21,20 +22,26 @@ a dispatch in the name it types.
 
 ## Prices
 
-| Model | Input, $ per million tokens | Cache hit, $ per million tokens | Output, $ per million tokens | Against Opus 5 (input, cache hit, output) |
+| Model | Input, $ per million tokens | Cache hit, $ per million tokens | Output, $ per million tokens | Against Opus 5.5 (input, cache hit, output) |
 |---|---|---|---|---|
-| Sonnet 5 | 2 | 0.20 | 10 | 40%, 40%, 40% |
-| Opus 5 | 5 | 0.50 | 25 | 100%, 100%, 100% |
-| Fable 5.1 | 10 | 0.25 | 50 | 200%, 50%, 200% |
+| Sonnet 5 | 2 | 0.20 | 10 | 50%, 100%, 50% |
+| Opus 5.5 | 4 | 0.20 | 20 | 100%, 100%, 100% |
+| Fable 5.1 | 10 | 0.25 | 50 | 250%, 125%, 250% |
 
-Fable 5.1 prices a cache hit at 2.5% of its input price, where every other
-model uses 10%, so a Fable 5.1 cache hit costs half of an Opus 5 cache hit.
-A subagent that reads many files sends its
-whole context back on every turn, and after the first turn most of that
-input is cache hits, so Fable 5.1 pays less than Opus 5 for those tokens.
-Uncached input and output stay at double. Nobody has measured what share
-of a real dispatch's tokens are cache hits, so 200% is the ceiling on the
-Fable premium and 50% is the floor.
+Opus 5.5 shipped on 2026-09-22 at 20% under Opus 5 on input and output
+(Opus 5 was 5 / 0.50 / 25) and at 60% under it on cache hits. Opus 5.5
+prices a cache hit at 5% of its input price and Fable 5.1 at 2.5%, so a
+Fable 5.1 cache hit now costs a quarter more than an Opus 5.5 cache hit,
+where against Opus 5 it cost half.
+
+A subagent that reads many files sends its whole context back on every turn, and after the first turn most of
+that input is cache hits, so the Fable premium on a long dispatch sits
+nearer 125% than 250%. Nobody has measured what share of a real
+dispatch's tokens are cache hits, so 250% is the ceiling on the Fable
+premium and 125% is the floor.
+
+Sonnet 5 and Opus 5.5 charge the same for a cache hit, so on a long
+dispatch Sonnet's saving comes only from uncached input and output.
 
 Per-token price is an input to the analysis, not the ranking. The ranking
 is cost per finished task, which counts the retry a cheap failure causes
@@ -43,14 +50,26 @@ and the orchestrator tokens spent writing the brief again.
 ## Why Opus at medium is the default
 
 Anthropic's coding runs on Opus 5 put the effort curve like this. At
-`medium`, Opus 5 gives up about 2 points of pass rate for half the cost of
-the default (`high`). At `low` it gives up about 8 points for a quarter of
+`medium`, Opus 5 gave up about 2 points of pass rate for half the cost of
+its default (`high`). At `low` it gave up about 8 points for a quarter of
 the cost. Two points is the price of halving the bill, and eight points is
-not, so `medium` is the default and `low` appears nowhere in the ladder.
+not, so `medium` became the default and `low` appears nowhere in the
+ladder.
 
-On research and knowledge work the curve is nearly flat. `medium` matched
+On research and knowledge work the curve was nearly flat. `medium` matched
 the default's accuracy at 70% to 85% of its cost across four benchmarks,
-so nothing there argues for a higher default either.
+so nothing there argued for a higher default either.
+
+Opus 5.5 keeps `medium` for a stronger reason. Anthropic's migration guide
+sets `medium` as the API default on Opus 5.5 (Opus 5 defaulted to `high`),
+and its testing has Opus 5.5 at `medium` matching or beating Opus 5 at
+`high` on multistep coding in a real codebase, in fewer steps and with
+about half the tokens. The same guide says `low` comes close on several
+coding evaluations at much lower cost, and that at a given level Opus 5.5
+thinks more per turn than Opus 5, most of all at `xhigh` and `max`. So
+`opus-xhigh` turns run longer than they did on Opus 5. Anthropic has
+published no point-by-point effort curve for Opus 5.5, so the Opus 5 curve
+above is still the only one with numbers.
 
 ## Why Sonnet stays out of code investigation
 
@@ -98,17 +117,20 @@ Anthropic's guidance is to sweep effort on the current model before
 dropping a tier, and it reports that the larger model at lower effort often
 wins on cost per task. Fable 5 at `low` beat Sonnet 5 on a deep-research
 benchmark while costing about 10% less per task. Nobody has measured Sonnet
-5 at `xhigh` against Opus 5 at `medium` on this user's work, and a fourth
+5 at `xhigh` against Opus 5.5 at `medium` on this user's work, and a fourth
 agent makes every dispatch a harder choice. The model step is the one the
 published numbers say moves accuracy, so a failed Sonnet task goes to Opus
 at `medium`, not to Sonnet at a higher effort.
 
 ## Why Fable is user-only
 
-Fable costs double Opus on uncached input and on output, and on a coding
-subset Opus 5 matched Fable 5 (91.7% against 91.3%) at about 60% of its
-cost. Those are Fable 5 numbers. Anthropic's Fable 5.1 prompting guide
-says the 5.1 gains over Fable 5 are largest at the higher effort levels,
+Fable costs two and a half times Opus 5.5 on uncached input and on
+output, and on a coding subset Opus 5 matched Fable 5 (91.7% against
+91.3%) at about 60% of its cost. Those are Opus 5 and Fable 5 numbers, and
+Opus 5.5 at `medium` beats Opus 5 at `high` in Anthropic's own testing at
+a lower price, so the gap Fable has to justify grew.
+
+Anthropic's Fable 5.1 prompting guide says the 5.1 gains over Fable 5 are largest at the higher effort levels,
 that 5.1 at `medium` roughly matches Fable 5 at lower cost, and that 5.1
 at `low` is often competitive with Opus and Sonnet on cost per task while
 scoring higher. None of that is measured on this user's briefs.
