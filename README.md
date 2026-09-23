@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 40
+# rev: 41
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -140,13 +140,13 @@ agents:
 
 | Codex agent | Model and effort | Mirrors |
 |---|---|---|
-| `luna-xhigh` | `gpt-5.6-luna`, xhigh | `sonnet-medium`, fully specified edits and runs |
-| `sol-xhigh` | `gpt-5.6-sol`, xhigh | `opus-medium`, the default worker |
+| `luna-xhigh` | `gpt-6-luna`, xhigh | `sonnet-medium`, fully specified edits and runs |
+| `sol-xhigh` | `gpt-6-sol`, xhigh | `opus-medium`, the default worker |
 | `astra-medium` | `gpt-6-astra`, medium | `opus-xhigh`, the one escalation step |
 | `astra-xhigh` | `gpt-6-astra`, xhigh | `fable-xhigh`, only when the user names it |
 
-In `~/.codex/config.toml` it sets the orchestrator to `gpt-5.6-sol` at
-medium effort, sets `agents.default_subagent_model` to `gpt-5.6-sol` at
+In `~/.codex/config.toml` it sets the orchestrator to `gpt-6-sol` at
+medium effort, sets `agents.default_subagent_model` to `gpt-6-sol` at
 xhigh so an unnamed spawn lands there, and sets `tui.status_line` to the
 same seven fields the Claude Code status line shows (directory, branch,
 dirty marker, model with effort, context used, 5-hour limit, weekly limit).

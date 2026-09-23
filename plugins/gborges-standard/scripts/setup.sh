@@ -10,7 +10,7 @@
 # A third flag, --codex-config, writes the Codex CLI's own model setup into
 # ~/.codex: four agent files under ~/.codex/agents that mirror the plugin's
 # four Claude subagents, the [agents] defaults that send every spawn to
-# GPT-5.6 Sol at xhigh effort, the orchestrator model, and the footer
+# GPT-6 Sol at xhigh effort, the orchestrator model, and the footer
 # status line. It defaults to on when a codex binary is on PATH.
 #
 # A fourth flag, --attribution, sets the 'attribution' key in
@@ -226,15 +226,14 @@ printf 'Wrote %s: %s\n' "$config_file" "$(tr -d '\n' < "$config_file")"
 # subagent: luna-xhigh takes fully specified edits like sonnet-medium,
 # sol-xhigh is the default worker like opus-medium, astra-medium is the one
 # escalation step like opus-xhigh, and astra-xhigh runs only when the user
-# names it, like fable-xhigh. Terra is out. On CodeRabbit's long-horizon
-# coding run Terra passed 40.7% of tasks against Sol's 63.7% while spending
-# 2.6 times the output tokens, so it costs more per finished task than Sol
-# on the work the default rung sends. Astra at medium is the escalation
-# because the model step is what moves accuracy: Astra leads Sol by 20
-# points on Terminal-Bench 4.0, while Sol at max buys almost nothing over
-# Sol at xhigh. Sol is also the default rung Codex can actually spawn, since
-# Codex's catalog marks Luna multi_agent_version v1 while Sol and Astra are
-# v2, so a Sol orchestrator's spawn cannot land on Luna by model name.
+# names it, like fable-xhigh. Luna and Sol are the GPT-6 versions, which
+# cost half what GPT-5.6 Luna and Sol cost and score within two points of
+# them on Artificial Analysis's coding index. Terra has no GPT-6 version and
+# no rung. Astra at medium is the escalation because the model step is what
+# moves accuracy: Astra leads GPT-6 Sol by 8 points on OSWorld 2.0, while
+# Sol at max gains 2 points over Sol at xhigh on DeepSWE for 2.7 times the
+# cost. Codex CLI 0.155.0 is the first version that accepts the gpt-6-sol
+# and gpt-6-luna names, so an older CLI gets a warning at the end.
 codex_dir="${HOME}/.codex"
 agents_dir="${codex_dir}/agents"
 codex_config_file="${codex_dir}/config.toml"
@@ -253,12 +252,12 @@ developer_instructions = "${instructions}"
 EOF
 }
 
-write_agent luna-xhigh gpt-5.6-luna xhigh \
-  "GPT-5.6 Luna at xhigh effort. Use for an edit or a run whose brief names the exact change and a command that checks it, for parallel copies of one such task across files, and for fetching a named doc page outside the codebase. Never for reading code to reach a conclusion, and never for a brief whose files run past 272K tokens." \
+write_agent luna-xhigh gpt-6-luna xhigh \
+  "GPT-6 Luna at xhigh effort. Use for an edit or a run whose brief names the exact change and a command that checks it, for parallel copies of one such task across files, and for fetching a named doc page outside the codebase. Never for reading code to reach a conclusion, and never for a brief whose files run past 272K tokens." \
   "You are a worker handling one fully specified unit of work from the orchestrating session. Run the check the brief names before you report. If the check fails or you cannot finish, say so plainly and quote the failing output instead of working around it."
 
-write_agent sol-xhigh gpt-5.6-sol xhigh \
-  "GPT-5.6 Sol at xhigh effort. The default for delegated work, and the floor for any task that reads code to reach a conclusion (an investigation, a diagnosis, a review, a design choice)." \
+write_agent sol-xhigh gpt-6-sol xhigh \
+  "GPT-6 Sol at xhigh effort. The default for delegated work, and the floor for any task that reads code to reach a conclusion (an investigation, a diagnosis, a review, a design choice)." \
   "You are a general-purpose worker handling a delegated unit of work from the orchestrating session. When the brief names a check, run it before you report. If the check fails or you cannot finish, say so plainly and quote the failing output."
 
 write_agent astra-medium gpt-6-astra medium \
@@ -318,13 +317,13 @@ for line in text.splitlines():
 body = re.sub(r"\n{3,}", "\n\n", "\n".join(kept)).strip("\n")
 managed_top = (
     "# Written by gborges-standard setup.sh: orchestrator model.\n"
-    'model = "gpt-5.6-sol"\n'
+    'model = "gpt-6-sol"\n'
     'model_reasoning_effort = "medium"\n'
 )
 managed_tables = (
     "# Written by gborges-standard setup.sh: spawns default to Sol xhigh unless they name an agent in ~/.codex/agents.\n"
     "[agents]\n"
-    'default_subagent_model = "gpt-5.6-sol"\n'
+    'default_subagent_model = "gpt-6-sol"\n'
     'default_subagent_reasoning_effort = "xhigh"\n'
     "\n"
     "# Written by gborges-standard setup.sh: the Claude Code status line fields, in the same order.\n"
@@ -335,8 +334,8 @@ managed_tables = (
 out = managed_top + ("\n" + body + "\n" if body else "") + "\n" + managed_tables
 
 parsed = tomllib.loads(out)
-assert parsed["model"] == "gpt-5.6-sol"
-assert parsed["agents"]["default_subagent_model"] == "gpt-5.6-sol"
+assert parsed["model"] == "gpt-6-sol"
+assert parsed["agents"]["default_subagent_model"] == "gpt-6-sol"
 assert len(parsed["tui"]["status_line"]) == 7
 
 tmp = path + ".tmp"
@@ -346,3 +345,12 @@ os.replace(tmp, path)
 PY
 
 printf 'Wrote %s and 4 agents in %s\n' "$codex_config_file" "$agents_dir"
+
+# Every Codex session reads the orchestrator model from config.toml, so a
+# CLI too old to know gpt-6-sol fails on its first message.
+if command -v codex >/dev/null 2>&1; then
+  codex_version=$(codex --version 2>/dev/null | awk '{print $NF}')
+  if [ -n "$codex_version" ] && [ "$(printf '%s\n%s\n' 0.155.0 "$codex_version" | sort -V | head -n 1)" != 0.155.0 ]; then
+    printf 'Codex CLI %s predates gpt-6-sol and gpt-6-luna. Run: codex update\n' "$codex_version"
+  fi
+fi

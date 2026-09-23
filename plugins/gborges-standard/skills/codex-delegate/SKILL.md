@@ -1,7 +1,7 @@
 ---
 name: codex-delegate
 description: >-
-  Delegate a coding subtask to the Codex CLI on an OpenAI model (GPT-5.6 Luna, GPT-5.6 Sol, or
+  Delegate a coding subtask to the Codex CLI on an OpenAI model (GPT-6 Luna, GPT-6 Sol, or
   GPT-6 Astra), spending ChatGPT-plan quota instead of Claude tokens. Use only when
   `~/.claude/gborges-standard.json` says `"codex": true` (a missing file means off). Then prefer
   this over a Claude subagent whenever the brief stands alone from the conversation and a command
@@ -33,6 +33,10 @@ run this bundle without a Codex install, so the binary is often absent. When it 
 in this session and say once, in a sentence, that Codex was not reachable. Installing and
 signing in (`codex login`) is the user's step, not yours.
 
+The rungs need Codex CLI 0.155.0 or later. An older CLI rejects `gpt-6-sol` and `gpt-6-luna` with
+"The 'gpt-6-sol' model is not supported when using Codex with a ChatGPT account." When a run
+fails with that line, run `codex update` and send the same command again.
+
 ## The allowance you are spending
 
 Codex signs in through the ChatGPT account, not an API key, so a delegated run spends the same
@@ -63,22 +67,23 @@ name says both.
 
 | Rung | `-m` | Effort | Mirrors | Takes |
 |---|---|---|---|---|
-| `luna-xhigh` | `gpt-5.6-luna` | `xhigh` | `sonnet-medium` | An edit or a run whose brief names the exact change and a command that checks it. Parallel copies of one such task. Never a brief past 272K tokens, since Luna's recall past 256K is 41% |
-| `sol-xhigh` | `gpt-5.6-sol` | `xhigh` | `opus-medium` | The default. Any task that reads code to reach a result a command can check, any second-model opinion, and any brief that must read past 272K tokens |
+| `luna-xhigh` | `gpt-6-luna` | `xhigh` | `sonnet-medium` | An edit or a run whose brief names the exact change and a command that checks it. Parallel copies of one such task. Never a brief past 272K tokens. OpenAI published no long-context recall score for GPT-6 Luna, and GPT-5.6 Luna's recall past 256K tokens was 41% |
+| `sol-xhigh` | `gpt-6-sol` | `xhigh` | `opus-medium` | The default. Any task that reads code to reach a result a command can check, any second-model opinion, and any brief that must read past 272K tokens |
 | `astra-medium` | `gpt-6-astra` | `medium` | `opus-xhigh` | A task that failed once on a lower rung. One long dependent chain. The orchestrator picks this on its own |
 | `astra-xhigh` | `gpt-6-astra` | `xhigh` | `fable-xhigh` | Only when the user's latest message names Astra. A hook refuses any Astra run above medium the user did not ask for |
 
-Terra has no rung. On long-horizon coding it passes 23 points fewer tasks than Sol while
-spending 2.6 times the output tokens, so it costs more per finished task than Sol on the work
-the default rung sends, and Luna already covers the short work at a quarter of Terra's price.
+No GPT-5.6 model has a rung. GPT-6 Sol and GPT-6 Luna cost half what their GPT-5.6 versions
+cost and score within two points of them on Artificial Analysis's coding index. GPT-5.6 Terra
+has no GPT-6 version, and on long-horizon coding it passed 23 points fewer tasks than GPT-5.6
+Sol.
 
 A failure on one rung is first a reason to reread the brief for a bad spec and resend it to the
 same rung. Escalate one rung, once, when the brief's own check failed or Codex said it could not
 finish, and put the exact failing output in the escalated brief. The escalation is a model step,
-Sol to Astra, because Astra leads Sol by 20 points on Terminal-Bench 4.0 while Sol at max scores
-the same as Sol at xhigh. After a second failure report to the user instead of climbing again.
+Sol to Astra. Astra leads GPT-6 Sol by 8 points on OSWorld 2.0, while Sol at max gains 2 points
+over Sol at xhigh on DeepSWE for 2.7 times the cost. After a second failure report to the user instead of climbing again.
 
-Astra costs 2.5 times Sol per token and per unit of ChatGPT allowance. At medium it is the
+Astra costs 5 times Sol per token and per unit of ChatGPT allowance. At medium it is the
 escalation rung and needs no permission. Above medium (high, xhigh, max, ultra) it runs only
 when the user named Astra in their latest message ("consult astra", "ask astra at max"). The
 hook fills in medium on an unnamed Astra run that set no effort, and xhigh on a named one.
@@ -92,7 +97,7 @@ user to ask for.
 Write the brief to a file in the scratchpad first, then run this with `run_in_background` set:
 
 ```sh
-codex exec -m gpt-5.6-luna -c model_reasoning_effort=xhigh \
+codex exec -m gpt-6-luna -c model_reasoning_effort=xhigh \
   -C /absolute/path/to/repo -s workspace-write -c approval_policy=never \
   -c mcp_servers.playwright.enabled=false -c mcp_servers.chrome-devtools.enabled=false \
   --json -o <scratch>/<lane>.md - < <scratch>/<lane>.brief.md > <scratch>/<lane>.jsonl 2>&1
@@ -100,7 +105,7 @@ codex exec -m gpt-5.6-luna -c model_reasoning_effort=xhigh \
 
 | Part | Why |
 |---|---|
-| `-m` and `-c model_reasoning_effort=` | The rung. Unpinned, Codex runs the orchestrator model from `~/.codex/config.toml` at its own default effort, which is low on Sol. The hook fills in the effort when the command omits it |
+| `-m` and `-c model_reasoning_effort=` | The rung. Unpinned, Codex runs the orchestrator model from `~/.codex/config.toml` at its own default effort, which is medium on Sol. The hook fills in the effort when the command omits it |
 | `-C /absolute/path` | Codex resolves a relative path against its own working directory, not yours |
 | `-s read-only` to investigate, `-s workspace-write` to edit | The sandbox is the guardrail, since approvals are off |
 | `-c approval_policy=never` | Codex has no terminal to ask in. Any other policy stalls the run |

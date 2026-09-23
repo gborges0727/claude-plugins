@@ -8,7 +8,7 @@ skill starts a lane. Every other Bash command passes untouched. The skill
 tells the main agent which model and effort to name, and this hook
 enforces the one rule that costs the most when broken.
 
-GPT-6 Astra costs 2.5 times what Sol costs per token. The skill's
+GPT-6 Astra costs 5 times what Sol costs per token. The skill's
 escalation rung runs Astra at medium effort, and that runs on the
 orchestrator's own judgment. Anything above medium (high, xhigh, max, or
 ultra) runs only when the user asked for it by name in their latest
@@ -20,7 +20,7 @@ as the Fable rule in route-spawns.py, with the effort as the line.
 
 The hook also fills in the effort when the call left it out. Codex takes
 the effort from its config, and a call without one runs at the model's
-own default, which is low on Sol. Every rung but the escalation runs at
+own default, which is medium on Sol. Every rung but the escalation runs at
 xhigh, so a missing effort becomes xhigh on Luna and Sol, and on Astra
 when the user named it. On an Astra call the user did not name, a
 missing effort becomes medium, the escalation rung's setting. An effort
@@ -75,7 +75,7 @@ WITHIN_CAP = ("none", "low", "medium")
 DENY_REASON = (
     "GPT-6 Astra runs above medium effort only when the user's own message "
     "names Astra. This message did not, so send the same brief to "
-    "gpt-6-astra at medium, the escalation rung, or to gpt-5.6-sol."
+    "gpt-6-astra at medium, the escalation rung, or to gpt-6-sol."
 )
 
 # Where a `codex exec` command begins. The fill-in inserts the effort flag

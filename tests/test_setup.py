@@ -19,8 +19,8 @@ import tempfile
 SCRIPT = Path(__file__).resolve().parent.parent / "plugins" / "gborges-standard" / "scripts" / "setup.sh"
 
 AGENTS = {
-    "luna-xhigh": ("gpt-5.6-luna", "xhigh"),
-    "sol-xhigh": ("gpt-5.6-sol", "xhigh"),
+    "luna-xhigh": ("gpt-6-luna", "xhigh"),
+    "sol-xhigh": ("gpt-6-sol", "xhigh"),
     "astra-medium": ("gpt-6-astra", "medium"),
     "astra-xhigh": ("gpt-6-astra", "xhigh"),
 }
@@ -120,9 +120,9 @@ class SetupWrites(unittest.TestCase):
             self.assertTrue(agent["description"])
             self.assertTrue(agent["developer_instructions"])
         parsed = self.config()
-        self.assertEqual(parsed["model"], "gpt-5.6-sol")
+        self.assertEqual(parsed["model"], "gpt-6-sol")
         self.assertEqual(parsed["model_reasoning_effort"], "medium")
-        self.assertEqual(parsed["agents"]["default_subagent_model"], "gpt-5.6-sol")
+        self.assertEqual(parsed["agents"]["default_subagent_model"], "gpt-6-sol")
         self.assertEqual(parsed["agents"]["default_subagent_reasoning_effort"], "xhigh")
         self.assertEqual(parsed["tui"]["status_line"][0], "current-dir")
         self.assertEqual(len(parsed["tui"]["status_line"]), 7)
@@ -150,8 +150,8 @@ class SetupWrites(unittest.TestCase):
         result = run_setup(self.home, "--fable", "on", "--codex", "off", "--codex-config", "on")
         self.assertEqual(result.returncode, 0, result.stderr)
         parsed = self.config()
-        self.assertEqual(parsed["model"], "gpt-5.6-sol")
-        self.assertEqual(parsed["agents"]["default_subagent_model"], "gpt-5.6-sol")
+        self.assertEqual(parsed["model"], "gpt-6-sol")
+        self.assertEqual(parsed["agents"]["default_subagent_model"], "gpt-6-sol")
         self.assertEqual(parsed["agents"]["old"]["description"], "an agent table the script must keep")
         self.assertEqual(parsed["projects"]["/tmp/repo"]["trust_level"], "trusted")
         self.assertEqual(parsed["mcp_servers"]["bear"]["args"], ["mcp-server"])
