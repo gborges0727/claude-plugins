@@ -153,7 +153,7 @@ def run_codex(run, prompt, label):
     else:
         cmd = ["codex", "exec", "-C", str(run.worktree)]
     cmd += [
-        "-m", "gpt-5.6-luna" if SMOKE else "gpt-6-astra",
+        "-m", "gpt-6-luna" if SMOKE else "gpt-6-astra",
         "-c", "model_reasoning_effort=" + ("low" if SMOKE else "xhigh"),
         "-c", trust,
         *CODEX_FLAGS,

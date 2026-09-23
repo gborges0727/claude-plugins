@@ -368,16 +368,16 @@ class CodexCalls(HookCase):
         self.assertEqual(self.spawn(FABLE)["hookSpecificOutput"]["permissionDecision"], "deny")
 
     def test_a_luna_call_without_an_effort_gets_xhigh(self):
-        out = self.codex("gpt-5.6-luna")["hookSpecificOutput"]
+        out = self.codex("gpt-6-luna")["hookSpecificOutput"]
         self.assertEqual(out["permissionDecision"], "allow")
         self.assertEqual(out["updatedInput"]["config"], {"model_reasoning_effort": "xhigh"})
         self.assertEqual(out["updatedInput"]["cwd"], "/repo")
 
     def test_an_effort_the_call_set_is_kept_on_sol(self):
-        self.assertIsNone(self.codex("gpt-5.6-sol", config={"model_reasoning_effort": "max"}))
+        self.assertIsNone(self.codex("gpt-6-sol", config={"model_reasoning_effort": "max"}))
 
     def test_other_config_keys_survive_the_fill_in(self):
-        out = self.codex("gpt-5.6-sol", config={"sandbox_mode": "read-only"})
+        out = self.codex("gpt-6-sol", config={"sandbox_mode": "read-only"})
         self.assertEqual(
             out["hookSpecificOutput"]["updatedInput"]["config"],
             {"sandbox_mode": "read-only", "model_reasoning_effort": "xhigh"},
@@ -413,17 +413,17 @@ class CodexExecCommands(HookCase):
         )
 
     def test_a_luna_command_without_an_effort_gets_the_flag_after_exec(self):
-        out = self.bash("codex exec -m gpt-5.6-luna -C /repo --json 'do it' > out.jsonl")["hookSpecificOutput"]
+        out = self.bash("codex exec -m gpt-6-luna -C /repo --json 'do it' > out.jsonl")["hookSpecificOutput"]
         self.assertEqual(out["permissionDecision"], "allow")
         self.assertEqual(
             out["updatedInput"]["command"],
-            "codex exec -c model_reasoning_effort=xhigh -m gpt-5.6-luna -C /repo --json 'do it' > out.jsonl",
+            "codex exec -c model_reasoning_effort=xhigh -m gpt-6-luna -C /repo --json 'do it' > out.jsonl",
         )
 
     def test_an_effort_the_command_set_is_kept(self):
-        self.assertIsNone(self.bash("codex exec -m gpt-5.6-sol -c model_reasoning_effort=max 'do it'"))
-        self.assertIsNone(self.bash('codex exec -m gpt-5.6-sol -c model_reasoning_effort="max" - < brief.md'))
-        self.assertIsNone(self.bash("codex exec --model=gpt-5.6-sol --config model_reasoning_effort=low 'x'"))
+        self.assertIsNone(self.bash("codex exec -m gpt-6-sol -c model_reasoning_effort=max 'do it'"))
+        self.assertIsNone(self.bash('codex exec -m gpt-6-sol -c model_reasoning_effort="max" - < brief.md'))
+        self.assertIsNone(self.bash("codex exec --model=gpt-6-sol --config model_reasoning_effort=low 'x'"))
 
     def test_astra_above_medium_without_a_mention_is_denied(self):
         out = self.bash("codex exec -m gpt-6-astra -c model_reasoning_effort=xhigh 'do it'")["hookSpecificOutput"]
@@ -446,12 +446,12 @@ class CodexExecCommands(HookCase):
         self.assertEqual(out["hookSpecificOutput"]["permissionDecision"], "deny")
 
     def test_a_resume_command_gets_the_same_treatment(self):
-        out = self.bash("codex exec resume 01a0-thread -m gpt-5.6-luna - < next.md")["hookSpecificOutput"]
-        self.assertEqual(out["updatedInput"]["command"], "codex exec -c model_reasoning_effort=xhigh resume 01a0-thread -m gpt-5.6-luna - < next.md")
+        out = self.bash("codex exec resume 01a0-thread -m gpt-6-luna - < next.md")["hookSpecificOutput"]
+        self.assertEqual(out["updatedInput"]["command"], "codex exec -c model_reasoning_effort=xhigh resume 01a0-thread -m gpt-6-luna - < next.md")
 
     def test_a_command_in_a_chain_only_reads_its_own_flags(self):
-        out = self.bash("cd /repo && codex exec -m gpt-5.6-luna 'x' && echo -c model_reasoning_effort=max")
-        self.assertIn("codex exec -c model_reasoning_effort=xhigh -m gpt-5.6-luna", out["hookSpecificOutput"]["updatedInput"]["command"])
+        out = self.bash("cd /repo && codex exec -m gpt-6-luna 'x' && echo -c model_reasoning_effort=max")
+        self.assertIn("codex exec -c model_reasoning_effort=xhigh -m gpt-6-luna", out["hookSpecificOutput"]["updatedInput"]["command"])
 
     def test_a_command_with_no_model_is_left_alone(self):
         self.assertIsNone(self.bash("codex exec 'do it'"))
