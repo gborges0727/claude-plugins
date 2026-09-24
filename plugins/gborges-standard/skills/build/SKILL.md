@@ -59,8 +59,9 @@ When the ask is a spec file or an issue, hand those two sections to one
 subagent, then do "Review" and "Finish" in this session. The ask already
 stands alone, and this session needs the diff, not the test output that
 led to it. Send the brief to `gborges-standard:opus-medium`. When
-`~/.claude/gborges-standard.json` says `"codex": true`, send it through the
-`codex-delegate` skill on the `sol-xhigh` rung instead.
+`~/.claude/gborges-standard.json` says `"codex": true`, or the user asked
+for Codex in this session, send it through the `codex-delegate` skill on
+the `sol-xhigh` rung instead.
 
 The brief carries:
 

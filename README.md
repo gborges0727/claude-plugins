@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 41
+# rev: 42
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -67,7 +67,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `writing-voice` | Skill | Two-pass ritual for every artifact (a file, a PR body, a commit message, a comment), whatever its length. The style alone shapes chat replies |
 | `read-aloud-prep` | Skill | Rewriting documents so a TTS voice reads them cleanly |
 | `bear-notes` | Skill | Writing into Bear without minting junk tags and wikilinks |
-| `route-codex.py` | `PreToolUse` hook | Guards every Codex delegation, both a `codex exec` command in a Bash call and an `mcp__codex__codex` call. Lets GPT-6 Astra run at medium on its own, refuses it above medium unless the user's latest message named Astra, and fills in the effort when the call set none |
+| `route-codex.py` | `PreToolUse` hook | Guards every Codex delegation, both a `codex exec` command in a Bash call and an `mcp__codex__codex` call. Refuses every call when the setup file has Codex off, until a message in the session asks for Codex. Lets GPT-6 Astra run at medium on its own, refuses it above medium unless the user's latest message named Astra, and fills in the effort when the call set none |
 | `codex-delegate` | Skill | Handing a subtask to the Codex CLI on one of four rungs (Luna, Sol, Astra at medium, or the user-summoned Astra at xhigh), so ChatGPT-plan quota pays for it instead of Claude tokens. Each lane is a `codex exec` command run in the background, so a fan-out starts every lane at once. Needs the `codex` binary on PATH and signed in |
 | `model-routing-review` | Skill | Explicit invocation only. Re-derives the delegation ladder from today's catalog, prices, and scores, rewrites [docs/model-routing.md](docs/model-routing.md), and lists every file the ladder change touches |
 | `pair-debate` | Skill | Explicit invocation only. Puts Fable 5.1 and GPT-6 Astra, both at xhigh, in a room to work one hard problem as peers. `scripts/debate.py` runs the conversation in the background: blind drafts, an argued definition of done the user approves, then alternating turns in one shared worktree until both agree. The session reports events and reruns the agreed check at the end |
@@ -255,9 +255,12 @@ the cost reasoning.
 
 `/gborges-standard:setup` writes `~/.claude/gborges-standard.json`, two
 switches per machine. `fable` false makes the hook rewrite `fable-xhigh` to
-`opus-xhigh`. `codex` true tells the session, through one line the
-per-message hook adds, to send fully specified mechanical work to the
-`codex-delegate` skill first.
+`opus-xhigh`. `codex` true tells the session to send a task whose brief
+stands alone and has a command that checks it to the `codex-delegate` skill
+first. `codex` false, the default, sends every task to a Claude subagent
+(`opus-medium` unless the task needs another rung). Codex then runs only
+after a message in the session asks for it, and `route-codex.py` refuses
+any Codex call before that.
 
 Claude Code re-reads the agent list on each Agent call, so a running session
 picks the agents up without a restart. The routing rule lives in the output

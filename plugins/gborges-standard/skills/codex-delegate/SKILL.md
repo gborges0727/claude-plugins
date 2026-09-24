@@ -2,13 +2,13 @@
 name: codex-delegate
 description: >-
   Delegate a coding subtask to the Codex CLI on an OpenAI model (GPT-6 Luna, GPT-6 Sol, or
-  GPT-6 Astra), spending ChatGPT-plan quota instead of Claude tokens. Use only when
-  `~/.claude/gborges-standard.json` says `"codex": true` (a missing file means off). Then prefer
-  this over a Claude subagent whenever the brief stands alone from the conversation and a command
-  checks the result: boilerplate, a repeated edit across files, tests against a pasted interface,
-  a bug a named test confirms, or a second-model opinion. Also use when the user says to delegate
-  or use Codex, names a Codex rung (consult astra, ask sol, send it to luna), or continues a
-  Codex thread.
+  GPT-6 Astra), spending ChatGPT-plan quota instead of Claude tokens. Use when the user's message
+  in this session asks for Codex, names a Codex rung (consult astra, ask sol, send it to luna), or
+  continues a Codex thread. Without such a message, use it only when
+  `~/.claude/gborges-standard.json` says `"codex": true` (a missing file means off), and then
+  prefer it over a Claude subagent whenever the brief stands alone from the conversation and a
+  command checks the result: boilerplate, a repeated edit across files, tests against a pasted
+  interface, a bug a named test confirms, or a second-model opinion.
 ---
 
 # Codex delegation
@@ -21,6 +21,13 @@ Do not delegate through the `mcp__codex__codex` tool. Claude Code runs MCP tool 
 time and a Codex call returns only when the whole task is done, so a fan-out of five lanes
 through MCP starts the fifth lane eight minutes after the first. The MCP tool remains fine for
 one short question where you would wait for the answer anyway.
+
+## Check that Codex is allowed
+
+Codex runs in one of two cases. The user's message in this session asked for Codex, by name or
+by a rung name. Or `~/.claude/gborges-standard.json` says `"codex": true`. In every other case,
+send the brief to the `gborges-standard:opus-medium` subagent, or to the Claude agent on the
+rung the task needs. The `route-codex.py` hook refuses a Codex run that neither case allows.
 
 ## Check the binary exists first
 

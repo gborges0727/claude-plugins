@@ -327,6 +327,10 @@ class NoCodexLine(HookCase):
 
 
 class CodexCalls(HookCase):
+    def setUp(self):
+        super().setUp()
+        self.write_config('{"fable": true, "codex": true}')
+
     def test_astra_without_a_mention_and_no_effort_runs_at_medium(self):
         out = self.codex("gpt-6-astra")["hookSpecificOutput"]
         self.assertEqual(out["permissionDecision"], "allow")
@@ -402,8 +406,65 @@ class CodexCalls(HookCase):
         )
 
 
+class CodexOffByDefault(HookCase):
+    """Codex runs only when the setup file or a user message allows it."""
+
+    def bash(self, command, session_id="s1"):
+        return run_hook(
+            CODEX,
+            {"session_id": session_id, "tool_name": "Bash", "tool_input": {"command": command}},
+            self.home,
+        )
+
+    def assert_denied(self, out):
+        block = out["hookSpecificOutput"]
+        self.assertEqual(block["permissionDecision"], "deny")
+        self.assertIn(OPUS_MEDIUM, block["permissionDecisionReason"])
+
+    def test_a_missing_setup_file_refuses_both_tools(self):
+        self.assert_denied(self.codex("gpt-6-sol", config={"model_reasoning_effort": "xhigh"}))
+        self.assert_denied(self.bash("codex exec -m gpt-6-sol -c model_reasoning_effort=xhigh - < b.md"))
+
+    def test_codex_off_refuses_a_command_with_no_model(self):
+        self.write_config('{"fable": true, "codex": false}')
+        self.assert_denied(self.bash("codex exec - < brief.md"))
+
+    def test_asking_for_codex_allows_it_for_the_rest_of_the_session(self):
+        self.write_config('{"fable": true, "codex": false}')
+        self.submit("use codex for task delegation")
+        self.submit("now fix the tests")
+        self.assertIsNone(self.codex("gpt-6-sol", config={"model_reasoning_effort": "xhigh"}))
+        out = self.bash("codex exec -m gpt-6-luna 'do it'")["hookSpecificOutput"]
+        self.assertEqual(out["permissionDecision"], "allow")
+
+    def test_a_rung_name_counts_as_asking(self):
+        for prompt in ("ask sol about this", "send it to Luna", "consult astra"):
+            session = prompt.split()[-1]
+            self.submit(prompt, session_id=session)
+            self.assertIsNone(
+                self.codex("gpt-6-sol", session_id=session, config={"model_reasoning_effort": "xhigh"}),
+                prompt,
+            )
+
+    def test_asking_in_one_session_does_not_allow_another(self):
+        self.submit("use codex", session_id="a")
+        self.assert_denied(self.codex("gpt-6-sol", session_id="b", config={"model_reasoning_effort": "xhigh"}))
+
+    def test_a_message_without_the_word_does_not_allow_it(self):
+        self.submit("delegate the renames to a subagent")
+        self.assert_denied(self.codex("gpt-6-sol", config={"model_reasoning_effort": "xhigh"}))
+
+    def test_other_bash_commands_pass_when_codex_is_off(self):
+        self.assertIsNone(self.bash("codex --version"))
+        self.assertIsNone(self.bash("git status"))
+
+
 class CodexExecCommands(HookCase):
     """The same rules applied to a Bash command that runs `codex exec`."""
+
+    def setUp(self):
+        super().setUp()
+        self.write_config('{"fable": true, "codex": true}')
 
     def bash(self, command, session_id="s1"):
         return run_hook(

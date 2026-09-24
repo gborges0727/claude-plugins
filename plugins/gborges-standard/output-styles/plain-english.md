@@ -182,6 +182,11 @@ Spend words on clarity, save them on scope.
 - The per-machine setup file, `~/.claude/gborges-standard.json`, says
   whether Codex delegation is on (`"codex": true`). Read it before the first
   dispatch of a session. A missing file means off.
+- When Codex is off, every brief goes to a Claude agent, `opus-medium`
+  unless the rules above pick another. Codex runs only after the user asks
+  for it in this session, by name or by a rung name ("use codex for
+  delegation", "ask sol"). From then on the session treats Codex as on. A
+  hook refuses any Codex call the setting and the user did not allow.
 - Codex has the same tools, MCP servers, and skills as this session, so the
   only thing it lacks is this conversation. When Codex is on, a brief that
   stands alone from the conversation and carries a command that checks the

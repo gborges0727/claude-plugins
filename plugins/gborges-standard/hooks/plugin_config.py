@@ -27,6 +27,13 @@ for a fork. fork_from_prompt() looks for the word "fork" in the message,
 write_fork() records the answer, and read_fork() reports it back. The
 spawn hook uses it to let a fork through on a Fable session when the user
 asked for one.
+
+A third record says whether any message in the session asked for Codex.
+codex_from_prompt() looks for the word "codex" or a Codex rung name
+(luna, sol, astra). Unlike the other records, it never turns off.
+write_codex() runs only for a message that asks, so "use codex for
+delegation" early in a session keeps Codex allowed for the rest of it.
+route-codex.py reads it with read_codex() when the "codex" key is false.
 """
 
 import json
@@ -164,3 +171,25 @@ def write_astra(session_id, named):
 def read_astra(session_id):
     """Report whether this session's latest message named Astra."""
     return _read_record(session_id, "astra-mention")
+
+
+# The word Codex, or one of the rung names the codex-delegate skill answers
+# to ("ask sol", "send it to luna", "consult astra").
+CODEX_WORD = re.compile(r"\b(codex|luna|sol|astra)\b", re.IGNORECASE)
+
+
+def codex_from_prompt(prompt):
+    """Say whether this message text asks for Codex."""
+    if not isinstance(prompt, str):
+        return False
+    return CODEX_WORD.search(prompt) is not None
+
+
+def write_codex(session_id):
+    """Record that a message in this session asked for Codex."""
+    _write_record(session_id, True, "codex-request")
+
+
+def read_codex(session_id):
+    """Report whether any message in this session asked for Codex."""
+    return _read_record(session_id, "codex-request")
