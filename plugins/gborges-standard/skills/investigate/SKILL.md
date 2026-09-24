@@ -19,8 +19,9 @@ back. The phases produce command output, probe results, and logs, and this
 session needs only the report.
 
 Send the brief to `gborges-standard:opus-medium`. When
-`~/.claude/gborges-standard.json` says `"codex": true`, send it through the
-`codex-delegate` skill on the `sol-xhigh` rung instead.
+`~/.claude/gborges-standard.json` says `"codex": true`, or the user asked
+for Codex in this session, send it through the `codex-delegate` skill on
+the `sol-xhigh` rung instead.
 
 ## The brief
 

@@ -179,9 +179,11 @@ measured on real briefs.
 
 `fable` false makes the dispatch hook rewrite `fable-xhigh` to
 `opus-xhigh`, so an account without Fable never pays for a failed call.
-`codex` true tells the orchestrator, through one line the per-message hook
-adds, to send fully specified mechanical work to the `codex-delegate` skill
-ahead of `sonnet-medium`. A missing file means Fable on and Codex off.
+`codex` true tells the orchestrator to send a task whose brief stands alone
+and has a command that checks it to the `codex-delegate` skill ahead of the
+Claude agent. `codex` false sends every task to a Claude agent,
+`opus-medium` unless the task needs another rung, until a message in the
+session asks for Codex. A missing file means Fable on and Codex off.
 
 `/gborges-standard:setup` writes the file from two questions.
 `plugins/gborges-standard/scripts/setup.sh --fable off --codex off` writes
@@ -220,11 +222,15 @@ deliverable once instead of drafting it in thinking and again as the reply.
 `hooks/remind-writing-rules.py` runs on every user message. It records
 whether the message named Fable, and whether it used the
 word fork, in two per-session state files under
-`~/.claude/gborges-standard/state/`.
+`~/.claude/gborges-standard/state/`. A third file marks the session once
+any message asks for Codex, by name or by a rung name (luna, sol, astra),
+and that mark lasts for the rest of the session.
 
 `hooks/route-codex.py` runs before every Codex delegation. That is a
 Bash call whose command runs `codex exec`, the way the `codex-delegate`
-skill starts a lane, or an `mcp__codex__codex` call. It lets a run on
+skill starts a lane, or an `mcp__codex__codex` call. When the setup file
+has Codex off and no message in the session asked for Codex, it refuses
+the call with a reason that sends the brief to `opus-medium`. It lets a run on
 `gpt-6-astra` go at medium, the escalation rung, on the orchestrator's
 own judgment. Above medium it refuses the run unless the latest user
 message named Astra, with a reason that points the orchestrator at Astra

@@ -27,20 +27,21 @@ record and denies a Fable spawn the user never asked for. A second record
 of the same shape says whether the message used the word "fork", which
 lets a fork through on a Fable session when the user asked for one.
 
-It also appends one sentence saying whether this machine may hand coding
-subtasks to the Codex CLI. The "codex" key in ~/.claude/gborges-standard.json
-decides the wording, and plugin_config.load() reads it. The main agent then
-knows the answer with no tool call and no guess.
+It also marks the session when a message asks for Codex, by name or by a
+rung name. That mark never clears, so it records whether the user asked for
+Codex at any point in the session. route-codex.py reads it on a machine
+whose "codex" key is false and refuses a Codex call the user never asked
+for.
 
 On any problem (the style file is missing, the Reminder section is gone,
 the settings file will not read) the hook still exits 0 and the turn
-proceeds. The switch below silences the reminder line only. The mention
-record and the Codex line are written either way, because the two rules
-they feed do not depend on the writing style. A third record of the same
-shape says whether the message named Astra, which route-codex.py reads
-before it lets a Codex call run on that model. A message that invokes the
-pair-debate skill counts as naming both Fable and Astra, because that
-skill always runs the two of them at xhigh.
+proceeds. The switch below silences the reminder line only. The records
+are written either way, because the rules they feed do not depend on the
+writing style. A further record of the same shape says whether the message
+named Astra, which route-codex.py reads before it lets a Codex call run on
+that model above medium. A message that invokes the pair-debate skill
+counts as naming both Fable and Astra, because that skill always runs the
+two of them at xhigh.
 
 Config:
   WRITING_VOICE_REMIND  1|0  switch for the reminder line (default 1)
@@ -90,6 +91,14 @@ except ImportError:
         def write_astra(session_id, named):
             return None
 
+        @staticmethod
+        def codex_from_prompt(prompt):
+            return False
+
+        @staticmethod
+        def write_codex(session_id):
+            return None
+
 STYLE = Path(__file__).resolve().parent.parent / "output-styles" / "plain-english.md"
 
 SECTION = re.compile(r"^## Reminder\s*\n(.*?)(?=^#|\Z)", re.MULTILINE | re.DOTALL)
@@ -129,6 +138,8 @@ def main():
         event.get("session_id"),
         debate or plugin_config.astra_from_prompt(event.get("prompt")),
     )
+    if debate or plugin_config.codex_from_prompt(event.get("prompt")):
+        plugin_config.write_codex(event.get("session_id"))
 
     lines = []
     if os.environ.get("WRITING_VOICE_REMIND", "1") == "1":

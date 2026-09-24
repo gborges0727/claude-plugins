@@ -3,9 +3,12 @@
 # ~/.claude/gborges-standard.json. Two keys live there. 'fable' says whether
 # this account can run the Claude Fable 5.1 model. When it is false, a hook
 # rewrites the plugin's fable-xhigh subagent to opus-xhigh. 'codex' says
-# whether the Codex CLI is installed and signed in on this machine. When it
-# is true, the orchestrator hands fully specified mechanical work to the
-# codex-delegate skill before it reaches for the sonnet-medium subagent.
+# whether the orchestrator hands delegated tasks to the Codex CLI without
+# being asked. When it is true, a task whose brief stands alone and has a
+# command that checks it goes to the codex-delegate skill first. When it is
+# false, every task goes to a Claude subagent, opus-medium unless the task
+# needs another rung, and a hook refuses Codex calls until a message in the
+# session asks for Codex.
 #
 # A third flag, --codex-config, writes the Codex CLI's own model setup into
 # ~/.codex: four agent files under ~/.codex/agents that mirror the plugin's
@@ -35,7 +38,9 @@ Write ~/.claude/gborges-standard.json, the config the gborges-standard hooks rea
 Usage: setup.sh [--fable on|off] [--codex on|off] [--codex-config on|off] [--attribution on|off]
 
   --fable on|off         This account can run the Claude Fable 5.1 model. Default on.
-  --codex on|off         The Codex CLI is available for delegated work. Default off.
+  --codex on|off         Send delegated tasks to the Codex CLI by default. Off sends
+                         them to Claude subagents (opus-medium) unless you ask for
+                         Codex in a message. Default off.
   --codex-config on|off  Write the Codex CLI's model, subagent, and status line
                          config under ~/.codex. Default on when codex is on PATH.
   --attribution on|off   Let Claude Code add its AI-attribution trailer to commits
@@ -143,7 +148,7 @@ if [ -z "$fable" ]; then
   fable=$(ask fable on 'Can this account run the Claude Fable 5.1 model? (on/off)') || exit 2
 fi
 if [ -z "$codex" ]; then
-  codex=$(ask codex off 'Delegate mechanical work to the Codex CLI? (on/off)') || exit 2
+  codex=$(ask codex off 'Delegate subagent tasks to Codex by default? Off uses Claude subagents (opus-medium) unless you ask for Codex. (on/off)') || exit 2
 fi
 if [ -z "$codex_config" ]; then
   if command -v codex >/dev/null 2>&1; then codex_default=on; else codex_default=off; fi

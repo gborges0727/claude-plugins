@@ -13,9 +13,12 @@ Ask whether this account can run the Claude Fable 5.1 model. Offer "Yes" (the
 account has Fable, so the fable-xhigh subagent runs as written) and "No" (the
 hook rewrites fable-xhigh to opus-xhigh). Yes is the default.
 
-Ask whether to delegate mechanical work to the Codex CLI. Offer "Off" (every
-subagent is a Claude subagent) and "On" (fully specified mechanical work goes
-to the codex-delegate skill first). Off is the default.
+Ask whether to delegate subagent tasks to Codex by default. Offer "Off"
+(every task goes to a Claude subagent, `opus-medium` unless the task needs
+another rung, and Codex runs only after the user asks for it in a message)
+and "On" (a task whose brief stands alone and has a command that checks it
+goes to the codex-delegate skill first). Off is the default and is listed
+first.
 
 Ask whether to write the Codex CLI's own config. Offer "Yes" (the script
 writes four agents under `~/.codex/agents`, the subagent defaults, the

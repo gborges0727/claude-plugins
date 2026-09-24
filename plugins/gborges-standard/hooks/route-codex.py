@@ -6,9 +6,18 @@ the MCP call that starts a Codex thread. The second is Bash, where it
 looks only at commands that run `codex exec`, the way the codex-delegate
 skill starts a lane. Every other Bash command passes untouched. The skill
 tells the main agent which model and effort to name, and this hook
-enforces the one rule that costs the most when broken.
+enforces the two rules that cost the most when broken.
 
-GPT-6 Astra costs 5 times what Sol costs per token. The skill's
+The first rule keeps Codex off unless someone turned it on. When the
+"codex" key in ~/.claude/gborges-standard.json is false, or the file is
+missing, every Codex call is refused unless a user message earlier in this
+session asked for Codex by name or by a rung name. remind-writing-rules.py
+marks the session when one does, and the mark lasts for the session. The
+reason sends the main agent to the gborges-standard:opus-medium subagent
+with the same brief.
+
+The second rule caps Astra. GPT-6 Astra costs 5 times what Sol costs per
+token. The skill's
 escalation rung runs Astra at medium effort, and that runs on the
 orchestrator's own judgment. Anything above medium (high, xhigh, max, or
 ultra) runs only when the user asked for it by name in their latest
@@ -33,11 +42,11 @@ model_reasoning_effort=...` flag, and the model is `-m` or `--model`. The
 fill-in on a command inserts `-c model_reasoning_effort=<effort>` right
 after the words `codex exec`, and changes nothing else in the command.
 
-A call that names no model at all is left alone. Codex then runs the
-orchestrator model from ~/.codex/config.toml, and the skill tells the main
-agent to name a model on every call, so an unnamed call is a skill miss
-rather than a cost the hook should guess at. A command the shell parser
-cannot split is left alone too.
+Once Codex is allowed, a call that names no model at all is left alone.
+Codex then runs the orchestrator model from ~/.codex/config.toml, and the
+skill tells the main agent to name a model on every call, so an unnamed
+call is a skill miss rather than a cost the hook should guess at. A
+command the shell parser cannot split is left alone too.
 
 On any read failure the hook stays silent and the call proceeds.
 """
@@ -52,7 +61,16 @@ try:
 except ImportError:
     # Fail safe when the sibling module is missing. Astra reads as
     # unmentioned, so it runs at medium and nothing higher.
+    # Codex reads as on, so a missing module never blocks a delegation.
     class plugin_config:  # noqa: N801
+        @staticmethod
+        def load():
+            return {"fable": True, "codex": True}
+
+        @staticmethod
+        def read_codex(session_id):
+            return False
+
         @staticmethod
         def read_astra(session_id):
             return False
@@ -78,12 +96,29 @@ DENY_REASON = (
     "gpt-6-astra at medium, the escalation rung, or to gpt-6-sol."
 )
 
+OFF_REASON = (
+    "Codex delegation is off on this machine (~/.claude/gborges-standard.json "
+    "has no \"codex\": true), and no message in this session asked for Codex. "
+    "Send the same brief to the gborges-standard:opus-medium subagent, or to the "
+    "Claude agent on the rung the task needs."
+)
+
 # Where a `codex exec` command begins. The fill-in inserts the effort flag
 # right after this match.
 EXEC_START = re.compile(r"\bcodex\s+exec\b")
 
 # Tokens that end one shell command and begin the next.
 COMMAND_BREAKS = ("&&", "||", ";", "|", "&")
+
+
+def codex_allowed(event):
+    """Say whether the setup file or a user message allows a Codex call."""
+    try:
+        if plugin_config.load().get("codex"):
+            return True
+        return plugin_config.read_codex(event.get("session_id"))
+    except Exception:
+        return True
 
 
 def pick_effort(model, effort, summoned):
@@ -158,6 +193,9 @@ def reply(decision, reason, updated=None):
 
 
 def handle_mcp(event, tool_input):
+    if not codex_allowed(event):
+        reply("deny", OFF_REASON)
+        return
     model = tool_input.get("model")
     if not isinstance(model, str) or not model:
         return
@@ -180,7 +218,12 @@ def handle_bash(event, tool_input):
     if not isinstance(command, str) or not EXEC_START.search(command):
         return
     found, model, effort = parse_exec(command)
-    if not found or not model:
+    if not found:
+        return
+    if not codex_allowed(event):
+        reply("deny", OFF_REASON)
+        return
+    if not model:
         return
     summoned = model in ASTRA_MODELS and plugin_config.read_astra(event.get("session_id"))
     decision, fill = pick_effort(model, effort, summoned)

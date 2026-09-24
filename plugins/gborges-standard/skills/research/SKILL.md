@@ -12,8 +12,8 @@ while it reads.
 
 The agent reads to reach a conclusion, so it runs on
 `gborges-standard:opus-medium`. When `~/.claude/gborges-standard.json`
-says `"codex": true`, send it through the `codex-delegate` skill on the
-`sol-xhigh` rung instead, since the brief stands alone and the output file
+says `"codex": true`, or the user asked for Codex in this session, send it
+through the `codex-delegate` skill on the `sol-xhigh` rung instead, since the brief stands alone and the output file
 checks it. Either way, run it in the background.
 
 ## The brief
