@@ -12,7 +12,8 @@ so the next review can tell what moved.
 
 Last reviewed 2026-09-22 against Codex CLI 0.156.0. Anthropic shipped
 Opus 5.5 and OpenAI shipped GPT-6 Sol and GPT-6 Luna that day, and both
-moved the ladder.
+moved the ladder. Sonnet 5.5 replaced Sonnet 5 on the mechanical rung
+on 2026-09-28 at the same price, and nothing else moved that day.
 
 ## The two ladders
 
@@ -77,7 +78,8 @@ Sol 100, 10, 500, Terra 50, 5, 300, and Luna 5, 0.5, 30.
 | GPT-5.6 Terra | 2 | 0.20 | 12 | 4 / 0.40 / 18 | 2026-07-30 cut, checked 2026-09-04 |
 | GPT-5.6 Sol | 4 | 0.40 | 20 | 8 / 0.80 / 30 | 2026-08-21 cut, promised through 2026-11-21, off the ladder since 2026-09-22 |
 | GPT-6 Astra | 10 | 1 | 50 | 20 / 2 / 75 | 2026-08 launch, checked 2026-09-22 |
-| Claude Sonnet 5 | 2 | 0.20 | 10 | n/a | checked 2026-09-01 |
+| Claude Sonnet 5.5 | 2 | 0.20 | 10 | n/a | checked 2026-09-28 |
+| Claude Sonnet 5 | 2 | 0.20 | 10 | n/a | checked 2026-09-01, off the ladder since 2026-09-28 |
 | Claude Opus 5.5 | 4 | 0.20 | 20 | n/a | launched 2026-09-22 |
 | Claude Opus 5 | 5 | 0.50 | 25 | n/a | checked 2026-09-01, off the ladder since 2026-09-22 |
 | Claude Fable 5.1 | 10 | 0.25 | 50 | n/a | checked 2026-09-01 |
@@ -95,7 +97,7 @@ mechanical and default rungs, and dearer on the escalation rung:
 
 | Rung | Claude, in / out | Codex, in / out | Codex as a share of Claude |
 |---|---|---|---|
-| mechanical | Sonnet 5, 2 / 10 | GPT-6 Luna, 0.10 / 0.50 | 5% / 5% |
+| mechanical | Sonnet 5.5, 2 / 10 | GPT-6 Luna, 0.10 / 0.50 | 5% / 5% |
 | default | Opus 5.5, 4 / 20 | GPT-6 Sol, 2 / 10 | 50% / 50% |
 | escalation | Opus 5.5, 4 / 20 | Astra, 10 / 50 | 250% / 250% |
 | summoned | Fable 5.1, 10 / 50 | Astra, 10 / 50 | 100% / 100% |
