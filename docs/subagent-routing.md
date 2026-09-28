@@ -6,13 +6,14 @@ section, `plugins/gborges-standard/output-styles/plain-english.md`. This
 file holds the why, so the rule can stay short. Prices and published
 numbers below are from Anthropic's API pricing, its cost guidance, its
 Fable 5.1 prompting guide, and its Opus 5.5 migration guide as of
-2026-09-22.
+2026-09-22. The Sonnet 5.5 price is from the same pricing page on
+2026-09-28.
 
 ## The four agents
 
 | Agent | Model | Effort | Takes |
 |---|---|---|---|
-| `sonnet-medium` | Sonnet 5 | medium | An edit or a run whose brief names the exact change and a command that checks it. Parallel copies of one such task across files. Fetching a named doc page outside the codebase |
+| `sonnet-medium` | Sonnet 5.5 | medium | An edit or a run whose brief names the exact change and a command that checks it. Parallel copies of one such task across files. Fetching a named doc page outside the codebase |
 | `opus-medium` | Opus 5.5 | medium | The default. The floor for any task that reads code to reach a conclusion |
 | `opus-xhigh` | Opus 5.5 | xhigh | A task that failed once below it. A task that is one dependent chain the orchestrator cannot split. The stand-in for Fable on an account without it |
 | `fable-xhigh` | Fable 5.1 | xhigh | Only when the user's message names Fable |
@@ -24,7 +25,7 @@ a dispatch in the name it types.
 
 | Model | Input, $ per million tokens | Cache hit, $ per million tokens | Output, $ per million tokens | Against Opus 5.5 (input, cache hit, output) |
 |---|---|---|---|---|
-| Sonnet 5 | 2 | 0.20 | 10 | 50%, 100%, 50% |
+| Sonnet 5.5 | 2 | 0.20 | 10 | 50%, 100%, 50% |
 | Opus 5.5 | 4 | 0.20 | 20 | 100%, 100%, 100% |
 | Fable 5.1 | 10 | 0.25 | 50 | 250%, 125%, 250% |
 
@@ -40,7 +41,7 @@ nearer 125% than 250%. Nobody has measured what share of a real
 dispatch's tokens are cache hits, so 250% is the ceiling on the Fable
 premium and 125% is the floor.
 
-Sonnet 5 and Opus 5.5 charge the same for a cache hit, so on a long
+Sonnet 5.5 and Opus 5.5 charge the same for a cache hit, so on a long
 dispatch Sonnet's saving comes only from uncached input and output.
 
 Per-token price is an input to the analysis, not the ranking. The ranking
@@ -117,7 +118,7 @@ Anthropic's guidance is to sweep effort on the current model before
 dropping a tier, and it reports that the larger model at lower effort often
 wins on cost per task. Fable 5 at `low` beat Sonnet 5 on a deep-research
 benchmark while costing about 10% less per task. Nobody has measured Sonnet
-5 at `xhigh` against Opus 5.5 at `medium` on this user's work, and a fourth
+5.5 at `xhigh` against Opus 5.5 at `medium` on this user's work, and a fourth
 agent makes every dispatch a harder choice. The model step is the one the
 published numbers say moves accuracy, so a failed Sonnet task goes to Opus
 at `medium`, not to Sonnet at a higher effort.
