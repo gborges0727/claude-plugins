@@ -392,7 +392,10 @@ and the vendor's numbers rose. The facts:
   keeps the conversation prefix intact, so none of those reach a spawned
   agent. The agent files pin `claude-opus-5-5` by id rather than the
   `opus` alias, so a machine on an older Claude Code build that still
-  resolves the alias to Opus 5 runs the same model as every other.
+  resolves the alias to Opus 5 runs the same model as every other. Since
+  2026-09-29 every agent file and the `pair-debate` script name their
+  model by id, including `claude-fable-5-1`, and the maintainer moves
+  each id by hand when a newer model ships.
 - Scores. No independent Opus 5.5 row was published on 2026-09-22. The
   claims above are Anthropic's migration guide's, run in its own harness.
 

@@ -103,15 +103,15 @@ def claude_model():
     try:
         parsed = json.loads(CONFIG.read_text(encoding="utf-8"))
         if parsed.get("fable") is False:
-            return "opus"
+            return "claude-opus-5-5"
     except (OSError, ValueError):
         pass
-    return "fable"
+    return "claude-fable-5-1"
 
 
 def run_claude(run, prompt, label):
     """One Claude turn. Returns the reply text. Keeps the session id."""
-    model = "sonnet" if SMOKE else claude_model()
+    model = "claude-sonnet-5-5" if SMOKE else claude_model()
     cmd = [
         "claude", "-p",
         "--model", model,
