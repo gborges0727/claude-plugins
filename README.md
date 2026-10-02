@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 43
+# rev: 44
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -181,7 +181,7 @@ own, and a file at it would fire twice.
 | The four agents | No | Claude Code agents. `codex-session-style.py` drops the style's Subagents section so Codex never gets sent to a name it cannot resolve |
 | The two dependencies | No | `frontend-design` and `context7` live in a Claude marketplace that Codex cannot install from |
 
-The style arrives as about 6,300 characters of session context, which is the
+The style arrives as about 10,500 characters of session context, which is the
 one real cost of the Codex path. `WRITING_VOICE_STYLE=0` turns it off, and
 `WRITING_VOICE_REMIND=0` turns off the per-turn reminder as it always did.
 

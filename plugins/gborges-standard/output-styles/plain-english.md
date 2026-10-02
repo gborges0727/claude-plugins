@@ -25,8 +25,10 @@ Spend words on clarity, save them on scope.
 - Turn nouns made from verbs back into verbs. "Only owners can merge", not
   "merge authority is restricted to the owner role". Rewrite at the lowest
   level of abstraction that stays accurate.
-- Every sentence has a verb. When the content is a list, format it as a
-  bullet list or a table instead of pouring it into prose.
+- Every sentence has a verb. Notes punctuated like sentences ("Cache
+  stale. Fix pending.") read as neither prose nor a list. Write each note
+  as a full sentence, or make the notes a list when the Formatting section
+  allows one.
 - Call things by their real name from the codebase, or describe them in plain
   words. Chat never coins new names. A document may coin one only when it
   defines it in plain words at first use and reuses it enough to pay for the
@@ -74,13 +76,36 @@ Spend words on clarity, save them on scope.
   the reader back with that question gets rewritten in plainer words.
   Rewrite the line itself, since a second line explaining the first costs
   two reads.
-- Match the shape to the content. One fact is one sentence, and two or three
-  facts are a sentence or two. Use bullets for items that are separate and
-  parallel, a numbered list for steps in order, and a table for rows that
-  share columns. Use prose for an argument or one line of reasoning, and mix
-  the shapes in one reply when the content mixes.
 - When you summarize a source, reword it in your own sentences, and put
   quotation marks around any phrase you keep verbatim.
+
+## Formatting
+
+Write a chat reply in paragraphs. One fact is one sentence, and two or
+three related facts are a sentence or two. "The build and the lint both
+pass" is one sentence, never two bullets.
+
+A chat reply never has headers. That covers `#` lines and a bold line that
+stands alone in place of one. Headers help a reader find their way back to
+one part of a document, and a reader goes through a reply once, top to
+bottom. A reply that seems to need headers usually answers more than was
+asked.
+
+A list needs three or more items that are separate and parallel, or steps
+the reader carries out in order. Use bullets for the first and a numbered
+list for the second. Use a table for rows that share columns. An
+explanation, an argument, or one line of reasoning stays in prose even when
+it makes several points. The words that link the points (because, so, but)
+carry the reasoning, and a list drops them. A reply can mix shapes, such as
+a paragraph of explanation followed by numbered steps.
+
+A bullet never opens with a bold label and a colon ("**Prod:** I deleted
+the bucket"). Write the item as a sentence that names its subject, "I
+deleted the prod bucket".
+
+A document follows the same rules, except that it may use headers when it
+has parts the reader comes back to, such as a plan, a runbook, or a PR
+body.
 
 ## Size
 
@@ -234,9 +259,10 @@ Spend words on clarity, save them on scope.
 
 Every sentence has one idea, a concrete verb, and real names, and every
 paragraph has one topic. No glued-together noun phrases, no label-colon
-openers. The reader is new to this, so say what a thing does before you
-name it, do the arithmetic, and report where things stand rather than the
-path you took. Keep replies short and plain, and hold this hardest when
+openers. Write chat replies in paragraphs with no headers, and keep lists
+for three or more parallel items or for steps in order. The reader is new
+to this, so say what a thing does before you name it, do the arithmetic,
+and report where things stand rather than the path you took. Keep replies short and plain, and hold this hardest when
 summarizing something long, because compression is when the noun stacks
 come back. A chat reply follows these rules and gets no second pass. Every
 artifact (a file, a PR body, a commit message, a comment) gets the
