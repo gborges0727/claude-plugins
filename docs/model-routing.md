@@ -10,10 +10,13 @@ The `model-routing-review` skill rebuilds this file when either vendor
 ships a model or moves a price. Every number carries its date and source
 so the next review can tell what moved.
 
-Last reviewed 2026-09-22 against Codex CLI 0.156.0. Anthropic shipped
-Opus 5.5 and OpenAI shipped GPT-6 Sol and GPT-6 Luna that day, and both
-moved the ladder. Sonnet 5.5 replaced Sonnet 5 on the mechanical rung
-on 2026-09-28 at the same price, and nothing else moved that day.
+Last reviewed 2026-10-08 against Codex CLI 0.156.0. Anthropic shipped
+Haiku 5.5 on 2026-10-07, and it took the Claude mechanical rung from
+Sonnet 5.5. OpenAI shipped GPT-6.1 Sol on 2026-09-29, but this machine's
+Codex CLI cannot name it yet, so this review did not score it and the
+Codex side did not move. The review before ran on 2026-09-22, when Opus
+5.5, GPT-6 Sol, and GPT-6 Luna moved the ladder, and Sonnet 5.5 replaced
+Sonnet 5 on the mechanical rung on 2026-09-28.
 
 ## The two ladders
 
@@ -23,7 +26,7 @@ dispatch in the name it types.
 
 | Rung | Claude agent | Codex agent | Takes |
 |---|---|---|---|
-| mechanical | `sonnet-medium` | `luna-xhigh` | An edit or a run whose brief names the exact change and a command that checks it. Parallel copies of one such task. Fetching a named doc page |
+| mechanical | `haiku-medium` | `luna-xhigh` | An edit or a run whose brief names the exact change and a command that checks it. Parallel copies of one such task. Fetching a named doc page. On Claude, never a task that must hold more than 100K tokens in view |
 | default | `opus-medium` | `sol-xhigh` | Any task that reads code to reach a conclusion (an investigation, a diagnosis, a review, a design choice). On Codex, also any brief that must read past 272K tokens |
 | escalation | `opus-xhigh` | `astra-medium` | A task that failed once below it. One long dependent chain the orchestrator cannot split |
 | summoned | `fable-xhigh` | `astra-xhigh` | Only when the user's own message names the model, in any form. On Codex, any Astra call above medium effort |
@@ -70,37 +73,48 @@ Codex rate card prices that allowance in credits per million tokens
 price, so the API price is the plan burn rate too. The GPT-5.6 rates are
 Sol 100, 10, 500, Terra 50, 5, 300, and Luna 5, 0.5, 30.
 
-| Model | Input | Cache hit | Output | Long context (past 272K input) | Source date |
+| Model | Input | Cache hit | Output | Long context (OpenAI past 272K input, Haiku 5.5 past 100K) | Source date |
 |---|---|---|---|---|---|
-| GPT-6 Luna | 0.10 | 0.01 | 0.50 | 0.20 / 0.02 / 0.75 | launched 2026-09-22 |
-| GPT-6 Sol | 2 | 0.20 | 10 | 4 / 0.40 / 15 | launched 2026-09-22 |
+| GPT-6 Luna | 0.10 | 0.01 | 0.50 | 0.20 / 0.02 / 0.75 | launched 2026-09-22, checked 2026-10-08 |
+| GPT-6 Sol | 2 | 0.20 | 10 | 4 / 0.40 / 15 | launched 2026-09-22, checked 2026-10-08 |
+| GPT-6.1 Sol | 2 | 0.10 | 10 | 4 / 0.20 / 15 | launched 2026-09-29, checked 2026-10-08, not on the ladder |
 | GPT-5.6 Luna | 0.20 | 0.02 | 1.20 | 0.40 / 0.04 / 1.80 | 2026-07-30 cut, checked 2026-09-22, off the ladder since 2026-09-22 |
 | GPT-5.6 Terra | 2 | 0.20 | 12 | 4 / 0.40 / 18 | 2026-07-30 cut, checked 2026-09-04 |
 | GPT-5.6 Sol | 4 | 0.40 | 20 | 8 / 0.80 / 30 | 2026-08-21 cut, promised through 2026-11-21, off the ladder since 2026-09-22 |
-| GPT-6 Astra | 10 | 1 | 50 | 20 / 2 / 75 | 2026-08 launch, checked 2026-09-22 |
-| Claude Sonnet 5.5 | 2 | 0.20 | 10 | n/a | checked 2026-09-28 |
+| GPT-6 Astra | 10 | 1 | 50 | 20 / 2 / 75 | 2026-08 launch, checked 2026-10-08 |
+| Claude Haiku 5.5 | 0.10 | 0.01 | 0.50 | 0.50 / 0.05 / 2.50 | launched 2026-10-07, checked 2026-10-08 |
+| Claude Sonnet 5.5 | 2 | 0.10 | 10 | n/a | cache hit cut from 0.20 on 2026-10-07, checked 2026-10-08, off the ladder since 2026-10-08 |
 | Claude Sonnet 5 | 2 | 0.20 | 10 | n/a | checked 2026-09-01, off the ladder since 2026-09-28 |
-| Claude Opus 5.5 | 4 | 0.20 | 20 | n/a | launched 2026-09-22 |
+| Claude Opus 5.5 | 4 | 0.20 | 20 | n/a | launched 2026-09-22, checked 2026-10-08 |
 | Claude Opus 5 | 5 | 0.50 | 25 | n/a | checked 2026-09-01, off the ladder since 2026-09-22 |
-| Claude Fable 5.1 | 10 | 0.25 | 50 | n/a | checked 2026-09-01 |
+| Claude Fable 5.1 | 10 | 0.25 | 50 | n/a | checked 2026-10-08 |
 
 The OpenAI long-context row applies to the whole request once its input
-passes 272K tokens: input and cache double, output goes up by half.
+passes 272K tokens. Input and cache double, and output goes up by half.
+Haiku 5.5's higher row applies the same way once a prompt passes 100K
+tokens, and it costs five times the lower row on every price.
 Every GPT-6 and GPT-5.6 model lists a 1,050,000-token window and a
 128,000-token output cap on the API. The GPT-6 model pages add a
 cache-write price of 1.25 times input, and Codex does not charge it. The
 Codex CLI catalog reports a 272,000-token working window and an
 872,000-token maximum for the same models.
 
-Rung for rung, the Codex side is cheaper than the Claude side on the
-mechanical and default rungs, and dearer on the escalation rung:
+Rung for rung, the Codex side costs the same as the Claude side on the
+mechanical rung, half as much on the default rung, and more on the
+escalation rung.
 
 | Rung | Claude, in / out | Codex, in / out | Codex as a share of Claude |
 |---|---|---|---|
-| mechanical | Sonnet 5.5, 2 / 10 | GPT-6 Luna, 0.10 / 0.50 | 5% / 5% |
+| mechanical | Haiku 5.5, 0.10 / 0.50 | GPT-6 Luna, 0.10 / 0.50 | 100% / 100% |
 | default | Opus 5.5, 4 / 20 | GPT-6 Sol, 2 / 10 | 50% / 50% |
 | escalation | Opus 5.5, 4 / 20 | Astra, 10 / 50 | 250% / 250% |
 | summoned | Fable 5.1, 10 / 50 | Astra, 10 / 50 | 100% / 100% |
+
+The mechanical row's prices apply only while the prompt stays under 100K
+tokens.
+Past that, Haiku 5.5 bills its higher row and Luna stays at its base price
+until 272K, so Luna costs a fifth of Haiku there. The Claude rung takes no
+such brief.
 
 GPT-6 Sol costs half what Opus 5.5 costs on the default rung, at its
 list price with no promotion behind it. The two questions above still
@@ -125,10 +139,11 @@ tokens spent writing the brief again.
 All OpenAI numbers ran at the model's maximum effort unless noted. Scores
 compare safely only when the benchmark, the harness, and the effort match,
 and the vendor tables mix all three, so treat a gap under three points as
-noise. Every Claude row below is from before 2026-09-22. No independent
-Opus 5.5 score had been published on that date, so the Opus 5 rows stay as
-the Claude side's record, and Anthropic's own Opus 5.5 claims sit in the
-"Why the ladder changed on 2026-09-22, Opus 5.5" section.
+noise. Every Claude row in the first two tables is from before
+2026-09-22. No independent Opus 5.5 score had been published on that date,
+so the Opus 5 rows stay as the Claude side's record, and Anthropic's own
+Opus 5.5 claims sit in the "Why the ladder changed on 2026-09-22, Opus
+5.5" section. Haiku 5.5 has its own table below, from 2026-10-07.
 
 The first two tables hold the rows from the 2026-09-04 review, where
 Luna, Terra, and Sol are the GPT-5.6 models. OpenAI published none of
@@ -187,7 +202,43 @@ at 47 on the Intelligence Index, where the 2026-09-04 snapshot said 58.9.
 OpenAI's launch post returns 403 to a fetch. Codex read it with web
 search, and its coding rows match The Decoder, Kingy, and HandyAI.
 
+Anthropic's Haiku 5.5 system card runs every Haiku row at max effort
+unless a row says otherwise. The medium rows come from the effort charts
+in Anthropic's launch post. Artificial Analysis ran Haiku 5.5 the day it
+shipped, and its rows are the only independent ones so far.
+
+| Benchmark | Haiku 5.5 | Sonnet 5.5 | Other models, same source | Source |
+|---|---|---|---|---|
+| SWE-Bench Pro, max | 64.8 | 81.3 | | Anthropic system card |
+| Terminal-Bench 4.0, max | 39.2 | 70.6 | Opus 5.5 66.4 at xhigh, GPT-6 Luna 16.4 | Anthropic system card and launch post |
+| Terminal-Bench 4.0, medium | 20.3, $0.68 per task | 28.8, $0.68 per task | | Anthropic launch post |
+| OSWorld 2.1, max | 72.4 | 83.9 | GPT-6 Luna 48.9 | Anthropic launch post |
+| OSWorld 2.1, medium | 53.3, $0.13 per task | 66.0, $0.93 per task | GPT-6 Luna 37.5, $0.13 per task | Anthropic launch post |
+| ProgramBench, long-context coding | 82.0 | 79.7 | Opus 5.5 91.2 | Anthropic system card |
+| Long-context recall past 256K tokens | not published | not published | | |
+| ExploitBench, share of flags captured, plain arm | 38% | | | Anthropic system card, the authors' harness, not comparable with the ExploitBench row above |
+| AA Intelligence Index, max | 43 | 56 | GPT-6 Luna 38 | Artificial Analysis, 2026-10-07 |
+| AA Intelligence Index, high | 38 | | | Artificial Analysis |
+| AA Terminal-Bench 4.0, max | 33 | | GPT-6 Luna 13 | Artificial Analysis |
+| AA-Omniscience hallucination rate, max, lower is better | 40 | | GPT-6 Luna 77 | Artificial Analysis |
+| AA cost per Intelligence Index task, max | $0.21 | | GPT-6 Luna $0.07 | Artificial Analysis |
+
+Artificial Analysis has published no Coding Agent Index or long-context
+row for Haiku 5.5. Its Haiku run spent about 162K output tokens per index
+task at max and about 55K at high, against about 50K for GPT-6 Luna at
+max.
+
 What the rows say, one model at a time:
+
+- Haiku 5.5 takes the Claude mechanical rung. Every published row puts it
+  under Sonnet 5.5, by 8.5 to 12.7 points at medium and by 13 on the
+  Intelligence Index at max. On Terminal-Bench 4.0 at medium the two cost
+  the same per task, because long tasks push Haiku's prompts past its
+  100K-token price line. The rung takes neither long nor unchecked work,
+  and on this repo's briefs Haiku tied Sonnet at 8% of the cost, as the
+  2026-10-08 section below shows. It scores above GPT-6 Luna on every
+  benchmark both appear in, and costs three times as much as Luna per
+  index task at max.
 
 - GPT-6 Luna takes the mechanical rung. It scores within two points of
   GPT-5.6 Luna on both Artificial Analysis indexes at 39% of the cost
@@ -255,6 +306,22 @@ on either curve passes it.
 Sol at high costs 64% of xhigh for 1.3 points less on DeepSWE, which
 misses the half-cost bar. Luna at high loses 2 to 5 points. Both stay at
 xhigh.
+
+Anthropic's Haiku 5.5 launch post plots score and cost per task at all
+five efforts. Haiku 5.5 starts at `medium`, the effort Sonnet 5.5 ran at
+on this rung.
+
+| Haiku 5.5, benchmark | low | medium | high | xhigh | max |
+|---|---|---|---|---|---|
+| Terminal-Bench 4.0 | 12.7, $0.42 | 20.3, $0.68 | 24.8, $1.04 | 31.5, $1.75 | 39.2, $2.64 |
+| OSWorld 2.1 | 42.0, $0.07 | 53.3, $0.13 | 61.3, $0.18 | 67.6, $0.28 | 72.4, $0.61 |
+| Humanity's Last Exam, no tools | 30.9, $0.003 | 35.5, $0.007 | 39.7, $0.02 | 44.1, $0.06 | 45.9, $0.21 |
+
+Low costs 62%, 54%, and 43% of medium on the three rows for 7.6, 11.3,
+and 4.6 points less, so no row passes rule 5. High gains 4 to 8 points for
+38% to 186% more cost per task. On this repo's briefs high passed the same
+checks as medium and took 47% longer, so the rung stays at medium and a
+failure climbs to Opus rather than to a higher Haiku effort.
 
 The escalation rung runs Astra at medium, not Sol at max. Artificial
 Analysis measured Astra's whole effort range at four index points, 57 at
@@ -329,6 +396,85 @@ the call, which multiplies the allowance one call spends. Only Pro and
 Business Premium plans draw Astra from the full Codex allowance. Plus
 holds a limited Astra allowance, so on Plus an escalation can hit that
 cap before the 5-hour limit does.
+
+## Why the ladder changed on 2026-10-08, Haiku 5.5
+
+Anthropic shipped Haiku 5.5 (`claude-haiku-5-5`) on 2026-10-07. On
+2026-10-08 it took the Claude mechanical rung from Sonnet 5.5 at the same
+effort, `medium`, and the agent became `haiku-medium`. Sonnet 5.5 has no
+retirement date, so rule 1 of the review does not decide it. Rule 3 does,
+on this repo's own briefs. The facts:
+
+- Price. Below 100K tokens of prompt, Haiku 5.5 lists at 0.10 / 0.01 /
+  0.50 (input, cache hit, output), which is 5%, 10%, and 5% of Sonnet
+  5.5's 2 / 0.10 / 10. Past 100K the whole request pays 0.50 / 0.05 /
+  2.50, which is 25%, 50%, and 25%. Rule 4 sets the brief cap at that
+  line, so `haiku-medium` takes no task that must hold more than 100K
+  tokens in view.
+- The trial. On 2026-10-07 five briefs ran twice each on three arms, in
+  scratch worktrees of this repo, as headless Claude Code sessions with
+  the old `sonnet-medium` prompt. The briefs were a test file for `strip()`
+  in `strip-attribution.py`, checked by a mutation the tests had to catch,
+  a one-line bug planted in `route-codex.py` with the failing test named,
+  a rename of `read_mention` and `write_mention` across three hook files,
+  the Claude pricing page fetched into a table, and four questions about
+  the hooks answered with file and line references. A separate check
+  scored every run.
+
+| Arm | Briefs 1 to 4 passed | Hook questions right | Cost | Seconds |
+|---|---|---|---|---|
+| Sonnet 5.5, medium | 8 of 8 | 8 of 8 | $1.31 | 199 |
+| Haiku 5.5, medium | 8 of 8 | 8 of 8 | $0.10 | 202 |
+| Haiku 5.5, high | 8 of 8 | 8 of 8 | $0.12 | 297 |
+
+- What the trial shows. Haiku tied Sonnet on every check at 8% of the
+  cost, or 13% counting only the runs where Sonnet's prompt cache was
+  already warm. It took two to three times Sonnet's turns and tokens, so
+  its faster output bought no wall time. That passes rule 3, which asks
+  for half the cost within three points.
+- Reports. Haiku's report misstated the work in 4 of its 20 runs, though
+  the work itself passed. One report left out the test result the brief
+  asked for, and three miscounted or invented edits in the rename. In 3
+  runs Haiku ran the writing-voice passes on a Python test file. Sonnet's
+  10 reports had no errors, and no run in any arm claimed a check passed
+  that had failed. The `haiku-medium` prompt now includes the verification
+  paragraph from Anthropic's Haiku 5.5 prompting guide, asks for the
+  check's last lines and `git diff --stat` in the report, and tells the
+  agent the writing-voice passes skip code.
+- Published scores. Every published row puts Haiku 5.5 under Sonnet 5.5,
+  as the score table above shows. Anthropic's launch post says the same,
+  "Sonnet 5.5 and Opus 5.5 remain better choices for complex agentic
+  coding tasks like those measured by Terminal-Bench 4.0". The trial
+  briefs all passed on every arm, as the 2026-09-04 briefs did, so they
+  cannot rank accuracy. The published rows measure long, open-ended work,
+  which the rung never takes.
+- Cost per finished task. The rung takes only work a command checks, so
+  a Haiku failure costs one `opus-xhigh` retry, about $0.33 at Opus 5.5
+  prices from the 2026-09-04 token counts. Haiku saves about $0.06 a
+  brief against Sonnet with a warm cache. It stays cheaper per finished
+  task unless about one brief in five fails on Haiku that would have
+  passed on Sonnet.
+- Claude Code. Version 2.1.293 is the first to run Haiku 5.5. It resolves
+  the `haiku` alias to Haiku 5.5 on the Anthropic API only, and Bedrock,
+  Google Cloud, and Claude Platform on AWS still resolve it to Haiku 4.5.
+  The agent pins `claude-haiku-5-5`.
+- Refusals. The Haiku 5.5 system card says it "over-refused more than any
+  other model we tested", and Haiku 5.5 has no server-side fallback. A
+  refusal reaches the orchestrator as an agent that could not finish,
+  which escalates to `opus-xhigh` like any other failure.
+
+Each cell of the ladder, with its reason on 2026-10-08:
+
+| Rung | Host | Model, effort | Reason |
+|---|---|---|---|
+| mechanical | Claude | Haiku 5.5, medium | It tied Sonnet 5.5 on every check of this repo's briefs at 8% of the cost, which passes rule 3, and its brief cap sits at its 100K-token price line |
+| mechanical | Codex | GPT-6 Luna, xhigh | No new Luna shipped and its price did not move |
+| default | Claude | Opus 5.5, medium | No new Opus shipped and its price did not move |
+| default | Codex | GPT-6 Sol, xhigh | GPT-6.1 Sol shipped on 2026-09-29 at the same list price, but Codex CLI 0.156.0 cannot name it and this review gathered no score for it, so rule 3 has nothing to compare |
+| escalation | Claude | Opus 5.5, xhigh | No new Opus shipped and its price did not move |
+| escalation | Codex | GPT-6 Astra, medium | No new Astra shipped and its price did not move |
+| summoned | Claude | Fable 5.1, xhigh | Fable 5.1 is still Anthropic's most capable model at its highest list price, so rule 2 keeps it |
+| summoned | Codex | GPT-6 Astra, xhigh | Astra is still OpenAI's most capable model at its highest list price, so rule 2 keeps it |
 
 ## Why the ladder changed on 2026-09-22, GPT-6 Sol and Luna
 
@@ -423,6 +569,28 @@ medium, Astra at xhigh. The facts that moved it:
 
 ## Open questions
 
+- GPT-6.1 Sol shipped on 2026-09-29 at GPT-6 Sol's list price with half
+  its cache price, and Codex's changelog calls it "near-Astra". Codex CLI
+  0.161.0, released 2026-10-07, makes it the default model. This machine
+  runs 0.156.0, which cannot name it. A review on 0.161.0 or later should
+  score it against GPT-6 Sol on the default rung, and against Astra at
+  medium on the escalation rung, where rule 3 would take it at a fifth
+  of the price if it scores within three points of Astra.
+- The Haiku 5.5 trial ran two runs per brief on briefs every arm passed,
+  so it cannot rank accuracy. Ten harder mechanical briefs, three runs
+  each on `haiku-medium` and on Sonnet 5.5 at medium, would show whether
+  the published gap reaches this rung's work.
+- Haiku 5.5 misstated its own work in 4 of 20 trial reports. The
+  `haiku-medium` prompt now asks for the check's output and `git diff
+  --stat`. A rerun of the rename brief would show whether that stops it.
+- Nobody has published Haiku 5.5's recall past 256K tokens. The
+  100K-token cap keeps the rung well under that, but the cap rests on
+  price, not on a recall measurement.
+- The Codex catalog lists a hidden slug, `gpt-reserve`. Community reports
+  describe it as a model with its own weekly quota that lets Plus and Pro
+  accounts keep working after their regular Codex allowance runs out. In
+  September it ran GPT-5.6 Luna. OpenAI publishes no price for it, and it
+  is not a rung candidate.
 - Opus 5.5 has no independent score on any row of the table above and no
   point-by-point effort curve. Anthropic's claim that `medium` beats
   Opus 5 at `high` in half the tokens is the whole case for keeping
@@ -434,8 +602,10 @@ medium, Astra at xhigh. The facts that moved it:
   curve, and Opus 5.5 keeps it on the vendor's word. The three-brief
   Terra measurement above is one run per cell. A repeat on ten briefs
   with three runs each would give a curve worth acting on.
-- GPT-6 Sol and Luna have no Terminal-Bench, SWE-Bench Pro, or
-  long-context recall row. The mechanical rung's 272K-token cap rests on
+- GPT-6 Sol has no Terminal-Bench, SWE-Bench Pro, or long-context recall
+  row. GPT-6 Luna now has a Terminal-Bench 4.0 row (16.4 in Anthropic's
+  Haiku 5.5 launch, 13 from Artificial Analysis) but still no recall
+  row. The Codex mechanical rung's 272K-token cap rests on
   GPT-5.6 Luna's 41% recall past 256K tokens. The three briefs above,
   rerun on both models, would give this repo's first measured token
   counts for them.
@@ -479,7 +649,25 @@ medium, Astra at xhigh. The facts that moved it:
   read the same way
 - July price cut, https://community.openai.com/t/announcing-a-major-price-drop-for-5-6-terra-and-luna-and-fast-mode-for-5-6-sol/1388484
 - August Sol cut, https://www.explainx.ai/blog/openai-gpt-5-6-sol-api-price-cut-20-percent-august-2026
-- Anthropic prices, `docs/subagent-routing.md`, checked 2026-09-22
+- Anthropic prices, https://platform.claude.com/docs/en/about-claude/pricing,
+  checked 2026-10-08
+- Haiku 5.5 launch post and effort charts, https://www.anthropic.com/claude-haiku-5-5
+- Haiku 5.5 system card, https://www.anthropic.com/document/claude-haiku-5-5-system-card
+- Haiku 5.5 prompting guide, https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-haiku-5-5
+- Haiku 5.5 in Claude Code, https://code.claude.com/docs/en/model-config
+- Artificial Analysis on Haiku 5.5, https://artificialanalysis.ai/articles/claude-haiku-5-5
+- Sonnet 5.5 on Artificial Analysis, https://artificialanalysis.ai/models/claude-sonnet-5-5
+- GPT-6.1 Sol release, https://learn.chatgpt.com/docs/changelog (entry of
+  2026-09-29) and https://www.datacamp.com/blog/gpt-6-1-sol for its price,
+  since https://openai.com/index/introducing-gpt-6-1-sol/ returns 403 to a
+  plain fetch
+- Codex CLI 0.161.0 default model, https://github.com/openai/codex/releases
+- OpenAI retirement dates, https://developers.openai.com/api/docs/deprecations,
+  checked 2026-10-08
+- `gpt-reserve` reports, https://github.com/can1357/oh-my-pi/issues/10632 and
+  https://github.com/steipete/CodexBar/issues/3502
+- The Haiku 5.5 trial, five briefs run 2026-10-07 in this session's
+  scratch worktrees, results in the 2026-10-08 section above
 - Opus 5.5 prices, effort default, and the `medium` against `high`
   claims, Anthropic's Opus 5.5 migration guide as shipped in Claude
   Code's `claude-api` skill, read 2026-09-22

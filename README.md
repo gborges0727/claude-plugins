@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 44
+# rev: 45
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -88,7 +88,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `add-to-git` | Command | Explicit invocation only, never model-triggered |
 | `setup-repo` | Command | Writes `.claude/gborges-standard.json` at a repo's root, the per-repo `docs` folder and `tracker` choice the document-writing skills read. Wraps `scripts/setup-repo.sh` |
 | `setup` | Command | Writes `~/.claude/gborges-standard.json`, the per-machine switches for Fable access and Codex delegation, the `attribution` key in `~/.claude/settings.json` that stops Claude Code asking for AI attribution, and the Codex CLI's own model, subagent, and status line config under `~/.codex`. Wraps `scripts/setup.sh`, which does the same with no model turn |
-| `sonnet-medium` | Agent | Sonnet 5.5 at medium effort. Edits and runs with a command check in the brief, parallel copies of one such task, and fetching a named doc page |
+| `haiku-medium` | Agent | Haiku 5.5 at medium effort. Edits and runs with a command check in the brief, parallel copies of one such task, and fetching a named doc page, none needing more than 100K tokens in view |
 | `opus-medium` | Agent | Opus 5.5 at medium effort. The default, and the floor for anything that reads code to reach a conclusion |
 | `opus-xhigh` | Agent | Opus 5.5 at xhigh effort. One escalation step for a task that failed below it, and the stand-in for Fable on an account without it |
 | `fable-xhigh` | Agent | Fable 5.1 at xhigh effort. Runs only when the user's message names Fable. See [docs/subagent-routing.md](docs/subagent-routing.md) for the routing rule and the cost reasoning |
@@ -140,7 +140,7 @@ agents:
 
 | Codex agent | Model and effort | Mirrors |
 |---|---|---|
-| `luna-xhigh` | `gpt-6-luna`, xhigh | `sonnet-medium`, fully specified edits and runs |
+| `luna-xhigh` | `gpt-6-luna`, xhigh | `haiku-medium`, fully specified edits and runs |
 | `sol-xhigh` | `gpt-6-sol`, xhigh | `opus-medium`, the default worker |
 | `astra-medium` | `gpt-6-astra`, medium | `opus-xhigh`, the one escalation step |
 | `astra-xhigh` | `gpt-6-astra`, xhigh | `fable-xhigh`, only when the user names it |
@@ -241,13 +241,13 @@ A subagent spawned with the built-in `general-purpose` type inherits the
 orchestrating session's model and effort, so the same delegated task runs
 on Sonnet at low effort in one session and on Opus at max in another. The
 four files in `agents/` pin a model and an effort each, and their names say
-which: `sonnet-medium`, `opus-medium`, `opus-xhigh`, and `fable-xhigh`.
+which: `haiku-medium`, `opus-medium`, `opus-xhigh`, and `fable-xhigh`.
 Claude Code loads them as `gborges-standard:<name>`.
 
 The definitions alone change nothing, because Claude reaches for
 `general-purpose` by habit. The style's Subagents section is the routing
 rule. `opus-medium` is the default and the floor for any task that reads
-code to reach a conclusion. `sonnet-medium` takes work a command can check.
+code to reach a conclusion. `haiku-medium` takes work a command can check.
 `opus-xhigh` is one escalation step, taken once, after a failed check.
 `fable-xhigh` runs only when the user's own message names Fable, in any
 form, and `route-spawns.py` refuses every other dispatch of it. [docs/subagent-routing.md](docs/subagent-routing.md) holds

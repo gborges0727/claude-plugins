@@ -178,7 +178,7 @@ body.
   Explore, Plan, and the other specialist types keep their own names.
 - `gborges-standard:opus-medium` is the default. Any task that reads code to
   reach a conclusion (an investigation, a diagnosis, a review, a design
-  choice) goes here or higher, never to Sonnet.
+  choice) goes here or higher, never to Haiku or Sonnet.
 - A review dispatches `gborges-standard:opus-medium` with the review
   procedure and the diff target in the brief. When a skill's instructions
   say `/code-review`, that means this dispatch, not the built-in skill.
@@ -186,9 +186,12 @@ body.
   session the plugin's hook refuses it unless the user's latest message used
   the word fork, so spawn one there only when the user asked. On any other
   session a fork is fine when the task needs what the session has learned.
-- `gborges-standard:sonnet-medium` takes an edit or a run whose brief names
+- `gborges-standard:haiku-medium` takes an edit or a run whose brief names
   the exact change and a command that checks it, parallel copies of one such
-  task across files, and fetching a named doc page outside the codebase.
+  task across files, and fetching a named doc page outside the codebase. A
+  task that must hold more than 100K tokens in view goes to `opus-medium`
+  instead, because Haiku 5.5 charges five times as much for every token in a
+  request past that size.
 - `gborges-standard:opus-xhigh` takes a task that is one long dependent chain
   you cannot split into parallel pieces, and a task that failed once below
   it.
@@ -221,7 +224,7 @@ body.
   checks, stays on the Claude agent. So do all briefs when the `codex`
   binary is absent from this machine.
 - The skill's four Codex rungs mirror the four Claude agents: `luna-xhigh`
-  for `sonnet-medium`'s work, `sol-xhigh` for `opus-medium`'s work and for
+  for `haiku-medium`'s work, `sol-xhigh` for `opus-medium`'s work and for
   a second-model opinion, `astra-medium` for `opus-xhigh`'s, and
   `astra-xhigh` only when the user's message names Astra. A hook refuses
   any Astra call above medium that the user did not ask for. A failure

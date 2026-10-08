@@ -142,7 +142,7 @@ agents:
 
 | Codex agent | Model and effort | Mirrors |
 |---|---|---|
-| `luna-xhigh` | `gpt-6-luna`, xhigh | `sonnet-medium`, fully specified edits and runs |
+| `luna-xhigh` | `gpt-6-luna`, xhigh | `haiku-medium`, fully specified edits and runs |
 | `sol-xhigh` | `gpt-6-sol`, xhigh | `opus-medium`, the default worker |
 | `astra-medium` | `gpt-6-astra`, medium | `opus-xhigh`, the one escalation step |
 | `astra-xhigh` | `gpt-6-astra`, xhigh | `fable-xhigh`, only when the user names it |

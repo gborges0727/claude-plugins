@@ -74,7 +74,7 @@ name says both.
 
 | Rung | `-m` | Effort | Mirrors | Takes |
 |---|---|---|---|---|
-| `luna-xhigh` | `gpt-6-luna` | `xhigh` | `sonnet-medium` | An edit or a run whose brief names the exact change and a command that checks it. Parallel copies of one such task. Never a brief past 272K tokens. OpenAI published no long-context recall score for GPT-6 Luna, and GPT-5.6 Luna's recall past 256K tokens was 41% |
+| `luna-xhigh` | `gpt-6-luna` | `xhigh` | `haiku-medium` | An edit or a run whose brief names the exact change and a command that checks it. Parallel copies of one such task. Never a brief past 272K tokens. OpenAI published no long-context recall score for GPT-6 Luna, and GPT-5.6 Luna's recall past 256K tokens was 41% |
 | `sol-xhigh` | `gpt-6-sol` | `xhigh` | `opus-medium` | The default. Any task that reads code to reach a result a command can check, any second-model opinion, and any brief that must read past 272K tokens |
 | `astra-medium` | `gpt-6-astra` | `medium` | `opus-xhigh` | A task that failed once on a lower rung. One long dependent chain. The orchestrator picks this on its own |
 | `astra-xhigh` | `gpt-6-astra` | `xhigh` | `fable-xhigh` | Only when the user's latest message names Astra. A hook refuses any Astra run above medium the user did not ask for |

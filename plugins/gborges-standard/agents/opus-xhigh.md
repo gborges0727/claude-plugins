@@ -1,6 +1,6 @@
 ---
 name: opus-xhigh
-description: Opus 5.5 at xhigh effort. Use for a task that already failed once on opus-medium or sonnet-medium, or for a task that is one long dependent chain the orchestrator cannot split into parallel pieces. Also the stand-in for fable-xhigh when the account cannot run Fable.
+description: Opus 5.5 at xhigh effort. Use for a task that already failed once on opus-medium or haiku-medium, or for a task that is one long dependent chain the orchestrator cannot split into parallel pieces. Also the stand-in for fable-xhigh when the account cannot run Fable.
 model: claude-opus-5-5
 effort: xhigh
 ---

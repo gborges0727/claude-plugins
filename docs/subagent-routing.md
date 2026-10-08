@@ -6,14 +6,15 @@ section, `plugins/gborges-standard/output-styles/plain-english.md`. This
 file holds the why, so the rule can stay short. Prices and published
 numbers below are from Anthropic's API pricing, its cost guidance, its
 Fable 5.1 prompting guide, and its Opus 5.5 migration guide as of
-2026-09-22. The Sonnet 5.5 price is from the same pricing page on
-2026-09-28.
+2026-09-22. The Haiku 5.5 price is from the same pricing page on
+2026-10-08, and its published numbers are from Anthropic's Haiku 5.5
+launch post and system card of 2026-10-07.
 
 ## The four agents
 
 | Agent | Model | Effort | Takes |
 |---|---|---|---|
-| `sonnet-medium` | Sonnet 5.5 | medium | An edit or a run whose brief names the exact change and a command that checks it. Parallel copies of one such task across files. Fetching a named doc page outside the codebase |
+| `haiku-medium` | Haiku 5.5 | medium | An edit or a run whose brief names the exact change and a command that checks it. Parallel copies of one such task across files. Fetching a named doc page outside the codebase. Never a task that must hold more than 100K tokens in view |
 | `opus-medium` | Opus 5.5 | medium | The default. The floor for any task that reads code to reach a conclusion |
 | `opus-xhigh` | Opus 5.5 | xhigh | A task that failed once below it. A task that is one dependent chain the orchestrator cannot split. The stand-in for Fable on an account without it |
 | `fable-xhigh` | Fable 5.1 | xhigh | Only when the user's message names Fable |
@@ -21,11 +22,16 @@ Fable 5.1 prompting guide, and its Opus 5.5 migration guide as of
 Each name states its model and effort so the orchestrator sees the cost of
 a dispatch in the name it types.
 
+`haiku-medium` replaced the Sonnet 5.5 agent at medium effort on
+2026-10-08. The trial and the published numbers behind the move are in
+`docs/model-routing.md`, under "Why the ladder changed on 2026-10-08".
+
 ## Prices
 
 | Model | Input, $ per million tokens | Cache hit, $ per million tokens | Output, $ per million tokens | Against Opus 5.5 (input, cache hit, output) |
 |---|---|---|---|---|
-| Sonnet 5.5 | 2 | 0.20 | 10 | 50%, 100%, 50% |
+| Haiku 5.5, prompt up to 100K tokens | 0.10 | 0.01 | 0.50 | 2.5%, 5%, 2.5% |
+| Haiku 5.5, prompt over 100K tokens | 0.50 | 0.05 | 2.50 | 12.5%, 25%, 12.5% |
 | Opus 5.5 | 4 | 0.20 | 20 | 100%, 100%, 100% |
 | Fable 5.1 | 10 | 0.25 | 50 | 250%, 125%, 250% |
 
@@ -41,8 +47,12 @@ nearer 125% than 250%. Nobody has measured what share of a real
 dispatch's tokens are cache hits, so 250% is the ceiling on the Fable
 premium and 125% is the floor.
 
-Sonnet 5.5 and Opus 5.5 charge the same for a cache hit, so on a long
-dispatch Sonnet's saving comes only from uncached input and output.
+Haiku 5.5 bills a whole request at its higher row once the prompt passes
+100K tokens, and that row costs five times the lower one. A subagent's
+prompt grows with every file it reads, so `haiku-medium` takes no task that
+must hold more than 100K tokens in view. Below 100K tokens a Haiku cache
+hit costs 5% of an Opus 5.5 cache hit, so Haiku saves on cache hits as
+well, where Sonnet saved only on uncached input and output.
 
 Per-token price is an input to the analysis, not the ranking. The ranking
 is cost per finished task, which counts the retry a cheap failure causes
@@ -72,17 +82,20 @@ thinks more per turn than Opus 5, most of all at `xhigh` and `max`. So
 published no point-by-point effort curve for Opus 5.5, so the Opus 5 curve
 above is still the only one with numbers.
 
-## Why Sonnet stays out of code investigation
+## Why Haiku and Sonnet stay out of code investigation
 
 Sonnet reached wrong conclusions investigating codebases in this user's
-own sessions more than once. A wrong conclusion is the most expensive
+own sessions more than once. Haiku 5.5 is no safer here. Its system card
+reports more hallucination than the other current Claude models, and
+Anthropic's audit rates its instruction following "similar to or slightly
+worse than Claude Sonnet 5.5". A wrong conclusion is the most expensive
 failure a subagent can produce, because nothing downstream catches it and
 the orchestrator builds on it. Anthropic's guidance says the same thing in
 general terms. Price models on the hardest tenth of the work, because the
 tasks a cheap model fails decide the bill. On one twenty-problem research
 run two problems carried 43% of the spend.
 
-So Sonnet takes only work whose result a command can check. A test suite,
+So `haiku-medium` takes only work whose result a command can check. A test suite,
 a build, or a diff that applies is a checker that costs no judgment. Code
 investigation has no such checker, and it goes to Opus or higher.
 
@@ -112,16 +125,21 @@ The escalated brief is the same brief plus the exact failure output. A
 summary of what the first agent tried steers the stronger model into the
 same dead end.
 
-## Why there is no Sonnet at xhigh
+## Why there is no Haiku at a higher effort
 
 Anthropic's guidance is to sweep effort on the current model before
 dropping a tier, and it reports that the larger model at lower effort often
 wins on cost per task. Fable 5 at `low` beat Sonnet 5 on a deep-research
-benchmark while costing about 10% less per task. Nobody has measured Sonnet
-5.5 at `xhigh` against Opus 5.5 at `medium` on this user's work, and a fourth
-agent makes every dispatch a harder choice. The model step is the one the
-published numbers say moves accuracy, so a failed Sonnet task goes to Opus
-at `medium`, not to Sonnet at a higher effort.
+benchmark while costing about 10% less per task.
+
+On this repo's briefs, Haiku 5.5 at `high` passed the same ten checks as
+at `medium`, took 47% longer, and once left the test result out of its
+report. Anthropic's prompting guide says Haiku 5.5 at `low` and `medium`
+sometimes reports a change as done without running a check. The agent's
+prompt includes Anthropic's fix for that, and no run in the trial skipped a
+check. A fifth agent would make every dispatch a harder choice. The model
+step is the one the published numbers say moves accuracy, so a failed
+Haiku task goes to `opus-xhigh`, not to Haiku at a higher effort.
 
 ## Why Fable is user-only
 
@@ -138,8 +156,8 @@ scoring higher. None of that is measured on this user's briefs.
 
 The same guide says 5.1 at `low` calls search and retrieval tools less
 often and answers from memory instead. On a code investigation that is a
-wrong conclusion nobody catches, the failure that keeps Sonnet out of that
-work. So a `fable-low` or `fable-medium` rung waits on a measurement
+wrong conclusion nobody catches, the failure that keeps Haiku and Sonnet out
+of that work. So a `fable-low` or `fable-medium` rung waits on a measurement
 against `opus-medium` on real briefs, and the rule stands until then.
 
 The orchestrator judging a task "hard enough for Fable" is the guess that
@@ -163,12 +181,14 @@ A keyword pass over the 188 `default-agent` briefs splits them as 102
 edits (54%), 72 investigations (38%), 6 runs (3%), 1 doc fetch, and 7
 unclassified. The median brief runs 2,763 characters.
 
-So the Sonnet slot covers at most the 54% of edits that carry a command
+So `haiku-medium` covers at most the 54% of edits that carry a command
 check, and the 38% that investigate code stay on Opus by rule. Against
-per-token price, moving every eligible edit to Sonnet cuts those
-dispatches' cost by 60%. Some of those runs will fail and escalate, so the
-true saving on that slice sits below 60% and above zero until it is
-measured on real briefs.
+per-token price, moving every eligible edit from Opus 5.5 to Haiku 5.5 cuts
+those dispatches' cost by 97.5%. Haiku spent two to three times Sonnet's
+tokens on this repo's briefs, and some of its runs will fail and escalate,
+so the true saving on that slice sits below 97.5% and above zero until it
+is measured on real briefs. On the five trial briefs Haiku cost 8% of what
+Sonnet 5.5 cost.
 
 ## The setup file
 
