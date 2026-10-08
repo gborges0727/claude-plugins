@@ -228,7 +228,7 @@ printf 'Wrote %s: %s\n' "$config_file" "$(tr -d '\n' < "$config_file")"
 
 # The Codex side. Codex has no plugin field for agents or for config.toml,
 # so this is the one place they get written. Each agent mirrors one Claude
-# subagent: luna-xhigh takes fully specified edits like sonnet-medium,
+# subagent: luna-xhigh takes fully specified edits like haiku-medium,
 # sol-xhigh is the default worker like opus-medium, astra-medium is the one
 # escalation step like opus-xhigh, and astra-xhigh runs only when the user
 # names it, like fable-xhigh. Luna and Sol are the GPT-6 versions, which

@@ -34,7 +34,7 @@ waits for a later round.
 The user decides. You find facts. When a question needs a fact from the
 filesystem, a tool, or the web, get it yourself before asking, or send a
 subagent for it. A doc page or a single file lookup goes to
-`gborges-standard:sonnet-medium`. Anything that reads code to reach a
+`gborges-standard:haiku-medium`. Anything that reads code to reach a
 conclusion goes to `gborges-standard:opus-medium`. A broad search goes to
 `Explore`. Do not stop the round for it. Ask every question that does not
 depend on the fact now, and ask the ones that do once the fact is back.
