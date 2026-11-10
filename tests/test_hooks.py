@@ -231,7 +231,7 @@ class UnpinnedSpawns(HookCase):
 
 class ForkSpawns(HookCase):
     def test_a_fork_on_a_fable_session_is_denied_and_pointed_at_opus_medium(self):
-        transcript = self.write_transcript("claude-fable-5-1")
+        transcript = self.write_transcript("claude-fable-5-2")
         block = self.spawn("fork", transcript=transcript)["hookSpecificOutput"]
         self.assertEqual(block["permissionDecision"], "deny")
         self.assertIn(OPUS_MEDIUM, block["permissionDecisionReason"])
@@ -243,19 +243,19 @@ class ForkSpawns(HookCase):
 
     def test_the_newest_reply_decides_the_model(self):
         # The transcript's earlier reply is Sonnet; only the newest one counts.
-        transcript = self.write_transcript("claude-fable-5-1")
+        transcript = self.write_transcript("claude-fable-5-2")
         self.assertEqual(
             self.spawn("fork", transcript=transcript)["hookSpecificOutput"]["permissionDecision"],
             "deny",
         )
 
     def test_a_fork_on_fable_passes_when_the_message_asked_for_one(self):
-        transcript = self.write_transcript("claude-fable-5-1")
+        transcript = self.write_transcript("claude-fable-5-2")
         self.submit("Fork this and try the other approach.")
         self.assertIsNone(self.spawn("fork", transcript=transcript))
 
     def test_a_later_message_without_the_word_locks_forks_again(self):
-        transcript = self.write_transcript("claude-fable-5-1")
+        transcript = self.write_transcript("claude-fable-5-2")
         self.submit("Fork this.")
         self.submit("Now review it.")
         self.assertEqual(
@@ -277,7 +277,7 @@ class ForkSpawns(HookCase):
     def test_a_long_transcript_is_read_from_the_tail(self):
         transcript = self.home / "long.jsonl"
         filler = json.dumps({"type": "user", "message": {"content": "x" * 300_000}})
-        newest = json.dumps({"type": "assistant", "message": {"model": "claude-fable-5-1", "content": []}})
+        newest = json.dumps({"type": "assistant", "message": {"model": "claude-fable-5-2", "content": []}})
         transcript.write_text(filler + "\n" + newest + "\n" + filler + "\n", encoding="utf-8")
         self.assertEqual(
             self.spawn("fork", transcript=transcript)["hookSpecificOutput"]["permissionDecision"],

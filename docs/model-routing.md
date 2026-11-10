@@ -18,6 +18,10 @@ Codex side did not move. The review before ran on 2026-09-22, when Opus
 5.5, GPT-6 Sol, and GPT-6 Luna moved the ladder, and Sonnet 5.5 replaced
 Sonnet 5 on the mechanical rung on 2026-09-28.
 
+On 2026-11-10 the Claude summoned rung moved from Fable 5.1 to Fable 5.2.
+That change checked the Anthropic price page and the Fable 5.2 guides
+only. It was not a full review, and no other rung was rechecked.
+
 ## The two ladders
 
 Each Claude rung has one Codex rung that takes the same kind of work. A
@@ -87,7 +91,8 @@ Sol 100, 10, 500, Terra 50, 5, 300, and Luna 5, 0.5, 30.
 | Claude Sonnet 5 | 2 | 0.20 | 10 | n/a | checked 2026-09-01, off the ladder since 2026-09-28 |
 | Claude Opus 5.5 | 4 | 0.20 | 20 | n/a | launched 2026-09-22, checked 2026-10-08 |
 | Claude Opus 5 | 5 | 0.50 | 25 | n/a | checked 2026-09-01, off the ladder since 2026-09-22 |
-| Claude Fable 5.1 | 10 | 0.25 | 50 | n/a | checked 2026-10-08 |
+| Claude Fable 5.2 | 8 | 0.20 | 40 | n/a | checked 2026-11-10 |
+| Claude Fable 5.1 | 10 | 0.25 | 50 | n/a | checked 2026-11-10, off the ladder since 2026-11-10 |
 
 The OpenAI long-context row applies to the whole request once its input
 passes 272K tokens. Input and cache double, and output goes up by half.
@@ -101,14 +106,14 @@ Codex CLI catalog reports a 272,000-token working window and an
 
 Rung for rung, the Codex side costs the same as the Claude side on the
 mechanical rung, half as much on the default rung, and more on the
-escalation rung.
+escalation and summoned rungs.
 
 | Rung | Claude, in / out | Codex, in / out | Codex as a share of Claude |
 |---|---|---|---|
 | mechanical | Haiku 5.5, 0.10 / 0.50 | GPT-6 Luna, 0.10 / 0.50 | 100% / 100% |
 | default | Opus 5.5, 4 / 20 | GPT-6 Sol, 2 / 10 | 50% / 50% |
 | escalation | Opus 5.5, 4 / 20 | Astra, 10 / 50 | 250% / 250% |
-| summoned | Fable 5.1, 10 / 50 | Astra, 10 / 50 | 100% / 100% |
+| summoned | Fable 5.2, 8 / 40 | Astra, 10 / 50 | 125% / 125% |
 
 The mechanical row's prices apply only while the prompt stays under 100K
 tokens.
@@ -127,9 +132,9 @@ Analysis measured Astra at max using a third of GPT-5.6 Sol's tokens on
 its coding harness, and on this repo's three briefs Astra at medium spent
 29% fewer tokens than GPT-5.6 Sol at max.
 
-Astra's cache hit costs 1.00 against Fable's 0.25 and Opus 5.5's 0.20,
-so a long many-turn Astra session pays four times Fable's rate and five
-times Opus 5.5's on the tokens it resends. Per-token price is an input
+Astra's cache hit costs 1.00 against 0.20 for both Fable 5.2 and Opus
+5.5, so a long many-turn Astra session pays five times either model's
+rate on the tokens it resends. Per-token price is an input
 to the ranking, not the ranking. The ranking is cost per finished task,
 which counts the retry a cheap failure causes and the orchestrator
 tokens spent writing the brief again.
@@ -397,6 +402,39 @@ Business Premium plans draw Astra from the full Codex allowance. Plus
 holds a limited Astra allowance, so on Plus an escalation can hit that
 cap before the 5-hour limit does.
 
+## Why the ladder changed on 2026-11-10, Fable 5.2
+
+On 2026-11-10 Fable 5.2 (`claude-fable-5-2`) took the Claude summoned rung
+from Fable 5.1 at the same effort, `xhigh`. Rule 2 decides it. Claude
+Code's `claude-api` skill calls Fable 5.2 Anthropic's most capable widely
+released model. The orchestrator never picks this rung, so the lower
+price is not what moved it. This was not a full review, and the other
+seven cells stand as the 2026-10-08 table below gives them. The facts:
+
+- Price. Fable 5.2 lists at 8 / 0.20 / 40 (input, cache hit, output),
+  which is 80% of Fable 5.1's 10 / 0.25 / 50 on each price. Against Opus
+  5.5's 4 / 0.20 / 20 it costs twice as much on input and output and the
+  same on a cache hit. Fable 5.1 is still on Anthropic's price page.
+- Effort. Anthropic's Fable 5.2 prompting guide says to start at `high`,
+  and that on its internal coding evaluations `xhigh` "raised scores
+  slightly and used many more tokens". It publishes no numbers for either
+  level, so rule 5 keeps `xhigh`.
+- Claude Code. Fable 5.2 needs version 2.1.321 or later. From that
+  version the `fable` alias, which the agent file named before, resolves
+  to Fable 5.2 everywhere except Claude apps gateway sessions, where it
+  resolves to Fable 5. The agent file now pins `claude-fable-5-2` by id,
+  as the Opus and Haiku agents pin theirs. On an older build the alias
+  ran Fable 5.1, and Anthropic's model page says such a build cannot run
+  Fable 5.2. When a `fable-xhigh` dispatch fails with a model error, the
+  routing rule sends the brief to `opus-xhigh`.
+- Behavior. Anthropic lists four breaking API changes from Fable 5.1. One
+  applies to every request. The API rejects a request whose earlier turns
+  were edited after the model wrote its thinking. Anthropic's page says
+  that changes nothing when Claude Code builds the requests. The other
+  three apply to a conversation that switches models, to the older
+  computer use tool, and to the advisor tool.
+- Scores. This change gathered no benchmark row for Fable 5.2.
+
 ## Why the ladder changed on 2026-10-08, Haiku 5.5
 
 Anthropic shipped Haiku 5.5 (`claude-haiku-5-5`) on 2026-10-07. On
@@ -569,6 +607,17 @@ medium, Astra at xhigh. The facts that moved it:
 
 ## Open questions
 
+- Fable 5.2 has no row in the score table, which still carries Fable
+  5.1's numbers under Fable 5.1's name. The next full review should
+  gather Fable 5.2's rows.
+- Anthropic's Fable 5.2 prompting guide says `xhigh` gains little over
+  `high` for many more tokens, and gives no numbers. Hard briefs run on
+  Fable 5.2 at `high` and at `xhigh` would show whether the summoned rung
+  should drop a level.
+- The long-output note that `route-spawns.py` appends to a Fable dispatch
+  comes from the Fable 5.1 prompting guide, and the Fable 5.2 guide has no
+  such note. Nobody has checked whether Fable 5.2 still drafts a long
+  deliverable in its thinking and then writes it again.
 - GPT-6.1 Sol shipped on 2026-09-29 at GPT-6 Sol's list price with half
   its cache price, and Codex's changelog calls it "near-Astra". Codex CLI
   0.161.0, released 2026-10-07, makes it the default model. This machine
@@ -650,11 +699,15 @@ medium, Astra at xhigh. The facts that moved it:
 - July price cut, https://community.openai.com/t/announcing-a-major-price-drop-for-5-6-terra-and-luna-and-fast-mode-for-5-6-sol/1388484
 - August Sol cut, https://www.explainx.ai/blog/openai-gpt-5-6-sol-api-price-cut-20-percent-august-2026
 - Anthropic prices, https://platform.claude.com/docs/en/about-claude/pricing,
-  checked 2026-10-08
+  checked 2026-10-08, and the two Fable rows again on 2026-11-10
+- Fable 5.2 price and breaking changes, https://platform.claude.com/docs/en/models/fable-5-2/whats-new-fable-5-2
+- Fable 5.2 prompting guide, https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5-2
 - Haiku 5.5 launch post and effort charts, https://www.anthropic.com/claude-haiku-5-5
 - Haiku 5.5 system card, https://www.anthropic.com/document/claude-haiku-5-5-system-card
 - Haiku 5.5 prompting guide, https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-haiku-5-5
 - Haiku 5.5 in Claude Code, https://code.claude.com/docs/en/model-config
+- Fable 5.2 in Claude Code and the `fable` alias, the same page, read
+  2026-11-10
 - Artificial Analysis on Haiku 5.5, https://artificialanalysis.ai/articles/claude-haiku-5-5
 - Sonnet 5.5 on Artificial Analysis, https://artificialanalysis.ai/models/claude-sonnet-5-5
 - GPT-6.1 Sol release, https://learn.chatgpt.com/docs/changelog (entry of
