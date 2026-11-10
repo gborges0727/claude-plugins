@@ -1,12 +1,12 @@
 ---
 name: pair-debate
-description: Put Claude Fable 5.1 and GPT-6 Astra, both at xhigh, in a room to argue a hard problem to a solution. Explicit invocation only.
+description: Put Claude Fable 5.2 and GPT-6 Astra, both at xhigh, in a room to argue a hard problem to a solution. Explicit invocation only.
 disable-model-invocation: true
 ---
 
 # Pair debate
 
-Two architects, Fable 5.1 at xhigh and GPT-6 Astra at xhigh, work one problem as peers. Each
+Two architects, Fable 5.2 at xhigh and GPT-6 Astra at xhigh, work one problem as peers. Each
 writes a draft without seeing the other's. They argue until they agree on a written
 definition of done. The user approves it. Then they alternate turns in one shared worktree
 until both agree the work is finished. The deliverable is whatever the brief asks for, a

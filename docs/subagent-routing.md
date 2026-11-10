@@ -8,7 +8,9 @@ numbers below are from Anthropic's API pricing, its cost guidance, its
 Fable 5.1 prompting guide, and its Opus 5.5 migration guide as of
 2026-09-22. The Haiku 5.5 price is from the same pricing page on
 2026-10-08, and its published numbers are from Anthropic's Haiku 5.5
-launch post and system card of 2026-10-07.
+launch post and system card of 2026-10-07. The Fable 5.2 price and effort
+guidance are from the same pricing page and Anthropic's Fable 5.2
+prompting guide on 2026-11-10.
 
 ## The four agents
 
@@ -17,7 +19,7 @@ launch post and system card of 2026-10-07.
 | `haiku-medium` | Haiku 5.5 | medium | An edit or a run whose brief names the exact change and a command that checks it. Parallel copies of one such task across files. Fetching a named doc page outside the codebase. Never a task that must hold more than 100K tokens in view |
 | `opus-medium` | Opus 5.5 | medium | The default. The floor for any task that reads code to reach a conclusion |
 | `opus-xhigh` | Opus 5.5 | xhigh | A task that failed once below it. A task that is one dependent chain the orchestrator cannot split. The stand-in for Fable on an account without it |
-| `fable-xhigh` | Fable 5.1 | xhigh | Only when the user's message names Fable |
+| `fable-xhigh` | Fable 5.2 | xhigh | Only when the user's message names Fable |
 
 Each name states its model and effort so the orchestrator sees the cost of
 a dispatch in the name it types.
@@ -33,19 +35,20 @@ a dispatch in the name it types.
 | Haiku 5.5, prompt up to 100K tokens | 0.10 | 0.01 | 0.50 | 2.5%, 5%, 2.5% |
 | Haiku 5.5, prompt over 100K tokens | 0.50 | 0.05 | 2.50 | 12.5%, 25%, 12.5% |
 | Opus 5.5 | 4 | 0.20 | 20 | 100%, 100%, 100% |
-| Fable 5.1 | 10 | 0.25 | 50 | 250%, 125%, 250% |
+| Fable 5.2 | 8 | 0.20 | 40 | 200%, 100%, 200% |
 
 Opus 5.5 shipped on 2026-09-22 at 20% under Opus 5 on input and output
-(Opus 5 was 5 / 0.50 / 25) and at 60% under it on cache hits. Opus 5.5
-prices a cache hit at 5% of its input price and Fable 5.1 at 2.5%, so a
-Fable 5.1 cache hit now costs a quarter more than an Opus 5.5 cache hit,
-where against Opus 5 it cost half.
+(Opus 5 was 5 / 0.50 / 25) and at 60% under it on cache hits. Fable 5.2
+lists at 20% under Fable 5.1 on all three prices (Fable 5.1 was
+10 / 0.25 / 50). Opus 5.5 prices a cache hit at 5% of its input price and
+Fable 5.2 at 2.5%, so a Fable 5.2 cache hit costs the same as an Opus 5.5
+cache hit, where a Fable 5.1 cache hit cost a quarter more.
 
 A subagent that reads many files sends its whole context back on every turn, and after the first turn most of
-that input is cache hits, so the Fable premium on a long dispatch sits
-nearer 125% than 250%. Nobody has measured what share of a real
-dispatch's tokens are cache hits, so 250% is the ceiling on the Fable
-premium and 125% is the floor.
+that input is cache hits. So a long dispatch on Fable costs between 100%
+and 200% of what the same tokens cost on Opus 5.5. Nobody has measured
+what share of a real dispatch's tokens are cache hits, so nobody knows
+where in that range a real dispatch falls.
 
 Haiku 5.5 bills a whole request at its higher row once the prompt passes
 100K tokens, and that row costs five times the lower one. A subagent's
@@ -143,7 +146,7 @@ Haiku task goes to `opus-xhigh`, not to Haiku at a higher effort.
 
 ## Why Fable is user-only
 
-Fable costs two and a half times Opus 5.5 on uncached input and on
+Fable 5.2 costs twice what Opus 5.5 costs on uncached input and on
 output, and on a coding subset Opus 5 matched Fable 5 (91.7% against
 91.3%) at about 60% of its cost. Those are Opus 5 and Fable 5 numbers, and
 Opus 5.5 at `medium` beats Opus 5 at `high` in Anthropic's own testing at
@@ -159,6 +162,14 @@ often and answers from memory instead. On a code investigation that is a
 wrong conclusion nobody catches, the failure that keeps Haiku and Sonnet out
 of that work. So a `fable-low` or `fable-medium` rung waits on a measurement
 against `opus-medium` on real briefs, and the rule stands until then.
+
+The agent moved to Fable 5.2 (`claude-fable-5-2`) on 2026-11-10 and kept
+its effort. Anthropic's Fable 5.2 prompting guide says to start at `high`,
+where "most of the gain in capability is already present". It says that on
+Anthropic's internal coding evaluations `xhigh` "raised scores slightly
+and used many more tokens", and that 5.2 at `low` scored close to 5.1 at
+higher effort levels. The guide gives no numbers for any of that, so a
+`fable-high` agent waits on the same kind of measurement.
 
 The orchestrator judging a task "hard enough for Fable" is the guess that
 spends the most money when wrong, so no judgment is allowed. Cheaper cache

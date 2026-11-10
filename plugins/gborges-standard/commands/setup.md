@@ -9,7 +9,7 @@ disable-model-invocation: true
 
 Call AskUserQuestion once with all four questions in the one call.
 
-Ask whether this account can run the Claude Fable 5.1 model. Offer "Yes" (the
+Ask whether this account can run the Claude Fable 5.2 model. Offer "Yes" (the
 account has Fable, so the fable-xhigh subagent runs as written) and "No" (the
 hook rewrites fable-xhigh to opus-xhigh). Yes is the default.
 

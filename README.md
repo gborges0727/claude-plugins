@@ -40,7 +40,7 @@ Paste this loader rather than the body of `scripts/cloud-bootstrap.sh`, so the l
 
 ```bash
 #!/bin/bash
-# rev: 45
+# rev: 46
 curl -fsSL https://raw.githubusercontent.com/gborges0727/claude-plugins/main/scripts/cloud-bootstrap.sh | bash || true
 exit 0
 ```
@@ -70,7 +70,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `route-codex.py` | `PreToolUse` hook | Guards every Codex delegation, both a `codex exec` command in a Bash call and an `mcp__codex__codex` call. Refuses every call when the setup file has Codex off, until a message in the session asks for Codex. Lets GPT-6 Astra run at medium on its own, refuses it above medium unless the user's latest message named Astra, and fills in the effort when the call set none |
 | `codex-delegate` | Skill | Handing a subtask to the Codex CLI on one of four rungs (Luna, Sol, Astra at medium, or the user-summoned Astra at xhigh), so ChatGPT-plan quota pays for it instead of Claude tokens. Each lane is a `codex exec` command run in the background, so a fan-out starts every lane at once. Needs the `codex` binary on PATH and signed in |
 | `model-routing-review` | Skill | Explicit invocation only. Re-derives the delegation ladder from today's catalog, prices, and scores, rewrites [docs/model-routing.md](docs/model-routing.md), and lists every file the ladder change touches |
-| `pair-debate` | Skill | Explicit invocation only. Puts Fable 5.1 and GPT-6 Astra, both at xhigh, in a room to work one hard problem as peers. `scripts/debate.py` runs the conversation in the background: blind drafts, an argued definition of done the user approves, then alternating turns in one shared worktree until both agree. The session reports events and reruns the agreed check at the end |
+| `pair-debate` | Skill | Explicit invocation only. Puts Fable 5.2 and GPT-6 Astra, both at xhigh, in a room to work one hard problem as peers. `scripts/debate.py` runs the conversation in the background: blind drafts, an argued definition of done the user approves, then alternating turns in one shared worktree until both agree. The session reports events and reruns the agreed check at the end |
 | `grill` | Skill | Explicit invocation only. Interviews the user in rounds, every askable question at once with a recommended answer, until no decision is open. Runs `domain-modeling` alongside when the repo has a `CONTEXT.md` |
 | `build` | Skill | Explicit invocation only. Builds what the conversation (or a named spec or issue) asked for, one failing test then the smallest passing code, then a review by `opus-medium` against the ask and the repo's own review instructions. A spec file or an issue goes to one `opus-medium` subagent for the test loop, and a build discussed in the conversation stays in the session. Every build runs in its own git worktree on a `build/<slug>` branch. The skill commits there, removes the worktree, and merges only when told. A spec with tickets fans out one worktree per ticket |
 | `spec` | Skill | Explicit invocation only. Writes the conversation up as a spec under `docs/specs/`, and splits it into end-to-end tickets only when the work will not fit one session |
@@ -91,7 +91,7 @@ Every PR bumps the `rev`, in the snippet above and in `scripts/cloud-bootstrap.s
 | `haiku-medium` | Agent | Haiku 5.5 at medium effort. Edits and runs with a command check in the brief, parallel copies of one such task, and fetching a named doc page, none needing more than 100K tokens in view |
 | `opus-medium` | Agent | Opus 5.5 at medium effort. The default, and the floor for anything that reads code to reach a conclusion |
 | `opus-xhigh` | Agent | Opus 5.5 at xhigh effort. One escalation step for a task that failed below it, and the stand-in for Fable on an account without it |
-| `fable-xhigh` | Agent | Fable 5.1 at xhigh effort. Runs only when the user's message names Fable. See [docs/subagent-routing.md](docs/subagent-routing.md) for the routing rule and the cost reasoning |
+| `fable-xhigh` | Agent | Fable 5.2 at xhigh effort. Runs only when the user's message names Fable. See [docs/subagent-routing.md](docs/subagent-routing.md) for the routing rule and the cost reasoning |
 | `frontend-design` | Dependency | From `claude-plugins-official` |
 | `context7` | Dependency | From `claude-plugins-official` |
 
